@@ -1,5 +1,5 @@
-// modulos/productos/productos.gateway.js
-const db = require('../../config/database');
+// roppi.backend.modulos.products/productos.gateway.js
+const db = require('../../roppi.backend.config/database.js');
 
 class ProductosGateway {
 
@@ -15,11 +15,12 @@ class ProductosGateway {
       JOIN "RoppiTA".TAMANOS t ON p.ID_TAMANO = t.ID
       JOIN "RoppiTA".COLORES col ON p.ID_COLOR = col.ID
       JOIN "RoppiTA".MATERIALES m ON p.ID_MATERIAL = m.ID
+      WHERE p.ACTIVO = 1
     `);
     return result.rows;
   }
 
-  async buscarID(id) {
+  async buscarId(id) {
     const result = await db.query(`
       SELECT p.*,
              c.NOMBRE AS categoria,
@@ -36,10 +37,10 @@ class ProductosGateway {
     return result.rows[0];
   }
 
-  async buscarPorCategoria(idCategoria) {
+  async BuscarCategoria(idCategoria) {
     const result = await db.query(`
       SELECT * FROM "RoppiTA".PRODUCTOS
-      WHERE ID_CATEGORIA = $1
+      WHERE ID_CATEGORIA = $1 AND ACTIVO = 1
     `, [idCategoria]);
     return result.rows;
   }
@@ -48,8 +49,8 @@ class ProductosGateway {
     const result = await db.query(`
       INSERT INTO "RoppiTA".PRODUCTOS
         (ID_CATEGORIA, ID_TAMANO, ID_COLOR, ID_MATERIAL, ID_PERSONALIZACION,
-         SKU, PRECIO, USUARIO_CREACION, USUARIO_MODIFICACION)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
+         SKU, PRECIO, ACTIVO, USUARIO_CREACION, USUARIO_MODIFICACION)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 1, $8, $8)
       RETURNING *
     `, [idCategoria, idTamano, idColor, idMaterial, idPersonalizacion, sku, precio, usuarioId]);
     return result.rows[0];
@@ -64,6 +65,18 @@ class ProductosGateway {
       WHERE ID = $3
       RETURNING *
     `, [precio, usuarioId, id]);
+    return result.rows[0];
+  }
+
+  async eliminarLogico(id, usuarioId) {
+    const result = await db.query(`
+      UPDATE "RoppiTA".PRODUCTOS
+      SET ACTIVO = 0,
+          USUARIO_MODIFICACION = $1,
+          FECHA_MODIFICACION = CURRENT_TIMESTAMP
+      WHERE ID = $2
+      RETURNING *
+    `, [usuarioId, id]);
     return result.rows[0];
   }
 

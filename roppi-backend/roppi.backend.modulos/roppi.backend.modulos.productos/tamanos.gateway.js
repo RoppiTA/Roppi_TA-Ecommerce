@@ -1,5 +1,5 @@
 // modulos/productos/tamanos.gateway.js
-const db = require('../../config/database');
+const db = require('../../roppi.backend.config/database.js');
 
 class TamanosGateway {
 

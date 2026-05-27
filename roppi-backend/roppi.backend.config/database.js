@@ -1,5 +1,5 @@
 // la conexión a la base de datos está aquí
-
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 require('dotenv').config();
 
 const { Pool } = require('pg');
@@ -12,10 +12,19 @@ class Database {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
+      ssl: {
+        rejectUnauthorized: false,
+        checkServerIdentity: () => undefined
+    },                                    // la ecriptación la estoy bloqueando para probar la conexión
 
       // Pool settings
       max: Number(process.env.DB_MAX_CONNECTIONS) || 10,
       idleTimeoutMillis: Number(process.env.DB_IDLE_TIMEOUT) || 30000,
+    });
+
+    this.pool.on('connect', (client) => {
+        client.query('SET search_path TO "RoppiTA"');
+        console.log('Conectados a PostgreQSL');
     });
 
     this._registerEvents();
@@ -66,13 +75,14 @@ class Database {
   }
 
   async healthCheck() {
-    try {
-      await this.query('SELECT 1');
-      return true;
-    } catch {
-      return false;
-    }
+  try {
+    await this.query('SELECT 1');
+    return true;
+  } catch (error) {
+    console.error('❌ healthCheck error completo:', error);
+    return false;
   }
+}
 }
 
 module.exports = new Database();

@@ -1,5 +1,5 @@
-// src/modules/productos/materiales.gateway.js
-const db = require('../../config/database');
+// modulos/productos/materiales.gateway.js
+const db = require('../../roppi.backend.config/database.js');
 
 class MaterialesGateway {
 

@@ -1,5 +1,5 @@
-// src/modules/productos/colores.gateway.js
-const db = require('../../config/database');
+// modulos/productos/colores.gateway.js
+const db = require('../../roppi.backend.config/database.js');
 
 class ColoresGateway {
 
