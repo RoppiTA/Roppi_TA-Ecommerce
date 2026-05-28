@@ -3,8 +3,8 @@ export interface Material {
   //tabla "Materiales" sin los datos de auditoria
   id: string;
   nombre: string;
-  cantidad: number;
-  percentage: number;
+  descripcion : string;
+  costo_extra: number;
 }
 
 export type CreateMaterialDTO = Omit<Material, 'id'>;

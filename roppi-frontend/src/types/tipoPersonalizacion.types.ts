@@ -4,6 +4,7 @@ export interface tipoPersonalizacion {
   id: string;
   nombre: string;
   descripcion: string;
+  costo_extra: number;
 }
 
 export type CreatetipoPersonalizacionDTO = Omit<tipoPersonalizacion, 'id'>;
