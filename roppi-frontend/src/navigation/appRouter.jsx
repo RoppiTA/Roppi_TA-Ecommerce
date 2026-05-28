@@ -4,7 +4,7 @@
 
 // src/navigation/AppRouter.tsx
 import { Routes, Route } from 'react-router-dom';
-import MerchantStack from './stacks/MerchantStack';
+import ComercianteStack from './stacks/ComercianteStack';
 
 export const AppRouter = () => {
   const SIMULATED_USER = { id: 104, role: 'MERCHANT' };
@@ -12,7 +12,7 @@ export const AppRouter = () => {
   return (
     <Routes>
       {/* 🔴 ASEGÚRATE DE QUE EL PATH SEA "/*" */}
-      <Route path="/*" element={<MerchantStack userId={SIMULATED_USER.id} />} />
+      <Route path="/*" element={<ComercianteStack userId={SIMULATED_USER.id} />} />
     </Routes>
   );
 };

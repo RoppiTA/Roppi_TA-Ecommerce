@@ -2,8 +2,8 @@
  Se esta dejando como modelo para implementación de versión final
  con los atributos finales de descuento*/
 import { useState, useEffect } from 'react';
-import { DiscountsAPIService } from '../api/discounts.api';
-import { ProductsAPIService } from '../api/products.api';
+import { DiscountsAPIService } from '../api/mockDiscounts.api';
+import { ProductsAPIService } from '../api/mockProducts.api';
 import { Descuento, CreateDescuentoDTO } from '../types/producto/descuento.types';
 import { ProductoGenerico } from '../types/producto/productoGen.types';
 

@@ -10,7 +10,7 @@ import DiscountFormScreen from '../../views/comerciante/DiscountFormScreen';
 
 interface StackProps { userId: number; }
 
-export const MerchantStack = ({ userId }: StackProps) => {
+export const ComercianteStack = ({ userId }: StackProps) => {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'sans-serif' }}>
       {/* Tu menú lateral */}
@@ -47,4 +47,4 @@ export const MerchantStack = ({ userId }: StackProps) => {
     </div>
   );
 };
-export default MerchantStack;
+export default ComercianteStack;
