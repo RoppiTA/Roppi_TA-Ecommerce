@@ -1,3 +1,5 @@
+// Por ahora no tocar para asegurar funcionamiento de 
+//react-router-dom
 import React from "react";
 import ReactDOM from "react-dom/client";
 
