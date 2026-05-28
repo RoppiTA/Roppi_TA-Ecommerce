@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700;800&display=swap');
+
+:root {
+  --font-primary: 'Nunito', sans-serif;
+
+  --text-display-large: 45px;
+  --text-display-medium: 36px;
+  --text-display-small: 28px;
+
+  --text-heading-large: 32px;
+  --text-heading-medium: 28px;
+  --text-heading-small: 24px;
+
+  --text-title-large: 22px;
+  --text-title-medium: 20px;
+  --text-title-small: 18px;
+
+  --text-body: 14px;
+}
