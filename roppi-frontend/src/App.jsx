@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import AppRouter from './navigation/AppRouter';
+import AppRouter from './navigation/appRouter';
 
 function App() {
   /*Regina: Se utiliza el AppRouter como principal orquestador 

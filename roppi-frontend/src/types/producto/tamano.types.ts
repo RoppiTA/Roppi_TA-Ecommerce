@@ -4,6 +4,7 @@ export interface Tamano {
   id: number;
   nombre: string;
   descripcion: string;
+  activo: number;
 }
 
 export type CreateTamanoDTO = Omit<Tamano, 'id'>;

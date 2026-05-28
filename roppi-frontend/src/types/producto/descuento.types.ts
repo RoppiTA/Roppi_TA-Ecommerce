@@ -4,7 +4,8 @@ export interface Descuento {
   id: number;
   nombre: string;
   cantidad: number;
-  percentage: number;
+  porcentajeDescuento: number;
+  idGenericoVinculados: number[];
 }
 
 export type CreateDescuentoDTO = Omit<Descuento, 'id'>;

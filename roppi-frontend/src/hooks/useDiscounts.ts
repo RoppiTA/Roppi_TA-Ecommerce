@@ -3,78 +3,40 @@
  con los atributos finales de descuento*/
 import { useState, useEffect } from 'react';
 import { DiscountsAPIService } from '../api/discounts.api';
-import { Discount, CreateDiscountDTO } from '../types/discount.types';
+import { ProductsAPIService } from '../api/products.api';
+import { Descuento, CreateDescuentoDTO } from '../types/producto/descuento.types';
+import { ProductoGenerico } from '../types/producto/productoGen.types';
 
-export const useDiscounts = (discountId?: string) => {
-  const [discounts, setDiscounts] = useState<Discount[]>([]);
-  const [currentDiscount, setCurrentDiscount] = useState<Discount | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+export const useDiscounts = (discountId?: number) => {
+  const [discounts, setDiscounts] = useState<Descuento[]>([]);
+  const [availableProducts, setAvailableProducts] = useState<ProductoGenerico[]>([]);
+  const [currentDiscount, setCurrentDiscount] = useState<Descuento | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const fetchDiscounts = async () => {
+  const initData = async () => {
     setLoading(true);
-    try {
-      const data = await DiscountsAPIService.getDiscounts();
-      setDiscounts(data);
-    } catch (encodeError) {
-      console.error('Error al traer campañas');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDiscountById = async (id: string) => {
-    setLoading(true);
-    try {
-      const data = await DiscountsAPIService.getDiscountById(id);
-      setCurrentDiscount(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createDiscount = async (data: CreateDiscountDTO) => {
-    setLoading(true);
-    try {
-      await DiscountsAPIService.createDiscount(data);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateDiscount = async (id: string, data: Partial<CreateDiscountDTO>) => {
-    setLoading(true);
-    try {
-      await DiscountsAPIService.updateDiscount(id, data);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteDiscount = async (id: string) => {
-    try {
-      await DiscountsAPIService.deleteDiscount(id);
-      setDiscounts((prev) => prev.filter((d) => d.id !== id));
-    } catch (err) {
-      console.error(err);
-    }
+    const [listDesc, listProd] = await Promise.all([DiscountsAPIService.getDiscounts(), ProductsAPIService.getProducts()]);
+    setDiscounts(listDesc);
+    setAvailableProducts(listProd);
+    setLoading(false);
   };
 
   useEffect(() => {
     if (discountId) {
-      fetchDiscountById(discountId);
+      setLoading(true);
+      DiscountsAPIService.getDiscountById(discountId).then(setCurrentDiscount).finally(() => setLoading(false));
     } else {
-      fetchDiscounts();
+      initData();
     }
   }, [discountId]);
 
   return {
     discounts,
+    availableProducts, // Para marcar a qué categoría general (Gamarra) va el descuento
     currentDiscount,
     loading,
-    createDiscount,
-    updateDiscount,
-    deleteDiscount,
+    createDiscount: (d: CreateDescuentoDTO) => DiscountsAPIService.createDiscount(d).then(initData),
+    updateDiscount: (id: number, d: Partial<CreateDescuentoDTO>) => DiscountsAPIService.updateDiscount(id, d).then(initData),
+    deleteDiscount: (id: number) => DiscountsAPIService.deleteDiscount(id).then(initData)
   };
 };

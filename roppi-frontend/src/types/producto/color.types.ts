@@ -4,6 +4,7 @@ export interface Color {
   id: number;
   nombre: string;
   pantone: string;
+  activo: number;
 }
 
 export type CreateColorDTO = Omit<Color, 'id'>;

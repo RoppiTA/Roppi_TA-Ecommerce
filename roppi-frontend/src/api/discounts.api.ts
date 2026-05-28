@@ -1,38 +1,38 @@
-//ESTO ES SOLO UN MOCK
-//Sirve para hacer prueba inicial de código entregado
-//por consulta de IA, para asegurar el flujo
-import { Discount, CreateDiscountDTO } from '../types/discount.types';
+/*Este sigue siendo un MOCK pero ya tiene ejemplos de datos reales con los atributos
+ finales de la base de datos. Se utilizara para probar mientras no existe el back */
+import { Descuento, CreateDescuentoDTO } from '../types/producto/descuento.types'
 
-let mockDiscounts: Discount[] = [
-  { id: 'desc-1', code: 'GAMARRA20', percentage: 20 }
+let mockDiscountsDB: Descuento[] = [
+  { id: 1, nombre: 'Campaña Día de la Madre', cantidad: 50, porcentajeDescuento: 15.5,
+     idGenericoVinculados: [1] }
 ];
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const delay = () => new Promise(res => setTimeout(res, 300));
 
 export const DiscountsAPIService = {
-  getDiscounts: async (): Promise<Discount[]> => {
-    await delay(500);
-    return [...mockDiscounts];
+  getDiscounts: async () => { await delay(); return [...mockDiscountsDB]; },
+  
+  getDiscountById: async (id: number) => {
+    await delay();
+    return mockDiscountsDB.find(d => d.id === id) || null;
   },
-  getDiscountById: async (id: string): Promise<Discount> => {
-    await delay(500);
-    const discount = mockDiscounts.find(d => d.id === id);
-    if (!discount) throw new Error('No encontrado');
-    return { ...discount };
-  },
-  createDiscount: async (data: CreateDiscountDTO): Promise<Discount> => {
-    await delay(500);
-    const newDiscount = { id: `desc-${Date.now()}`, ...data };
-    mockDiscounts.push(newDiscount);
+
+  createDiscount: async (dto: CreateDescuentoDTO) => {
+    await delay();
+    const newId = Date.now();
+    const newDiscount = { id: newId, ...dto };
+    mockDiscountsDB.push(newDiscount);
     return newDiscount;
   },
-  updateDiscount: async (id: string, data: Partial<CreateDiscountDTO>): Promise<Discount> => {
-    await delay(500);
-    const index = mockDiscounts.findIndex(d => d.id === id);
-    mockDiscounts[index] = { ...mockDiscounts[index], ...data };
-    return mockDiscounts[index];
+
+  updateDiscount: async (id: number, dto: Partial<CreateDescuentoDTO>) => {
+    await delay();
+    const idx = mockDiscountsDB.findIndex(d => d.id === id);
+    if (idx !== -1) mockDiscountsDB[idx] = { ...mockDiscountsDB[idx], ...dto };
   },
-  deleteDiscount: async (id: string): Promise<void> => {
-    await delay(500);
-    mockDiscounts = mockDiscounts.filter(d => d.id !== id);
-  },
+
+  deleteDiscount: async (id: number) => {
+    await delay();
+    mockDiscountsDB = mockDiscountsDB.filter(d => d.id !== id);
+  }
 };
