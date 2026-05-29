@@ -85,4 +85,4 @@ class DBManager {
 }
 }
 
-module.exports = new Database();
+module.exports = new DBManager();

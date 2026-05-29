@@ -1,18 +1,19 @@
-// modulos/productos/materiales.gateway.js
-const db = require('../../roppi.backend.config/database.js');
-class MaterialesGateway {
+// roppi.backend.modulos/roppi.backend.mod.productos/personalizaciones.gateway.js
+const db = require('../../roppi.backend.config/database');
+
+class PersonalizacionesGateway {
 
   async findAll() {
     const result = await db.query(`
-      SELECT * FROM "RoppiTA".MATERIALES
-      WHERE ACTIVO = 1
+      SELECT * FROM "RoppiTA".PERSONALIZACIONES
+      WHERE ACTIVA = 1
     `);
     return result.rows;
   }
 
   async findById(id) {
     const result = await db.query(`
-      SELECT * FROM "RoppiTA".MATERIALES
+      SELECT * FROM "RoppiTA".PERSONALIZACIONES
       WHERE ID = $1
     `, [id]);
     return result.rows[0];
@@ -20,7 +21,7 @@ class MaterialesGateway {
 
   async create({ nombre, descripcion, usuarioId }) {
     const result = await db.query(`
-      INSERT INTO "RoppiTA".MATERIALES
+      INSERT INTO "RoppiTA".PERSONALIZACIONES
         (NOMBRE, DESCRIPCION, USUARIO_CREACION, USUARIO_MODIFICACION)
       VALUES ($1, $2, $3, $3)
       RETURNING *
@@ -30,7 +31,7 @@ class MaterialesGateway {
 
   async update(id, { nombre, descripcion, usuarioId }) {
     const result = await db.query(`
-      UPDATE "RoppiTA".MATERIALES
+      UPDATE "RoppiTA".PERSONALIZACIONES
       SET NOMBRE = $1,
           DESCRIPCION = $2,
           USUARIO_MODIFICACION = $3,
@@ -43,8 +44,8 @@ class MaterialesGateway {
 
   async deactivate(id, usuarioId) {
     const result = await db.query(`
-      UPDATE "RoppiTA".MATERIALES
-      SET ACTIVO = 0,
+      UPDATE "RoppiTA".PERSONALIZACIONES
+      SET ACTIVA = 0,
           USUARIO_MODIFICACION = $1,
           FECHA_MODIFICACION = CURRENT_TIMESTAMP
       WHERE ID = $2
@@ -55,4 +56,4 @@ class MaterialesGateway {
 
 }
 
-module.exports = new MaterialesGateway();
+module.exports = new PersonalizacionesGateway();
