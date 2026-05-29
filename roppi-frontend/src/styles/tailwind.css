@@ -1,9 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss' source(none);
+@source '../**/*.{js,ts,jsx,tsx}';
 
 @layer components {
-
   .btn-primary {
     @apply px-4 py-2 rounded-md text-white;
     background-color: var(--color-primary);
@@ -15,4 +13,19 @@
     box-shadow: var(--shadow-md);
   }
 
+  .input-form {
+    @apply w-full px-4 py-2 bg-white border rounded-md transition-all;
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+  }
+  .input-form:focus {
+    @apply outline-none ring-2;
+    --tw-ring-color: var(--color-primary);
+  }
+
+  .label-form {
+    @apply block text-sm font-semibold mb-1;
+    color: var(--color-text-secondary);
+  }
 }
+
