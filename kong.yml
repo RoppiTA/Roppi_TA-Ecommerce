@@ -1,0 +1,11 @@
+_format_version: "3.0"
+
+services:
+  - name: productos-microservice
+    # Ahora usamos el nombre del contenedor de docker (productos-service) en la misma red
+    url: http://productos-service:3000
+    routes:
+      - name: productos-route
+        paths:
+          - /api/productos
+        strip_path: false # false significa que Kong enviará "/api/productos" intacto a tu microservicio

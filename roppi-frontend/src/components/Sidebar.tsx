@@ -8,12 +8,9 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart3,
-  Boxes,
-  ChevronDown,
-  ChevronUp
+  Boxes
 } from 'lucide-react';
-import { useState } from 'react';
-import { NavLink } from 'react-router-dom'; // 🔴 Usamos NavLink nativo
+import { NavLink } from 'react-router-dom';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -21,24 +18,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
-  // El único estado que necesitamos es saber si el acordeón de "Catálogo" está abierto
-  const [expandedSections, setExpandedSections] = useState<string[]>(['catalog']);
-
+  
+  // 1. Catálogo ahora es un botón directo que apunta a /products
   const menuItems = [
-    { id: 'general', label: 'General', icon: LayoutDashboard, path: '/dashboard' },
-    {
-      id: 'catalog',
-      label: 'Catálogo',
-      icon: Boxes,
-      children: [
-        { id: 'productos', label: 'Productos', path: '/products' },
-        { id: 'descuentos', label: 'Descuentos', path: '/discounts' },
-        { id: 'categorias', label: 'Categorías', path: '/categories' },
-      ],
-    },
+    { id: 'catalog', label: 'Catálogo', icon: Boxes, path: '/products' }, 
     { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
     { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
-    { id: 'clients', label: 'Clientes', icon: Users, path: '/clients' },
+    { id: 'clients', label: 'Clientes', icon: Users, path: '/clientes' },
     { id: 'reports', label: 'Reportes', icon: BarChart3, path: '/reports' },
   ];
 
@@ -47,17 +33,10 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
   ];
 
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections((prev) =>
-      prev.includes(sectionId)
-        ? prev.filter((id) => id !== sectionId)
-        : [...prev, sectionId]
-    );
-  };
-
   return (
     <aside
-      className={`h-screen bg-white border-r border-border flex flex-col transition-all duration-300 ${
+      // 🟢 min-h-screen asegura que cubra TODO el largo vertical de la página
+      className={`min-h-screen bg-white border-r border-border flex flex-col transition-all duration-300 ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
@@ -65,83 +44,43 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       <div className="p-4 border-b border-border flex items-center justify-between">
         {!isCollapsed && (
           <div>
-            <h2 className="font-semibold text-lg">Roppi</h2>
-            <p className="text-xs text-muted-foreground">Gestión de Negocios</p>
+            {/* 🟢 Título principal más grande (text-2xl) */}
+            <h2 className="font-bold text-2xl tracking-tight text-slate-950">Roppi</h2>
+            {/* 🟢 Subtítulo más grande (text-sm) */}
+            <p className="text-sm font-medium text-muted-foreground">Gestión de Negocios</p>
           </div>
         )}
         <button
           onClick={onToggle}
           className="p-2 hover:bg-accent rounded-lg transition-colors"
         >
-          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          {isCollapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
         </button>
       </div>
 
       {/* Menu Items */}
       <nav className="flex-1 p-3 overflow-y-auto">
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isExpanded = expandedSections.includes(item.id);
-            const hasChildren = item.children && item.children.length > 0;
 
-            // CASO A: Tiene hijos (Como Catálogo). Solo abre/cierra el acordeón, no navega.
-            if (hasChildren) {
-              return (
-                <div key={item.id}>
-                  <button
-                    onClick={() => toggleSection(item.id)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent text-foreground transition-colors"
-                  >
-                    <Icon size={20} />
-                    {!isCollapsed && (
-                      <>
-                        <span className="text-sm flex-1 text-left">{item.label}</span>
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </>
-                    )}
-                  </button>
-
-                  {/* Render de los Hijos */}
-                  {isExpanded && !isCollapsed && (
-                    <div className="ml-8 mt-1 space-y-1">
-                      {item.children?.map((child) => (
-                        <NavLink
-                          key={child.id}
-                          to={child.path}
-                          className={({ isActive }) =>
-                            `w-full block text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                              isActive
-                                ? 'bg-primary text-primary-foreground font-medium'
-                                : 'hover:bg-accent text-foreground'
-                            }`
-                          }
-                        >
-                          {child.label}
-                        </NavLink>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            // CASO B: Enlaces directos sin hijos (General, Ordenes, etc.)
             return (
               <NavLink
                 key={item.id}
-                to={item.path || '#'}
+                to={item.path}
                 className={({ isActive }) =>
-                  `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                  `w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-primary text-primary-foreground font-medium'
-                      : 'hover:bg-accent text-foreground'
+                      ? 'bg-primary text-primary-foreground font-semibold'
+                      : 'hover:bg-accent text-foreground font-medium'
                   }`
                 }
                 title={isCollapsed ? item.label : undefined}
               >
-                <Icon size={20} />
-                {!isCollapsed && <span className="text-sm">{item.label}</span>}
+                {/* 🟢 Íconos ligeramente más grandes (size 22) para equilibrar el texto */}
+                <Icon size={22} />
+                {/* 🟢 Textos de opciones más grandes (text-base) */}
+                {!isCollapsed && <span className="text-base">{item.label}</span>}
               </NavLink>
             );
           })}
@@ -149,7 +88,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       </nav>
 
       {/* Bottom Items */}
-      <div className="p-3 border-t border-border space-y-1">
+      <div className="p-3 border-t border-border space-y-1.5">
         {bottomItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -157,14 +96,16 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               key={item.id}
               to={item.path}
               className={({ isActive }) =>
-                `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                  isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-accent text-foreground'
+                `w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
+                  isActive 
+                    ? 'bg-primary text-primary-foreground font-semibold' 
+                    : 'hover:bg-accent text-foreground font-medium'
                 }`
               }
               title={isCollapsed ? item.label : undefined}
             >
-              <Icon size={20} />
-              {!isCollapsed && <span className="text-sm">{item.label}</span>}
+              <Icon size={22} />
+              {!isCollapsed && <span className="text-base">{item.label}</span>}
             </NavLink>
           );
         })}

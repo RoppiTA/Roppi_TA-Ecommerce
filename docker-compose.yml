@@ -1,0 +1,32 @@
+# version: '3.9'
+
+services:
+  kong:
+    image: kong:3.4
+    container_name: roppi-kong-gateway
+    environment:
+      - KONG_DATABASE=off
+      - KONG_DECLARATIVE_CONFIG=/kong/declarative/kong.yml
+      - KONG_PROXY_ACCESS_LOG=/dev/stdout
+      - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+      - KONG_PROXY_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001
+    ports:
+      - "8000:8000" # Puerto para que el Frontend haga peticiones
+      - "8001:8001" # Puerto de administración de Kong
+    volumes:
+      - ./kong.yml:/kong/declarative/kong.yml
+
+  productos-service:
+    build:
+      context: ./roppi-backend
+      dockerfile: Dockerfile
+    container_name: roppi-productos-service
+    ports:
+      - "3000:3000" # Exponemos el puerto para pruebas directas si se requiere
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      # Aquí irían también las variables de tu DB (DB_HOST, DB_USER, etc)
+      # que el backend leerá para conectarse a PostgreSQL.
