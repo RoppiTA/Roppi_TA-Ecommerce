@@ -9,7 +9,7 @@ import { CreateDescuentoDTO, Descuento } from '../types/producto/descuento.types
 
 
 export const useProductosGenericos = () => {
-    // Estados ara productos, loading, error y catálogos maestros
+    // Estados para productos, loading, error y catálogos maestros
     const [productos, setProductos] = useState<ProductoGenerico[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -20,11 +20,12 @@ export const useProductosGenericos = () => {
     const [tamanos, setTamanos] = useState<Tamano[]>([]);
     const [personalizaciones, setPersonalizaciones] = useState<Personalizacion[]>([]);
 
-    //Función para cargar todos los datos necesarios 
+    // Función para cargar todos los datos necesarios 
     // (productos + catálogos) al inicio
     const fetchData = useCallback(async () => {
         try {
             setLoading(true);
+            setError(null);
             // Promise.all hace que las 5 peticiones ocurran al mismo tiempo 
             const [c, m, t, p, prods] = await Promise.all([
                 ProductosAPIService.getColores(),
@@ -52,8 +53,24 @@ export const useProductosGenericos = () => {
         fetchData();
     }, [fetchData]);
 
+    // Utiliza un estado local temporal o de retorno directo en la vista de edición.
+    const getProductoById = useCallback(async (id: number): Promise<ProductoGenerico> => {
+        try {
+            setLoading(true);
+            setError(null);
+            const producto = await ProductosAPIService.getProductoGenericoById(id);
+            return producto;
+        } catch (err) {
+            setError(`Error al obtener el producto con ID ${id}`);
+            console.error(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     // Funciones para agregar, actualizar y eliminar productos sin recargar 
-    // toda la lista, actulizando el estado local de productos directamente.
+    // toda la lista, actualizando el estado local de productos directamente.
     const addProducto = async (data: CreateProductGenericoDTO) => {
         try {
             const nuevo = await ProductosAPIService.createProductoGenerico(data);
@@ -87,8 +104,18 @@ export const useProductosGenericos = () => {
     };
 
     return {
-        productos, loading, error, colores, materiales, tamano: tamanos, 
-        personalizaciones, addProducto, updateProducto, deleteProducto, refresh: fetchData
+        productos, 
+        loading, 
+        error, 
+        colores, 
+        materiales, 
+        tamano: tamanos, 
+        personalizaciones, 
+        getProductoById, 
+        addProducto, 
+        updateProducto, 
+        deleteProducto, 
+        refresh: fetchData
     };
 };
 
@@ -164,4 +191,3 @@ export const useDescuentos = () => {
         refresh: fetchDescuentos
     };
 };
-

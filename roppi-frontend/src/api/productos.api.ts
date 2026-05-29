@@ -3,77 +3,103 @@ import { Color } from "../types/producto/color.types";
 import { Material } from "../types/producto/material.types";
 import { Personalizacion } from "../types/producto/personalizacion.types";
 import { Tamano } from "../types/producto/tamano.types";
-import {CreateDescuentoDTO, Descuento} from "../types/producto/descuento.types";
 import { CreateProductGenericoDTO, ProductoGenerico } from "../types/producto/productoGen.types";
+import { CreateDescuentoDTO, Descuento } from "../types/producto/descuento.types";
+
+// Función auxiliar privada para transformar la respuesta del backend al formato del frontend
+const mapearAProductoFrontend = (prod: any): ProductoGenerico => ({
+    id: prod.id,
+    nombre: prod.nombre,
+    descripcion: prod.descripcion,
+    precio_base: Number(prod.precioBase), // Convierte el string "20" o "30" del backend a número
+    maximo_stock: prod.maximoStock,       // Convierte maximoStock a maximo_stock
+    activo: prod.activo,
+    colores: prod.colores || [],
+    materiales: prod.materiales || [],
+    tamanos: prod.tamanos || [],
+    personalizaciones: prod.personalizaciones || []
+});
 
 export const ProductosAPIService = {
-    /*Primero hacemos el retrieval de los datos maestros de los 
-    atributos generales dado que estos se necesitan para llenar los 
-    formularios de creación y edición. */
+    /* --- DATOS MAESTROS --- */
     getColores: async (): Promise<Color[]> => {
-        //Falta cambiar el endpoint a la URL del backend.
         const response = await apiClient.get('/productos/colores');
         return response.data;
     },
 
     getMateriales: async (): Promise<Material[]> => {
-        //Falta cambiar el endpoint a la URL del backend.
         const response = await apiClient.get('/productos/materiales');
         return response.data;
     },
 
     getTamano: async (): Promise<Tamano[]> => {
-        //Falta cambiar el endpoint a la URL del backend.
         const response = await apiClient.get('/productos/tamanos');
         return response.data;
     },
 
     getPersonalizaciones: async (): Promise<Personalizacion[]> => {
-        //Falta cambiar el endpoint a la URL del backend.
         const response = await apiClient.get('/productos/personalizaciones');
         return response.data;
     },
     
-    /*A continuación hacemos el CRUD respecto a los productos genericos
-     considerando que trae en este caso todos los producto activo o 
-     inactivo*/
+    /* --- CRUD DE PRODUCTOS GENÉRICOS --- */
+    
+    // 1. OBTENER TODOS LOS PRODUCTOS
     getProductosGenericos: async (): Promise<ProductoGenerico[]> => {
-        // Hacemos la petición tipando la respuesta según la estructura real del backend
         const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/genericos');
-        
-        // Si el backend no devuelve datos válidos, retornamos un arreglo vacío
         if (!response.data || !response.data.datos) return [];
+        return response.data.datos.map(mapearAProductoFrontend);
+    },
 
-        // Mapeamos los nombres de propiedades CamelCase del backend a snake_case del frontend
-        return response.data.datos.map((prod: any) => ({
-            id: prod.id,
-            nombre: prod.nombre,
-            descripcion: prod.descripcion,
-            precio_base: Number(prod.precioBase), // Convertimos el string "20" a número
-            maximo_stock: prod.maximoStock,       // Convertimos de maximoStock a maximo_stock
-            activo: prod.activo,
-            colores: prod.colores || [],
-            materiales: prod.materiales || [],
-            tamanos: prod.tamanos || [],
-            personalizaciones: prod.personalizaciones || []
-        }));
-        
+    // 2. OBTENER UN SOLO PRODUCTO POR ID (¡Nuevo!)
+    getProductoGenericoById: async (id: number): Promise<ProductoGenerico> => {
+        const response = await apiClient.get<{ exito: boolean; datos: any }>(`/productos/genericos/${id}`);
+        if (!response.data || !response.data.datos) {
+            throw new Error(`No se encontraron datos para el producto con ID ${id}`);
+        }
+        return mapearAProductoFrontend(response.data.datos);
     },
     
+    // 3. CREAR PRODUCTO
     createProductoGenerico: async (productoData: CreateProductGenericoDTO): Promise<ProductoGenerico> => {
-        //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.post('/productos/genericos', productoData);
-        return response.data;
+        // Transformamos de regreso al enviar al backend si este espera CamelCase
+        const dtoBackend = {
+            nombre: productoData.nombre,
+            descripcion: productoData.descripcion,
+            precioBase: productoData.precio_base.toString(),
+            maximoStock: productoData.maximo_stock,
+            activo: productoData.activo,
+            tamanos: productoData.tamanos,
+            materiales: productoData.materiales,
+            colores: productoData.colores,
+            personalizaciones: productoData.personalizaciones
+        };
+
+        const response = await apiClient.post<{ exito: boolean; datos: any }>('/productos/genericos', dtoBackend);
+        return mapearAProductoFrontend(response.data.datos);
     },
 
+    // 4. MODIFICAR PRODUCTO
     updateProductoGenerico: async (id: number, productoData: CreateProductGenericoDTO): Promise<ProductoGenerico> => {
-        //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.put(`/productos/genericos/${id}`, productoData);
-        return response.data;
+        const dtoBackend = {
+            nombre: productoData.nombre,
+            descripcion: productoData.descripcion,
+            precioBase: productoData.precio_base.toString(),
+            maximoStock: productoData.maximo_stock,
+            activo: productoData.activo,
+            tamanos: productoData.tamanos,
+            materiales: productoData.materiales,
+            colores: productoData.colores,
+            personalizaciones: productoData.personalizaciones
+        };
+
+        const response = await apiClient.put<{ exito: boolean; datos: any }>(`/productos/genericos/${id}`, dtoBackend);
+        return mapearAProductoFrontend(response.data.datos);
     },
 
+    // 5. ELIMINAR (DESACTIVAR) PRODUCTO
     deleteProductoGenerico: async (id: number): Promise<void> => {
-        //Falta cambiar el endpoint a la URL del backend.
+        // Apunta al endpoint de desactivación del backend
         await apiClient.delete(`/productos/genericos/${id}/desactivar`);
     }
 };
