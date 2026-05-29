@@ -6,12 +6,12 @@ const express = require('express');
  * implementación para evitar más confusiones y para no tener que modificar tanto código de golpe. En una refactorización futura, se debería mover toda
  * esta lógica a ProductosServer, y dejar esta clase solo como un router que delega a ProductosServer.
  */
-const genericosGateway = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/genericos.bo.js');
-const coloresGateway = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/colores.bo.js');
-const materialesGateway = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/materiales.bo.js');
-const tamanosGateway = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/tamanos.bo.js');
-const personalizacionesGateway = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/personalizaciones.bo.js');
-const personalizadosGateway = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/personalizados.bo.js');
+const genericosBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/genericos.bo.js');
+const coloresBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/colores.bo.js');
+const materialesBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/materiales.bo.js');
+const tamanosBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/tamanos.bo.js');
+const personalizacionesBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/personalizaciones.bo.js');
+const personalizadosBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/personalizados.bo.js');
 
 class ProductosAPI {
   constructor() {
@@ -25,56 +25,160 @@ class ProductosAPI {
   // Método interno para mapear rutas hacia el procesarConsulta
   _configurarRutas() {
     // Genericos
-    this.router.get('/genericos', async (req, res) => this.procesarConsulta(req, res, 'listarGenericos'));
-    // Colores
-    this.router.get('/colores', async (req, res) => this.procesarConsulta(req, res, 'listarColores'));
-    // Materiales
-    this.router.get('/materiales', async (req, res) => this.procesarConsulta(req, res, 'listarMateriales'));
-    // Tamaños
-    this.router.get('/tamanos', async (req, res) => this.procesarConsulta(req, res, 'listarTamanos'));
-    // Personalizaciones
-    this.router.get('/personalizaciones', async (req, res) => this.procesarConsulta(req, res, 'listarPersonalizaciones'));
-    // Personalizados
-    this.router.get('/personalizados', async (req, res) => this.procesarConsulta(req, res, 'listarPersonalizados'));
-    
+    this.router.get('/genericos', async (req, res) => this.procesarConsultaGenericos(req, res, 'listarTodos'));
+    this.router.get('/genericos/:id', async (req, res) => this.procesarConsultaGenericos(req, res, 'obtenerPorId'));
 
-    this.router.get('/', async (req, res) => this.procesarConsulta(req, res, 'listarPersonalizados'));
+    this.router.post('/genericos', async (req, res) => this.procesarConsultaGenericos(req, res, 'crear'));
+
+    // Colores
+    this.router.get('/colores', async (req, res) => this.procesarConsultaColores(req, res, 'listarTodos'));
+    this.router.get('/colores/:id', async (req, res) => this.procesarConsultaColores(req, res, 'obtenerPorId'));
+
+    // Materiales
+    this.router.get('/materiales', async (req, res) => this.procesarConsultaMateriales(req, res, 'listarTodos'));
+    this.router.get('/materiales/:id', async (req, res) => this.procesarConsultaMateriales(req, res, 'obtenerPorId'));
+
+    // Tamaños
+    this.router.get('/tamanos', async (req, res) => this.procesarConsultaTamanos(req, res, 'listarTodos'));
+    this.router.get('/tamanos/:id', async (req, res) => this.procesarConsultaTamanos(req, res, 'obtenerPorId'));
+
+    // Personalizaciones
+    this.router.get('/personalizaciones', async (req, res) => this.procesarConsultaPersonalizaciones(req, res, 'listarTodos'));
+    this.router.get('/personalizaciones/:id', async (req, res) => this.procesarConsultaPersonalizaciones(req, res, 'obtenerPorId'));
+
+    // Personalizados
+    this.router.get('/personalizados', async (req, res) => this.procesarConsultaPersonalizados(req, res, 'listarTodos'));
+    this.router.get('/personalizados/:id', async (req, res) => this.procesarConsultaPersonalizados(req, res, 'obtenerPorId'));
   }
 
-  async procesarConsulta(request, response, accion) {
+  // Esto lo podemos factorizar en procesarConultaGenerico, procesarConsultaColores, etc.
+  async procesarConsultaGenericos(req, res, accion) {
     try {
       let resultado = null;
+      let statusCode = 200;
 
       switch (accion) {
-        case 'listarGenericos':
-          resultado = await genericosGateway.findAll();
+        case 'listarTodos':
+          resultado = await genericosBO.findAll();
           break;
-        case 'listarColores':
-          resultado = await coloresGateway.findAll();
+        case 'obtenerPorId':
+          resultado = await genericosBO.findById(req.params.id); // Asumiendo que tu gateway tiene findById
           break;
-        case 'listarMateriales':
-          resultado = await materialesGateway.findAll();
-          break;
-        case 'listarTamanos':
-          resultado = await tamanosGateway.findAll();
-          break;
-        case 'listarPersonalizaciones':
-          resultado = await personalizacionesGateway.findAll();
-          break;
-        case 'listarPersonalizados':
-          resultado = await personalizadosGateway.findAll();
+        case 'crear':
+          resultado = await genericosBO.crear(req.body); // Le pasamos el JSON entero que viene de la petición
+          statusCode = 201; // 201 significa "Creado"
           break;
         default:
-          return this.devolverError(response, 400, 'Acción no válida');
+          return this.devolverError(res, 400, 'Acción no válida en Genéricos');
       }
-
-      this.retornarRespuesta(response, 200, resultado);
-
+      return this.retornarRespuesta(res, statusCode, resultado);
     } catch (error) {
-      console.error(`[ProductosAPI Error] ${accion}:`, error);
-      this.devolverError(response, 500, 'Error interno del servidor procesando la consulta.');
+      console.error(`[ProductosAPI Error] Genericos - ${accion}:`, error);
+      return this.devolverError(res, 500, 'Error interno procesando Genéricos.');
     }
   }
+
+  async procesarConsultaColores(req, res, accion) {
+    try {
+      let resultado = null;
+      switch (accion) {
+        case 'listarTodos':
+          resultado = await coloresBO.findAll();
+          break;
+        case 'obtenerPorId':
+          resultado = await coloresBO.findById(req.params.id);
+          break;
+        default:
+          return this.devolverError(res, 400, 'Acción no válida en Colores');
+      }
+      return this.retornarRespuesta(res, 200, resultado);
+    } catch (error) {
+      console.error(`[ProductosAPI Error] Colores - ${accion}:`, error);
+      return this.devolverError(res, 500, 'Error interno procesando Colores.');
+    }
+  }
+
+  async procesarConsultaMateriales(req, res, accion) {
+    try {
+      let resultado = null;
+      switch (accion) {
+        case 'listarTodos':
+          resultado = await materialesBO.findAll();
+          break;
+        case 'obtenerPorId':
+          resultado = await materialesBO.findById(req.params.id);
+          break;
+        default:
+          return this.devolverError(res, 400, 'Acción no válida en Materiales');
+      }
+      return this.retornarRespuesta(res, 200, resultado);
+    } catch (error) {
+      console.error(`[ProductosAPI Error] Materiales - ${accion}:`, error);
+      return this.devolverError(res, 500, 'Error interno procesando Materiales.');
+    }
+  }
+
+  async procesarConsultaTamanos(req, res, accion) {
+    try {
+      let resultado = null;
+      switch (accion) {
+        case 'listarTodos':
+          resultado = await tamanosBO.findAll();
+          break;
+        case 'obtenerPorId':
+          resultado = await tamanosBO.findById(req.params.id);
+          break;
+        default:
+          return this.devolverError(res, 400, 'Acción no válida en Tamaños');
+      }
+      return this.retornarRespuesta(res, 200, resultado);
+    } catch (error) {
+      console.error(`[ProductosAPI Error] Tamaños - ${accion}:`, error);
+      return this.devolverError(res, 500, 'Error interno procesando Tamaños.');
+    }
+  }
+
+  async procesarConsultaPersonalizaciones(req, res, accion) {
+    try {
+      let resultado = null;
+      switch (accion) {
+        case 'listarTodos':
+          resultado = await personalizacionesBO.findAll();
+          break;
+        case 'obtenerPorId':
+          resultado = await personalizacionesBO.findById(req.params.id);
+          break;
+        default:
+          return this.devolverError(res, 400, 'Acción no válida en Personalizaciones');
+      }
+      return this.retornarRespuesta(res, 200, resultado);
+    } catch (error) {
+      console.error(`[ProductosAPI Error] Personalizaciones - ${accion}:`, error);
+      return this.devolverError(res, 500, 'Error interno procesando Personalizaciones.');
+    }
+  }
+
+  async procesarConsultaPersonalizados(req, res, accion) {
+    try {
+      let resultado = null;
+      switch (accion) {
+        case 'listarTodos':
+          resultado = await personalizadosBO.findAll();
+          break;
+        case 'obtenerPorId':
+          resultado = await personalizadosBO.findById(req.params.id);
+          break;
+        default:
+          return this.devolverError(res, 400, 'Acción no válida en Personalizados');
+      }
+      return this.retornarRespuesta(res, 200, resultado);
+    } catch (error) {
+      console.error(`[ProductosAPI Error] Personalizados - ${accion}:`, error);
+      return this.devolverError(res, 500, 'Error interno procesando Personalizados.');
+    }
+  }
+
+  // --- MÉTODOS DE RESPUESTA ---
 
   devolverError(response, status, mensaje) {
     return response.status(status).json({
