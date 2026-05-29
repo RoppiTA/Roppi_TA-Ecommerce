@@ -8,12 +8,14 @@ const Personalizacion = require('./personalizacion.model');
 
 class GenericosBO {
 
+  ///////////////////////////////////////////
     // Listar todos los genéricos sin sus relaciones (tamaños, materiales, colores, personalizaciones)
   async listarTodos() {
     const rows = await genericosGateway.findAll();
     return rows.map(row => new Generico(row));
   }
 
+    ///////////////////////////////////////////
   // Traer por id sí lista todas las relaciones del genérico (tamaños, materiales, colores, personalizaciones)
   async obtenerPorId(id) {
     // 1. Traer el genérico
@@ -39,6 +41,7 @@ class GenericosBO {
     return generico;
   }
 
+  ///////////////////////////////////////////
   //para crear se debe realizar una inserción de todas sus relaciones. Se manejan a este nivel por que si falla alguna inserción, se revierte toda la operación.
   async crear({ nombre, descripcion, precioBase, maximoStock, tamanos, materiales, colores, personalizaciones, usuarioId }) {
   const client = await db.getClient();
@@ -93,6 +96,87 @@ class GenericosBO {
     client.release();
   }
 }
+
+///////////////////////////////////////////
+// MODIFICAR
+//lo que estamos haciendo para actualizar las listas vinculadas es eliminar
+//todas las relaciones anteriores y volver a insertar las nuevas. Esto es más sencillo de implementar
+// aunque no es lo más óptimo. Para optimizar, tendríamos que comparar la lista anterior con la nueva 
+// y solo eliminar/insertar lo que cambió.
+    async actualizar(id, { nombre, descripcion, precioBase, maximoStock, 
+                        tamanos, materiales, colores, personalizaciones, 
+                        usuarioId }) {
+
+        const existe = await genericosGateway.findById(id);
+        if (!existe) throw new Error(`Genérico con ID ${id} no encontrado`);
+
+        const client = await db.getClient();
+        try {
+            await client.query('BEGIN');
+
+            // 1. Actualizar datos básicos
+            await genericosGateway.updateWithClient(client, id, {
+            nombre, descripcion, precioBase, maximoStock, usuarioId
+            });
+
+            // 2. Si vienen listas, reemplazarlas
+            if (tamanos) {
+            await genericosGateway.removeTodosLosTamanosWithClient(client, id);
+            for (const t of tamanos) {
+                await genericosGateway.addTamanoWithClient(client, {
+                idGenerico: id, idTamano: t.id, alto: t.alto, ancho: t.ancho, usuarioId
+                });
+            }
+            }
+
+            if (materiales) {
+            await genericosGateway.removeTodosLosMaterialesWithClient(client, id);
+            for (const m of materiales) {
+                await genericosGateway.addMaterialWithClient(client, {
+                idGenerico: id, idMaterial: m.id, costoExtra: m.costoExtra, usuarioId
+                });
+            }
+            }
+
+            if (colores) {
+            await genericosGateway.removeTodosLosColoresWithClient(client, id);
+            for (const c of colores) {
+                await genericosGateway.addColorWithClient(client, {
+                idGenerico: id, idColor: c.id, usuarioId
+                });
+            }
+            }
+
+            if (personalizaciones) {
+            await genericosGateway.removeTodosLasPersonalizacionesWithClient(client, id);
+            for (const p of personalizaciones) {
+                await genericosGateway.addPersonalizacionWithClient(client, {
+                idGenerico: id, idPersonalizacion: p.id, costoExtra: p.costoExtra, usuarioId
+                });
+            }
+            }
+
+            await client.query('COMMIT');
+            return await this.obtenerPorId(id);
+
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    async desactivar(id, usuarioId) {
+        // 1. Verificar que existe
+        const existe = await genericosGateway.findById(id);
+        if (!existe) throw new Error(`Genérico con ID ${id} no encontrado`);
+
+        // 2. Desactivar el genérico
+        const row = await genericosGateway.deactivate(id, usuarioId);
+
+        return new Generico(row);
+    }
 
 }
 
