@@ -31,19 +31,19 @@ class GenericosGateway {
   return result.rows[0];
   } 
 
-  async update(id, { nombre, descripcion, precioBase, maximoStock, usuarioId }) {
-    const result = await db.query(`
-      UPDATE "RoppiTA".GENERICOS
-      SET NOMBRE = $1,
-          DESCRIPCION = $2,
-          PRECIO_BASE = $3,
-          MAXIMO_STOCK = $4,
-          USUARIO_MODIFICACION = $5,
-          FECHA_MODIFICACION = CURRENT_TIMESTAMP
-      WHERE ID = $6
-      RETURNING *
-    `, [nombre, descripcion, precioBase, maximoStock, usuarioId, id]);
-    return result.rows[0];
+  async updateWithClient(client, id, { nombre, descripcion, precioBase, maximoStock, usuarioId }) {
+  const result = await client.query(`
+    UPDATE "RoppiTA".GENERICOS
+    SET NOMBRE = $1,
+        DESCRIPCION = $2,
+        PRECIO_BASE = $3,
+        MAXIMO_STOCK = $4,
+        USUARIO_MODIFICACION = $5,
+        FECHA_MODIFICACION = CURRENT_TIMESTAMP
+    WHERE ID = $6
+    RETURNING *
+  `, [nombre, descripcion, precioBase, maximoStock, usuarioId, id]);
+  return result.rows[0];
   }
 
   async deactivate(id, usuarioId) {
@@ -80,14 +80,13 @@ class GenericosGateway {
     return result.rows[0];
   }
 
-  async removeTamano(idGenerico, idTamano) {
-    const result = await db.query(`
-      DELETE FROM "RoppiTA".GENERICOSXTAMANOS
-      WHERE ID_GENERICO = $1 AND ID_TAMANO = $2
-      RETURNING *
-    `, [idGenerico, idTamano]);
-    return result.rows[0];
+  async removeTodosLosTamanosWithClient(client, idGenerico) {
+  await client.query(`
+    DELETE FROM "RoppiTA".GENERICOSXTAMANOS
+    WHERE ID_GENERICO = $1
+  `, [idGenerico]);
   }
+
 
   // ─── GENERICOSXMATERIALES (materiales asociados al producto genérico)────────────────────────────────
 
@@ -102,7 +101,7 @@ class GenericosGateway {
   }
 
 
-async addMaterialWithClient(client, { idGenerico, idMaterial, costoExtra, usuarioId }) {
+  async addMaterialWithClient(client, { idGenerico, idMaterial, costoExtra, usuarioId }) {
   const result = await client.query(`
     INSERT INTO "RoppiTA".GENERICOSXMATERIALES
       (ID_GENERICO, ID_MATERIAL, COSTO_EXTRA, USUARIO_CREACION, USUARIO_MODIFICACION)
@@ -110,17 +109,15 @@ async addMaterialWithClient(client, { idGenerico, idMaterial, costoExtra, usuari
     RETURNING *
   `, [idGenerico, idMaterial, costoExtra, usuarioId]);
   return result.rows[0];
-}
-
-  async removeMaterial(idGenerico, idMaterial) {
-    const result = await db.query(`
-      DELETE FROM "RoppiTA".GENERICOSXMATERIALES
-      WHERE ID_GENERICO = $1 AND ID_MATERIAL = $2
-      RETURNING *
-    `, [idGenerico, idMaterial]);
-    return result.rows[0];
   }
 
+
+  async removeTodosLosMaterialesWithClient(client, idGenerico) {
+  await client.query(`
+    DELETE FROM "RoppiTA".GENERICOSXMATERIALES
+    WHERE ID_GENERICO = $1
+  `, [idGenerico]);
+  }
   // ─── GENERICOSXCOLORES (colores asociados al producto genérico)───────────────────────────────────
 
   async findColoresByGenerico(idGenerico) {
@@ -133,7 +130,7 @@ async addMaterialWithClient(client, { idGenerico, idMaterial, costoExtra, usuari
     return result.rows;
   }
   
-async addColorWithClient(client, { idGenerico, idColor, usuarioId }) {
+  async addColorWithClient(client, { idGenerico, idColor, usuarioId }) {
   const result = await client.query(`
     INSERT INTO "RoppiTA".GENERICOSXCOLORES
       (ID_GENERICO, ID_COLOR, USUARIO_CREACION, USUARIO_MODIFICACION)
@@ -141,15 +138,14 @@ async addColorWithClient(client, { idGenerico, idColor, usuarioId }) {
     RETURNING *
   `, [idGenerico, idColor, usuarioId]);
   return result.rows[0];
-}
+  }
 
-  async removeColor(idGenerico, idColor) {
-    const result = await db.query(`
-      DELETE FROM "RoppiTA".GENERICOSXCOLORES
-      WHERE ID_GENERICO = $1 AND ID_COLOR = $2
-      RETURNING *
-    `, [idGenerico, idColor]);
-    return result.rows[0];
+
+  async removeTodosLosColoresWithClient(client, idGenerico) {
+  await client.query(`
+    DELETE FROM "RoppiTA".GENERICOSXCOLORES
+    WHERE ID_GENERICO = $1
+  `, [idGenerico]);
   }
 
   // ─── GENERICOSXPERSONALIZACIONES (personalizaciones asociadas al producto genérico)───────────────────────────────────
@@ -172,17 +168,15 @@ async addColorWithClient(client, { idGenerico, idColor, usuarioId }) {
     RETURNING *
   `, [idGenerico, idPersonalizacion, costoExtra, usuarioId]);
   return result.rows[0];
-}
-
-  async removePersonalizacion(idGenerico, idPersonalizacion) {
-    const result = await db.query(`
-      DELETE FROM "RoppiTA".GENERICOSXPERSONALIZACIONES
-      WHERE ID_GENERICO = $1 AND ID_PERSONALIZACION = $2
-      RETURNING *
-    `, [idGenerico, idPersonalizacion]);
-    return result.rows[0];
   }
 
+ 
+  async removeTodosLasPersonalizacionesWithClient(client, idGenerico) {
+  await client.query(`
+    DELETE FROM "RoppiTA".GENERICOSXPERSONALIZACIONES
+    WHERE ID_GENERICO = $1
+  `, [idGenerico]);
+  }
   // los métodos clientes "with client" son para ser usados dentro de transacciones manejadas a nivel de BO,
   //  para asegurar que si alguna inserción falla, se revierta toda la operación. 
   // Lo que hacen es asegurar que cada query use el mismo cliente y no haga utilice cualquier cliente en la BD

@@ -1,20 +1,20 @@
-// roppi.backend.modulos/roppi.backend.mod.productos/colores.bo.js
-const coloresGateway = require('./colores.gateway');
-const Color = require('./color.model');
+// roppi.backend.modulos/roppi.backend.mod.productos/personalizaciones.bo.js
+const personalizacionesGateway = require('./personalizaciones.gateway');
+const Personalizacion = require('./personalizacion.model');
 
-class ColoresBO {
+class PersonalizacionesBO {
 
   async listarTodos() {
-    const rows = await coloresGateway.findAll();
-    return rows.map(row => new Color(row));
+    const rows = await personalizacionesGateway.findAll();
+    return rows.map(row => new Personalizacion(row));
   }
 
   async obtenerPorId(id) {
-    const row = await coloresGateway.findById(id);
+    const row = await personalizacionesGateway.findById(id);
     if (!row) return null;
-    return new Color(row);
+    return new Personalizacion(row);
   }
 
 }
 
-module.exports = new ColoresBO();
+module.exports = new PersonalizacionesBO();
