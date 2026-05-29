@@ -3,6 +3,7 @@
 :root {
   --font-primary: 'Nunito', sans-serif;
 
+   --text-display-huge: 100px;
   --text-display-large: 45px;
   --text-display-medium: 36px;
   --text-display-small: 28px;

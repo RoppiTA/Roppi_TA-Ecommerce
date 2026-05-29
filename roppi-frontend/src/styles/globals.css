@@ -14,8 +14,8 @@
 }
 
 * {
-  margin: 0;
-  padding: 0;
+  margin: 8;
+  padding: 8;
   box-sizing: border-box;
 }
 
@@ -30,11 +30,11 @@ body {
   line-height: 1.5;
 }
 
-button {
+/*button {
   border: none;
   cursor: pointer;
   transition: var(--transition-default);
-}
+}*/
 
 a {
   text-decoration: none;
