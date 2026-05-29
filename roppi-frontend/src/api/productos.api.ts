@@ -38,9 +38,26 @@ export const ProductosAPIService = {
      considerando que trae en este caso todos los producto activo o 
      inactivo*/
     getProductosGenericos: async (): Promise<ProductoGenerico[]> => {
-        //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.get('/productos/genericos');
-        return response.data;
+        // Hacemos la petición tipando la respuesta según la estructura real del backend
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/genericos');
+        
+        // Si el backend no devuelve datos válidos, retornamos un arreglo vacío
+        if (!response.data || !response.data.datos) return [];
+
+        // Mapeamos los nombres de propiedades CamelCase del backend a snake_case del frontend
+        return response.data.datos.map((prod: any) => ({
+            id: prod.id,
+            nombre: prod.nombre,
+            descripcion: prod.descripcion,
+            precio_base: Number(prod.precioBase), // Convertimos el string "20" a número
+            maximo_stock: prod.maximoStock,       // Convertimos de maximoStock a maximo_stock
+            activo: prod.activo,
+            colores: prod.colores || [],
+            materiales: prod.materiales || [],
+            tamanos: prod.tamanos || [],
+            personalizaciones: prod.personalizaciones || []
+        }));
+        
     },
     
     createProductoGenerico: async (productoData: CreateProductGenericoDTO): Promise<ProductoGenerico> => {

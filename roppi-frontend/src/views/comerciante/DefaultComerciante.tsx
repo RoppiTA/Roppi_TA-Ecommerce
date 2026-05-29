@@ -117,6 +117,25 @@ export const DefaultComerciante = () => {
     setDiscounts(discounts.filter(d => d.id !== id));
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-lg font-medium text-slate-600">Cargando productos desde el catálogo...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-red-50 p-6 rounded-lg border border-red-200 text-center">
+          <h3 className="text-red-800 font-bold text-lg mb-2">Error de conexión</h3>
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">

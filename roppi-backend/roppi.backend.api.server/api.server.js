@@ -13,11 +13,15 @@ class APIServer {
 
     this._configurarMiddlewares();
     this._distribuirRecursos();
+    this.app.use(cors({
+      origin: 'http://localhost:5173',
+      credentials: true
+    }));
   }
 
   _configurarMiddlewares() {
-    // this.app.use(cors());
-    // this.app.use(express.json());
+    this.app.use(cors());
+    this.app.use(express.json());
     // Se omitió AuthenticatorMiddleware por petición del usuario para pruebas
   }
 
@@ -32,6 +36,7 @@ class APIServer {
     // Podemos preparar la distribución de otras rutas para el futuro
     // this.app.use('/api/pedidos', pedidosAPI.router);
     // this.app.use('/api/usuarios', usuariosAPI.router);
+    module.exports = APIServer;
   }
 
   startServer() {
