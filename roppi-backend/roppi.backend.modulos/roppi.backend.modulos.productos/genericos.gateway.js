@@ -20,16 +20,16 @@ class GenericosGateway {
     `, [id]);
     return result.rows[0];
   }
-
-  async create({ nombre, descripcion, precioBase, maximoStock, usuarioId }) {
-    const result = await db.query(`
-      INSERT INTO "RoppiTA".GENERICOS
-        (NOMBRE, DESCRIPCION, PRECIO_BASE, MAXIMO_STOCK, USUARIO_CREACION, USUARIO_MODIFICACION)
-      VALUES ($1, $2, $3, $4, $5, $5)
-      RETURNING *
-    `, [nombre, descripcion, precioBase, maximoStock, usuarioId]);
-    return result.rows[0];
-  }
+  
+  async createWithClient(client, { nombre, descripcion, precioBase, maximoStock, usuarioId }) {
+  const result = await client.query(`
+    INSERT INTO "RoppiTA".GENERICOS
+      (NOMBRE, DESCRIPCION, PRECIO_BASE, MAXIMO_STOCK, USUARIO_CREACION, USUARIO_MODIFICACION)
+    VALUES ($1, $2, $3, $4, $5, $5)
+    RETURNING *
+  `, [nombre, descripcion, precioBase, maximoStock, usuarioId]);
+  return result.rows[0];
+  } 
 
   async update(id, { nombre, descripcion, precioBase, maximoStock, usuarioId }) {
     const result = await db.query(`
@@ -70,8 +70,8 @@ class GenericosGateway {
     return result.rows;
   }
 
-  async addTamano({ idGenerico, idTamano, alto, ancho, usuarioId }) {
-    const result = await db.query(`
+  async addTamanoWithClient(client, { idGenerico, idTamano, alto, ancho, usuarioId }) {
+    const result = await client.query(`
       INSERT INTO "RoppiTA".GENERICOSXTAMANOS
         (ID_GENERICO, ID_TAMANO, ALTO, ANCHO, USUARIO_CREACION, USUARIO_MODIFICACION)
       VALUES ($1, $2, $3, $4, $5, $5)
@@ -101,15 +101,16 @@ class GenericosGateway {
     return result.rows;
   }
 
-  async addMaterial({ idGenerico, idMaterial, costoExtra, usuarioId }) {
-    const result = await db.query(`
-      INSERT INTO "RoppiTA".GENERICOSXMATERIALES
-        (ID_GENERICO, ID_MATERIAL, COSTO_EXTRA, USUARIO_CREACION, USUARIO_MODIFICACION)
-      VALUES ($1, $2, $3, $4, $4)
-      RETURNING *
-    `, [idGenerico, idMaterial, costoExtra, usuarioId]);
-    return result.rows[0];
-  }
+
+async addMaterialWithClient(client, { idGenerico, idMaterial, costoExtra, usuarioId }) {
+  const result = await client.query(`
+    INSERT INTO "RoppiTA".GENERICOSXMATERIALES
+      (ID_GENERICO, ID_MATERIAL, COSTO_EXTRA, USUARIO_CREACION, USUARIO_MODIFICACION)
+    VALUES ($1, $2, $3, $4, $4)
+    RETURNING *
+  `, [idGenerico, idMaterial, costoExtra, usuarioId]);
+  return result.rows[0];
+}
 
   async removeMaterial(idGenerico, idMaterial) {
     const result = await db.query(`
@@ -131,16 +132,16 @@ class GenericosGateway {
     `, [idGenerico]);
     return result.rows;
   }
-
-  async addColor({ idGenerico, idColor, usuarioId }) {
-    const result = await db.query(`
-      INSERT INTO "RoppiTA".GENERICOSXCOLORES
-        (ID_GENERICO, ID_COLOR, USUARIO_CREACION, USUARIO_MODIFICACION)
-      VALUES ($1, $2, $3, $3)
-      RETURNING *
-    `, [idGenerico, idColor, usuarioId]);
-    return result.rows[0];
-  }
+  
+async addColorWithClient(client, { idGenerico, idColor, usuarioId }) {
+  const result = await client.query(`
+    INSERT INTO "RoppiTA".GENERICOSXCOLORES
+      (ID_GENERICO, ID_COLOR, USUARIO_CREACION, USUARIO_MODIFICACION)
+    VALUES ($1, $2, $3, $3)
+    RETURNING *
+  `, [idGenerico, idColor, usuarioId]);
+  return result.rows[0];
+}
 
   async removeColor(idGenerico, idColor) {
     const result = await db.query(`
@@ -163,15 +164,15 @@ class GenericosGateway {
     return result.rows;
   }
 
-  async addPersonalizacion({ idGenerico, idPersonalizacion, costoExtra, usuarioId }) {
-    const result = await db.query(`
-      INSERT INTO "RoppiTA".GENERICOSXPERSONALIZACIONES
-        (ID_GENERICO, ID_PERSONALIZACION, COSTO_EXTRA, USUARIO_CREACION, USUARIO_MODIFICACION)
-      VALUES ($1, $2, $3, $4, $4)
-      RETURNING *
-    `, [idGenerico, idPersonalizacion, costoExtra, usuarioId]);
-    return result.rows[0];
-  }
+  async addPersonalizacionWithClient(client, { idGenerico, idPersonalizacion, costoExtra, usuarioId }) {
+  const result = await client.query(`
+    INSERT INTO "RoppiTA".GENERICOSXPERSONALIZACIONES
+      (ID_GENERICO, ID_PERSONALIZACION, COSTO_EXTRA, USUARIO_CREACION, USUARIO_MODIFICACION)
+    VALUES ($1, $2, $3, $4, $4)
+    RETURNING *
+  `, [idGenerico, idPersonalizacion, costoExtra, usuarioId]);
+  return result.rows[0];
+}
 
   async removePersonalizacion(idGenerico, idPersonalizacion) {
     const result = await db.query(`
@@ -181,6 +182,12 @@ class GenericosGateway {
     `, [idGenerico, idPersonalizacion]);
     return result.rows[0];
   }
+
+  // los métodos clientes "with client" son para ser usados dentro de transacciones manejadas a nivel de BO,
+  //  para asegurar que si alguna inserción falla, se revierta toda la operación. 
+  // Lo que hacen es asegurar que cada query use el mismo cliente y no haga utilice cualquier cliente en la BD
+
+
 
 }
 

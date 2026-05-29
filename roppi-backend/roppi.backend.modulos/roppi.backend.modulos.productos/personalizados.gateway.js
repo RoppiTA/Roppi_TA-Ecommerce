@@ -91,6 +91,17 @@ class PersonalizadosGateway {
     return result.rows[0];
   }
 
+  //metodo para poder hacer inserción con rollback
+  async createWithClient(client, { idGenerico, idTamano, idColor, idMaterial, idPersonalizacion, sku, precio, usuarioId }) {
+  const result = await client.query(`
+    INSERT INTO "RoppiTA".PERSONALIZADOS
+      (ID_GENERICO, ID_TAMANO, ID_COLOR, ID_MATERIAL, ID_PERSONALIZACION,
+       SKU, PRECIO, USUARIO_CREACION, USUARIO_MODIFICACION)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
+    RETURNING *
+  `, [idGenerico, idTamano, idColor, idMaterial, idPersonalizacion, sku, precio, usuarioId]);
+  return result.rows[0];
+}
 }
 
 module.exports = new PersonalizadosGateway();
