@@ -29,6 +29,9 @@ class ProductosAPI {
     this.router.get('/genericos/:id', async (req, res) => this.procesarConsultaGenericos(req, res, 'obtenerPorId'));
 
     this.router.post('/genericos', async (req, res) => this.procesarConsultaGenericos(req, res, 'crear'));
+    this.router.post('/genericos/:id', async (req, res) => this.procesarConsultaGenericos(req, res, 'actualizar'));
+    
+    this.router.delete('/genericos/:id/desactivar', async (req, res) => this.procesarConsultaGenericos(req, res, 'desactivar'));
 
     // Colores
     this.router.get('/colores', async (req, res) => this.procesarConsultaColores(req, res, 'listarTodos'));
@@ -67,6 +70,12 @@ class ProductosAPI {
         case 'crear':
           resultado = await genericosBO.crear(req.body); // Le pasamos el JSON entero que viene de la petición
           statusCode = 201; // 201 significa "Creado"
+          break;
+        case 'actualizar':
+          resultado = await genericosBO.actualizar(req.params.id, req.body);
+          break;
+        case 'desactivar':
+          resultado = await genericosBO.desactivar(req.params.id, req.body.usuarioId);
           break;
         default:
           return this.devolverError(res, 400, 'Acción no válida en Genéricos');
