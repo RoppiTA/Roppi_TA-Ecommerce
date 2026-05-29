@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 export const apiClient = axios.create({
-  baseURL: 'https://api.roppita.com/v1', // URL futura de backend
+  baseURL: 'http://127.0.0.1:3000/api', // URL futura de backend
   headers: {
      'Content-Type': 'application/json', 
      'Accept': 'application/json'

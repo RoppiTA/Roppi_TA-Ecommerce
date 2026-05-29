@@ -5,12 +5,14 @@ import { DiscountModal } from './DiscountModal';
 import { ProductoGenerico } from '../../types/producto/productoGen.types';
 import { Descuento } from '../../types/producto/descuento.types';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { useProductosGenericos } from '../../hooks/useProductos';
 
 export const DefaultComerciante = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { productos, loading, error } = useProductosGenericos();
 
-  const [products, setProducts] = useState<ProductoGenerico[]>([
+  /*const [products, setProducts] = useState<ProductoGenerico[]>([
     {
       id: 1,
       nombre: 'Blusa Casual',
@@ -65,7 +67,7 @@ export const DefaultComerciante = () => {
       maximo_stock: 0,
       colores: [], materiales: [], tamanos: [], personalizaciones:[]
     },
-  ]);
+  ]);*/
 
   const [discounts, setDiscounts] = useState<Descuento[]>([
     {
@@ -121,14 +123,14 @@ export const DefaultComerciante = () => {
         <h1 className="mb-8">Gestión de Productos y Descuentos</h1>
 
         <ProductList
-          products={products}
+          products={productos}
           onAddProduct={handleAddProduct}
         />
 
         <div className="mt-12">
           <DiscountTable
             discounts={discounts}
-            products={products}
+            products={productos}
             onAddDiscount={handleAddDiscount}
             onEditDiscount={handleEditDiscount}
             onDeleteDiscount={handleDeleteDiscount}
@@ -139,7 +141,7 @@ export const DefaultComerciante = () => {
       <DiscountModal
         open={discountModalOpen}
         discount={editingDiscount}
-        products={products}
+        products={productos}
         onClose={() => {
           setDiscountModalOpen(false);
           setEditingDiscount(null);

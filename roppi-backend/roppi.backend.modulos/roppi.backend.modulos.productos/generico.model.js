@@ -16,7 +16,7 @@ class Generico {
     this.materiales = [];
     this.colores = [];
     this.personalizaciones = [];
-    this.personalizados = [];
+    //this.personalizados = [];
     // Auditoría
     this.fechaCreacion = fecha_creacion;
     this.usuarioCreacion = usuario_creacion;

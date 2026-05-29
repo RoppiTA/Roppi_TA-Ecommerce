@@ -12,25 +12,25 @@ export const ProductosAPIService = {
     formularios de creación y edición. */
     getColores: async (): Promise<Color[]> => {
         //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.get('/api/colores');
+        const response = await apiClient.get('/productos/colores');
         return response.data;
     },
 
     getMateriales: async (): Promise<Material[]> => {
         //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.get('/api/materiales');
+        const response = await apiClient.get('/productos/materiales');
         return response.data;
     },
 
     getTamano: async (): Promise<Tamano[]> => {
         //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.get('/api/tamanos');
+        const response = await apiClient.get('/productos/tamanos');
         return response.data;
     },
 
     getPersonalizaciones: async (): Promise<Personalizacion[]> => {
         //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.get('/api/personalizaciones');
+        const response = await apiClient.get('/productos/personalizaciones');
         return response.data;
     },
     
@@ -39,25 +39,25 @@ export const ProductosAPIService = {
      inactivo*/
     getProductosGenericos: async (): Promise<ProductoGenerico[]> => {
         //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.get('/api/productos');
+        const response = await apiClient.get('/productos/genericos');
         return response.data;
     },
     
     createProductoGenerico: async (productoData: CreateProductGenericoDTO): Promise<ProductoGenerico> => {
         //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.post('/api/productos', productoData);
+        const response = await apiClient.post('/productos/genericos', productoData);
         return response.data;
     },
 
     updateProductoGenerico: async (id: number, productoData: CreateProductGenericoDTO): Promise<ProductoGenerico> => {
         //Falta cambiar el endpoint a la URL del backend.
-        const response = await apiClient.put(`/api/productos/${id}`, productoData);
+        const response = await apiClient.put(`/productos/genericos/${id}`, productoData);
         return response.data;
     },
 
     deleteProductoGenerico: async (id: number): Promise<void> => {
         //Falta cambiar el endpoint a la URL del backend.
-        await apiClient.delete(`/api/productos/${id}`);
+        await apiClient.delete(`/productos/genericos/${id}/desactivar`);
     }
 };
 
