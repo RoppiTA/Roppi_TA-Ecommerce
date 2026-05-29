@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 
 // Faltan los demás ServiciosAPI
-const ProductosAPI = require('./api/productos.api');
+const ProductosAPI = require('./api/productos.api.js');
 
 class APIServer {
   constructor() {

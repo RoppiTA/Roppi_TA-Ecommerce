@@ -11,7 +11,7 @@ const coloresBO = require('../../roppi.backend.modulos/roppi.backend.modulos.pro
 const materialesBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/materiales.bo.js');
 const tamanosBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/tamanos.bo.js');
 const personalizacionesBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/personalizaciones.bo.js');
-const personalizadosBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/personalizados.bo.js');
+//const personalizadosBO = require('../../roppi.backend.modulos/roppi.backend.modulos.productos/personalizados.bo.js');
 
 class ProductosAPI {
   constructor() {
@@ -50,8 +50,8 @@ class ProductosAPI {
     this.router.get('/personalizaciones/:id', async (req, res) => this.procesarConsultaPersonalizaciones(req, res, 'obtenerPorId'));
 
     // Personalizados
-    this.router.get('/personalizados', async (req, res) => this.procesarConsultaPersonalizados(req, res, 'listarTodos'));
-    this.router.get('/personalizados/:id', async (req, res) => this.procesarConsultaPersonalizados(req, res, 'obtenerPorId'));
+    //this.router.get('/personalizados', async (req, res) => this.procesarConsultaPersonalizados(req, res, 'listarTodos'));
+    //this.router.get('/personalizados/:id', async (req, res) => this.procesarConsultaPersonalizados(req, res, 'obtenerPorId'));
   }
 
   // Esto lo podemos factorizar en procesarConultaGenerico, procesarConsultaColores, etc.
