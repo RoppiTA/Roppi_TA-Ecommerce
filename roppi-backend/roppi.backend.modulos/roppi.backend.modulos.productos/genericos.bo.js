@@ -1,10 +1,10 @@
 // roppi.backend.modulos/roppi.backend.mod.productos/genericos.bo.js
 const genericosGateway = require('./genericos.gateway');
 const Generico = require('./generico.model');
-const Tamano = require('./tamano.model');
-const Material = require('./material.model');
+const GenericoTamano = require('./tamanoGenerico.js');
+const GenericoMaterial = require('./materialGenerico.js');
+const GenericoPersonalizacion = require('./personalizacionGenerico.js');
 const Color = require('./color.model');
-const Personalizacion = require('./personalizacion.model');
 
 class GenericosBO {
 
@@ -33,10 +33,10 @@ class GenericosBO {
     ]);
 
     // 3. Moldear con sus models
-    generico.tamanos = tamanos.map(row => new Tamano(row));
-    generico.materiales = materiales.map(row => new Material(row));
+    generico.tamanos = tamanos.map(row => new GenericoTamano(row));
+    generico.materiales = materiales.map(row => new GenericoMaterial(row));
     generico.colores = colores.map(row => new Color(row));
-    generico.personalizaciones = personalizaciones.map(row => new Personalizacion(row));
+    generico.personalizaciones = personalizaciones.map(row => new GenericoPersonalizacion(row));
 
     return generico;
   }
