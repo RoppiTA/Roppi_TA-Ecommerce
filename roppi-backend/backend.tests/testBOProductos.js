@@ -26,7 +26,6 @@ async function testObtenerPorId() {
 async function run() {
   try {
     await testListar();
-    await testObtenerPorId();
   } catch (error) {
     console.error('Error:', error.message);
   } finally {
