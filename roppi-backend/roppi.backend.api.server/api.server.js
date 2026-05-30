@@ -13,7 +13,7 @@ class APIServer {
     this._configurarMiddlewares();
     this._distribuirRecursos();
     this.app.use(cors({
-      origin: 'http://localhost:5173',
+      origin: 'http://localhost:3100',
       credentials: true
     }));
   }
