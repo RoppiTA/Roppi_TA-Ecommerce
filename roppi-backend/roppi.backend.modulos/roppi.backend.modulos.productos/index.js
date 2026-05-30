@@ -1,9 +1,9 @@
-require('dotenv').config({ path: '../.env' }); // Datos de conexión, etc...
-const APIServer = require('./api.server');
+require('dotenv').config({ path: '../.env' });
+const ProductServer = require('./producto.server.js');
 
 async function main() {
   try {
-    const server = new APIServer();
+    const server = new ProductServer();
     await server.startServer();
   } catch (error) {
     console.error('No se pudo inicializar la API:', error);

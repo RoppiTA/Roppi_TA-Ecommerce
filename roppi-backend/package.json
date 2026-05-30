@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node roppi.backend.api.server/index.js",
+    "start_api": "node roppi.backend.api.server/index.js",
+    "start_products_server": "node roppi.backend.modulos/roppi.backend.modulos.productos/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
