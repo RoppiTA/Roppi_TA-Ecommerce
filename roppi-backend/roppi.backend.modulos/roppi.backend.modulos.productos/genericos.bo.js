@@ -104,8 +104,8 @@ class GenericosBO {
 // aunque no es lo más óptimo. Para optimizar, tendríamos que comparar la lista anterior con la nueva 
 // y solo eliminar/insertar lo que cambió.
     async actualizar(id, { nombre, descripcion, precioBase, maximoStock, 
-                        tamanos, materiales, colores, personalizaciones, 
-                        usuarioId }) {
+                     //   tamanos, materiales, colores, personalizaciones,         usuarioId 
+                     }) {
 
         const existe = await genericosGateway.findById(id);
         if (!existe) throw new Error(`Genérico con ID ${id} no encontrado`);
@@ -118,7 +118,7 @@ class GenericosBO {
             await genericosGateway.updateWithClient(client, id, {
             nombre, descripcion, precioBase, maximoStock, usuarioId
             });
-
+/*
             // 2. Si vienen listas, reemplazarlas
             if (tamanos) {
             await genericosGateway.removeTodosLosTamanosWithClient(client, id);
@@ -155,7 +155,7 @@ class GenericosBO {
                 });
             }
             }
-
+*/
             await client.query('COMMIT');
             return await this.obtenerPorId(id);
 
