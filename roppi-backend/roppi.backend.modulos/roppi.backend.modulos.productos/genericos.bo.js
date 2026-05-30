@@ -116,7 +116,8 @@ class GenericosBO {
 
             // 1. Actualizar datos básicos
             await genericosGateway.updateWithClient(client, id, {
-            nombre, descripcion, precioBase, maximoStock, usuarioId
+            nombre, descripcion, precioBase, maximoStock 
+            //usuarioId
             });
 /*
             // 2. Si vienen listas, reemplazarlas
