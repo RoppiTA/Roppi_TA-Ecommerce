@@ -12,7 +12,7 @@ export const DefaultComerciante = () => {
   const navigate = useNavigate();
   const { productos, loading, error } = useProductosGenericos();
 
-  /*const [products, setProducts] = useState<ProductoGenerico[]>([
+  /*const [products, setProducts] = useState<ProductoGenerico[]>([ 
     {
       id: 1,
       nombre: 'Blusa Casual',

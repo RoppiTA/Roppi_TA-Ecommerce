@@ -54,7 +54,7 @@ class GenericosBO {
     const idGenerico = genericoRow.id;
 
     // Insertar todas las relacinones de manera paralela
-    await Promise.all([
+    /*await Promise.all([
       ...tamanos.map(t => genericosGateway.addTamanoWithClient(client, {
         idGenerico, idTamano: t.id, alto: t.alto, ancho: t.ancho, usuarioId
       })),
@@ -84,7 +84,7 @@ class GenericosBO {
           }
         }
       }
-    }
+    }*/
 
     await client.query('COMMIT');
     return await this.obtenerPorId(idGenerico);

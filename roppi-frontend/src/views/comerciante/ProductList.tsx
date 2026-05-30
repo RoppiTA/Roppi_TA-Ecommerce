@@ -14,7 +14,7 @@ export function ProductList({ products, onAddProduct }: ProductListProps) {
   const navigate = useNavigate();
 
   const handleViewProduct = (id:number) => {
-    navigate('/products/view/${id}');
+    navigate('/products/view/', { state: { productoId: id }});
   };
 
   return (
