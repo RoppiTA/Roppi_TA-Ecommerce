@@ -3,6 +3,7 @@ import { Color } from "../types/producto/color.types";
 import { Material } from "../types/producto/material.types";
 import { Personalizacion } from "../types/producto/personalizacion.types";
 import { Tamano } from "../types/producto/tamano.types";
+import { GenericoXColor, GenericoXMaterial, GenericoXPersonalizacion, GenericoXTamano } from "../types/producto/genericoAtributos.types";
 import { CreateProductGenericoDTO, ProductoGenerico } from "../types/producto/productoGen.types";
 import { CreateDescuentoDTO, Descuento } from "../types/producto/descuento.types";
 
@@ -11,35 +12,87 @@ const mapearAProductoFrontend = (prod: any): ProductoGenerico => ({
     id: prod.id,
     nombre: prod.nombre,
     descripcion: prod.descripcion,
-    precio_base: Number(prod.precioBase), // Convierte el string "20" o "30" del backend a número
-    maximo_stock: prod.maximoStock,       // Convierte maximoStock a maximo_stock
+    precio_base: Number(prod.precioBase),
+    maximo_stock: prod.maximoStock,
     activo: prod.activo,
-    colores: prod.colores || [],
-    materiales: prod.materiales || [],
-    tamanos: prod.tamanos || [],
-    personalizaciones: prod.personalizaciones || []
+    colores: (prod.colores || []).map(mapearAGenericoXColor),
+    materiales: (prod.materiales || []).map(mapearAGenericoXMaterial),
+    tamanos: (prod.tamanos || []).map(mapearAGenericoXTamano),
+    personalizaciones: (prod.personalizaciones || []).map(mapearAGenericoXPersonalizacion)
+});
+
+const mapearAGenericoXColor = (c: any): GenericoXColor => ({
+    id_color: c.id,
+});
+
+const mapearAGenericoXMaterial = (c: any): GenericoXMaterial => ({
+    id_material: c.id,
+    costo_extra: c.costoExtra
+});
+
+const mapearAGenericoXTamano = (c: any): GenericoXTamano => ({
+    id_tamano: c.id,
+    ancho: c.ancho,
+    alto: c.alto
+});
+
+const mapearAGenericoXPersonalizacion = (c: any): GenericoXPersonalizacion => ({
+    id_personalizacion: c.id,
+    costo_extra: c.costoExtra
+});
+
+const mapearAColor = (c: any): Color => ({
+    id: c.id,
+    nombre: c.nombre,
+    pantone: c.pantone,
+    activo: c.activo
+});
+
+const mapearAMaterial = (m: any): Material => ({
+    id: m.id,
+    nombre: m.nombre,
+    descripcion: m.descripcion,
+    activo: m.activo
+});
+
+const mapearATamano = (t: any): Tamano => ({
+    id: t.id,
+    nombre: t.nombre,
+    descripcion: t.descripcion,
+    activo: t.activo
+});
+
+const mapearAPersonalizacion = (p: any): Personalizacion => ({
+    id: p.id,
+    nombre: p.nombre,
+    descripcion: p.descripcion,
+    activo: p.activo
 });
 
 export const ProductosAPIService = {
     /* --- DATOS MAESTROS --- */
     getColores: async (): Promise<Color[]> => {
-        const response = await apiClient.get('/productos/colores');
-        return response.data;
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/colores');
+        if (!response.data || !response.data.datos) return [];
+        return response.data.datos.map(mapearAColor);
     },
 
     getMateriales: async (): Promise<Material[]> => {
-        const response = await apiClient.get('/productos/materiales');
-        return response.data;
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/materiales');
+        if (!response.data || !response.data.datos) return [];
+        return response.data.datos.map(mapearAMaterial);
     },
 
     getTamano: async (): Promise<Tamano[]> => {
-        const response = await apiClient.get('/productos/tamanos');
-        return response.data;
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/tamanos');
+        if (!response.data || !response.data.datos) return [];
+        return response.data.datos.map(mapearATamano);
     },
 
     getPersonalizaciones: async (): Promise<Personalizacion[]> => {
-        const response = await apiClient.get('/productos/personalizaciones');
-        return response.data;
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/personalizaciones');
+        if (!response.data || !response.data.datos) return [];
+        return response.data.datos.map(mapearAPersonalizacion);
     },
     
     /* --- CRUD DE PRODUCTOS GENÉRICOS --- */
@@ -66,13 +119,13 @@ export const ProductosAPIService = {
         const dtoBackend = {
             nombre: productoData.nombre,
             descripcion: productoData.descripcion,
-            precioBase: productoData.precio_base.toString(),
-            maximoStock: productoData.maximo_stock,
-            activo: productoData.activo,
-            tamanos: productoData.tamanos,
-            materiales: productoData.materiales,
-            colores: productoData.colores,
-            personalizaciones: productoData.personalizaciones
+            precioBase: productoData.precio_base,
+            maximoStock: productoData.maximo_stock
+            /*activo: productoData.activo,
+            tamanos: [],//productoData.tamanos,
+            materiales: [],//productoData.materiales,
+            colores: [],//productoData.colores,
+            personalizaciones: []//productoData.personalizaciones*/
         };
 
         const response = await apiClient.post<{ exito: boolean; datos: any }>('/productos/genericos', dtoBackend);
@@ -84,14 +137,16 @@ export const ProductosAPIService = {
         const dtoBackend = {
             nombre: productoData.nombre,
             descripcion: productoData.descripcion,
-            precioBase: productoData.precio_base.toString(),
-            maximoStock: productoData.maximo_stock,
-            activo: productoData.activo,
-            tamanos: productoData.tamanos,
-            materiales: productoData.materiales,
-            colores: productoData.colores,
-            personalizaciones: productoData.personalizaciones
+            precioBase: productoData.precio_base,
+            maximoStock: productoData.maximo_stock
+            /*activo: productoData.activo,
+            tamanos: [],//productoData.tamanos,
+            materiales: [],//productoData.materiales,
+            colores: [],//productoData.colores,
+            personalizaciones: []//productoData.personalizaciones*/
         };
+
+        console.log("3. Ver que tiene backend:", dtoBackend);
 
         const response = await apiClient.put<{ exito: boolean; datos: any }>(`/productos/genericos/${id}`, dtoBackend);
         return mapearAProductoFrontend(response.data.datos);

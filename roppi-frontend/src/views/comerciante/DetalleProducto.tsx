@@ -8,13 +8,14 @@ import { Color } from '../../types/producto/color.types';
 import { Tamano } from '../../types/producto/tamano.types';
 import { Personalizacion } from '../../types/producto/personalizacion.types';
 import { GenericoXColor, GenericoXMaterial, GenericoXPersonalizacion, GenericoXTamano } from '../../types/producto/genericoAtributos.types';
-import { ProductoGenerico } from '../../types/producto/productoGen.types';
+import { ProductoGenerico, CreateProductGenericoDTO } from '../../types/producto/productoGen.types';
 import assets from '../../assets/assets.js';
+import { useProductosGenericos } from '../../hooks/useProductos';
 
 type Mode = 'view' | 'create' | 'edit';
 
 // Listas predefinidas
-const AVAILABLE_MATERIALS: Material[] = [
+/*const AVAILABLE_MATERIALS: Material[] = [
   { id: 1, nombre: 'Algodón', descripcion: '', activo:1},
   { id: 2, nombre: 'Poliéster', descripcion: '', activo:1 },
   { id: 3, nombre: 'Lino', descripcion: '', activo:1 },
@@ -82,12 +83,30 @@ const getMaterial       = (id: number) => AVAILABLE_MATERIALS.find(m => m.id ===
 const getColor          = (id: number) => AVAILABLE_COLORS.find(c => c.id === id);
 const getTamano         = (id: number) => AVAILABLE_SIZES.find(s => s.id === id);
 const getPersonalizacion= (id: number) => AVAILABLE_CUSTOMIZATIONS.find(p => p.id === id);
-
+*/
 
 export default function DetalleProducto(){
     const location = useLocation();
     const navigate = useNavigate();
 
+// Sacamos el ID desde el estado oculto de la navegación
+    const state = location.state as { productoId?: number } | null;
+    const id_nav = state?.productoId;
+    console.log("Valor de id: ", id_nav);
+// 1. Extraemos las funciones y catálogos necesarios del hook
+// Modifica la parte superior de DetalleProducto.tsx para que quede así:
+    const { 
+      colores = [],           // Si por algún motivo llega undefined, se inicializa como array vacío
+      materiales = [],        // ¡Esto asegura que materiales.find() NUNCA falle!
+      tamano = [],           // Ahora directo en plural, alineado con el hook
+      personalizaciones = [], 
+      getProductoById, 
+      addProducto, 
+      updateProducto, 
+      deleteProducto,
+      loading: loadingHook 
+    } = useProductosGenericos();
+    
     const mode: Mode =
     location.pathname.includes('/new')
         ? 'create'
@@ -97,11 +116,17 @@ export default function DetalleProducto(){
 
   const [product, setProduct] = useState<ProductoGenerico | null>(null);
   const [editedProduct, setEditedProduct] = useState<ProductoGenerico | null>(null);
+  const [loadingLocal, setLoadingLocal] = useState<boolean>(false);
 
   const isEditable = mode === 'create' || mode === 'edit';
 
-  useEffect(() => {
+// 4. Helpers dinámicos usando las listas maestras de la base de datos
+  const getMaterial        = (idMat: number) => materiales.find(m => m.id === idMat);
+  const getColor           = (idCol: number) => colores.find(c => c.id === idCol);
+  const getTamano          = (idTam: number) => tamano.find(s => s.id === idTam);
+  const getPersonalizacion = (idPer: number) => personalizaciones.find(p => p.id === idPer);
 
+  useEffect(() => {
     // CREATE
     if (mode === 'create') {
 
@@ -117,151 +142,146 @@ export default function DetalleProducto(){
         tamanos: [],
         personalizaciones: []
       });
-
       setEditedProduct(emptyproduct);
-
+      setProduct(null);
       return;
     }
 
     // EDIT / VIEW
     // aquí luego irá tu fetch por id
+    const fetchSingleProduct = async () => {
+      if (!id_nav) return;
+      try {
+        setLoadingLocal(true);
+        const data = await getProductoById(Number(id_nav)); // Llamada directa a tu API
 
-    const fetchProduct = async () => {
+        setProduct(data);
+        setEditedProduct(data);
+      } catch (err) {
+        console.error("No se pudo cargar el producto", err);
+      } finally {
+        setLoadingLocal(false);
+      }
+    };
 
-    // MOCK
-    const data = defaultProduct;
-
-    // FUTURO:
-    // const data = await api.getProduct(id)
-
-    setProduct(data);
-    setEditedProduct(data);
-  };
-
-  fetchProduct();
-
-  }, [mode, product]);
+  fetchSingleProduct();
+  }, [mode, id_nav, getProductoById]);
 
   const handleStartEdit = () => {
-    navigate(`/products/edit/`); // navigate(`/products/edit/${id}`);
+    navigate('/products/edit', { state: { productoId: id_nav } }); // navigate(`/products/edit/${id}`);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!editedProduct) return;
+    try {
+      const productoDTO: CreateProductGenericoDTO = {
+        nombre: editedProduct.nombre,
+        descripcion: editedProduct.descripcion,
+        precio_base: editedProduct.precio_base,
+        activo: editedProduct.activo,
+        maximo_stock: editedProduct.maximo_stock,
+        colores: editedProduct.colores,
+        materiales: editedProduct.materiales,
+        tamanos: editedProduct.tamanos,
+        personalizaciones: editedProduct.personalizaciones
+      };
 
-/*    const handleSave = async () => {
+      console.log("Valor de id: ", id_nav);
 
-  try {
-
-    let response;
-
-    // CREATE
-    if (mode === 'create') {
-
-      response = await api.post(
-        '/productos',
-        editedProduct
-      );
-
-    } else {
-
-      // EDIT
-      response = await api.put(
-        `/productos/${editedProduct.id}`,
-        editedProduct
-      );
+      if (mode === 'create') {
+        console.log("por alguna razon estoy aca");
+        const nuevo = await addProducto(productoDTO);
+        // Redirección limpia tras crear
+        navigate('/products/view', { state: { productoId: nuevo.id } });
+      } else if (mode === 'edit' && id_nav) {
+        console.log("Estoy llegando a entrar acá");
+        const actualizado = await updateProducto(id_nav, productoDTO);
+        setProduct(actualizado);
+        setEditedProduct(actualizado);
+        // Redirección limpia tras editar
+        navigate('/products/view', { state: { productoId: id_nav } });
+      }
+    } catch (error) {
+      alert('Error al intentar guardar el producto.');
     }
-
-    const savedProduct = response.data;
-
-    // sincronizar estados locales
-    setProduct(savedProduct);
-
-    setEditedProduct(savedProduct);
-
-    // volver a detalle
-    navigate(`/products/${savedProduct.id}`);
-
-  } catch (error) {
-
-    console.error(error);
-
-    alert('Error al guardar');
-  }
-};*/
-
-    setProduct(editedProduct);
-    navigate(`/products/view`);// navigate(`/products/${editedProduct.id}`);
   };
 
   const handleCancel = () => {
     setEditedProduct(product);
-    navigate(`/products/view`);// navigate(`/products/${editedProduct.id}`);
+    if (mode === 'create') {
+      navigate('/products');
+    } else {
+      navigate('/products/view', { state: { productoId: id_nav } });
+    }
   };
 
-  const handleDelete = () => {
-    if (window.confirm('¿Estás seguro de que quieres desactivar este producto?')) {
-        // API
+  const handleDelete = async () => {
+    if (id_nav && window.confirm('¿Estás seguro de que quieres desactivar este producto?')) {
+      try {
+        await deleteProducto(id_nav);
         navigate('/products');
+      } catch (error) {
+        alert('Error al desactivar el producto.');
+      }
     }
   };
 
 const currentProduct = isEditable ? editedProduct : product;
 
-if (!currentProduct) {
-  return <div>Cargando...</div>;
+if (loadingHook || loadingLocal) {
+    return <div className="p-8 text-center text-lg font-medium">Cargando información...</div>;
 }
-if (!editedProduct) return;
+
+if (!currentProduct) {
+    return <div className="p-8 text-center text-red-500">Producto no encontrado o sesión expirada (F5).</div>;
+  }
   
 /* Manejo para añadir relaciones del producto generico */
 
   const handleAddMaterial = (materialId: number) => {
-    const material = AVAILABLE_MATERIALS.find(m => m.id === materialId);
-    if (material && !currentProduct.materiales.find(m => m.id_material === materialId)) {
-        const materialgen: GenericoXMaterial = { id_material:materialId, costo_extra:0 }
+    if (materiales.find(m => m.id === materialId) && !currentProduct.materiales.find(m => m.id_material === materialId)) {
+      const materialgen: GenericoXMaterial = { id_material: materialId, costo_extra: 0 };
       setEditedProduct({
         ...currentProduct,
-        materiales: [...currentProduct.materiales, { ...materialgen }]
+        materiales: [...currentProduct.materiales, materialgen]
       });
     }
   };
 
   const handleAddColor = (colorId: number) => {
-    const color = AVAILABLE_COLORS.find(c => c.id === colorId);
-    if (color && !editedProduct.colores.find(c => c.id_color === colorId)) {
-        const colorgen: GenericoXColor = { id_color:colorId}
+    if (colores.find(c => c.id === colorId) && !currentProduct.colores.find(c => c.id_color === colorId)) {
+      const colorgen: GenericoXColor = { id_color: colorId };
       setEditedProduct({
-        ...editedProduct,
-        colores: [...editedProduct.colores, { ...colorgen }]
+        ...currentProduct,
+        colores: [...currentProduct.colores, colorgen]
       });
     }
   };
 
   const handleAddSize = (sizeId: number) => {
-    const size = AVAILABLE_SIZES.find(s => s.id === sizeId);
-    if (size && !editedProduct.tamanos.find(s => s.id_tamano === sizeId)) {
-        const tamanogen: GenericoXTamano = { id_tamano:sizeId, ancho:0, alto:0}
+    if (tamano.find(s => s.id === sizeId) && !currentProduct.tamanos.find(s => s.id_tamano === sizeId)) {
+      const tamanogen: GenericoXTamano = { id_tamano: sizeId, ancho: 0, alto: 0 };
       setEditedProduct({
-        ...editedProduct,
-        tamanos: [...editedProduct.tamanos, { ...tamanogen }]
+        ...currentProduct,
+        tamanos: [...currentProduct.tamanos, tamanogen]
       });
     }
   };
 
   const handleAddCustomization = (customizationId: number) => {
-    const customization = AVAILABLE_CUSTOMIZATIONS.find(c => c.id === customizationId);
-    if (customization && !editedProduct.personalizaciones.find(c => c.id_personalizacion === customizationId)) {
-        const personalizaciongen: GenericoXPersonalizacion = {id_personalizacion:customizationId, costo_extra:0}
-        setEditedProduct({
-        ...editedProduct,
-        personalizaciones: [...editedProduct.personalizaciones, { ...personalizaciongen }]
+    if (personalizaciones.find(c => c.id === customizationId) && !currentProduct.personalizaciones.find(c => c.id_personalizacion === customizationId)) {
+      const personalizaciongen: GenericoXPersonalizacion = { id_personalizacion: customizationId, costo_extra: 0 };
+      setEditedProduct({
+        ...currentProduct,
+        personalizaciones: [...currentProduct.personalizaciones, personalizaciongen]
       });
     }
   };
 
-  const getAvailableMaterials = () => AVAILABLE_MATERIALS.filter(m => !editedProduct.materiales.find(em => em.id_material === m.id));
-  const getAvailableColors = () => AVAILABLE_COLORS.filter(c => !editedProduct.colores.find(ec => ec.id_color === c.id));
-  const getAvailableSizes = () => AVAILABLE_SIZES.filter(s => !editedProduct.tamanos.find(es => es.id_tamano === s.id));
-  const getAvailableCustomizations = () => AVAILABLE_CUSTOMIZATIONS.filter(c => !editedProduct.personalizaciones.find(ec => ec.id_personalizacion === c.id));
+  const getAvailableMaterials = () => materiales.filter(m => !currentProduct.materiales.find(em => em.id_material === m.id));
+  const getAvailableColors = () => colores.filter(c => !currentProduct.colores.find(ec => ec.id_color === c.id));
+  const getAvailableSizes = () => tamano.filter(s => !currentProduct.tamanos.find(es => es.id_tamano === s.id));
+  const getAvailableCustomizations = () => personalizaciones.filter(c => !currentProduct.personalizaciones.find(ec => ec.id_personalizacion === c.id));
 
   return (
     <>
@@ -342,7 +362,7 @@ if (!editedProduct) return;
                   fullWidth
                   label="Nombre del producto"
                   value={currentProduct.nombre}
-                  onChange={(e) => setEditedProduct({ ...editedProduct, nombre: e.target.value })}
+                  onChange={(e) => setEditedProduct({ ...currentProduct, nombre: e.target.value })}
                   variant="outlined"
                 />
               ) : (
@@ -364,7 +384,7 @@ if (!editedProduct) return;
                 label="Precio base"
                 type="number"
                 value={currentProduct.precio_base}
-                onChange={(e) => setEditedProduct({ ...editedProduct, precio_base: Number(e.target.value) })}
+                onChange={(e) => setEditedProduct({ ...currentProduct, precio_base: Number(e.target.value) })}
                 slotProps={{ input: {startAdornment: <InputAdornment position="start">S/.</InputAdornment>} }}
               />
             ) : (
@@ -380,7 +400,7 @@ if (!editedProduct) return;
                 label="Stock máximo"
                 type="number"
                 value={currentProduct.maximo_stock}
-                onChange={(e) => setEditedProduct({ ...editedProduct, maximo_stock: Number(e.target.value) })}
+                onChange={(e) => setEditedProduct({ ...currentProduct, maximo_stock: Number(e.target.value) })}
               />
             ) : (
               <div>
@@ -399,7 +419,7 @@ if (!editedProduct) return;
                 multiline
                 rows={3}
                 value={currentProduct.descripcion}
-                onChange={(e) => setEditedProduct({ ...editedProduct, descripcion: e.target.value })}
+                onChange={(e) => setEditedProduct({ ...currentProduct, descripcion: e.target.value })}
               />
             ) : (
               <div>
@@ -432,17 +452,17 @@ if (!editedProduct) return;
                           value={mat.costo_extra}
                           onChange={(e) => {
                             // Actualizamos solo el atributo extra; el id_material no cambia
-                            const updated = [...editedProduct.materiales];
+                            const updated = [...currentProduct.materiales];
                             updated[index] = { ...updated[index], costo_extra: Number(e.target.value) };
-                            setEditedProduct({ ...editedProduct, materiales: updated });
+                            setEditedProduct({ ...currentProduct, materiales: updated });
                           }}
                           slotProps={{ input: { startAdornment: <InputAdornment position="start">S/.</InputAdornment> } }}
                           sx={{ width: 160 }}
                         />
                         <IconButton size="small" color="error"
                           onClick={() => setEditedProduct({
-                            ...editedProduct,
-                          materiales: editedProduct.materiales.filter(m => m.id_material !== mat.id_material)
+                            ...currentProduct,
+                          materiales: currentProduct.materiales.filter(m => m.id_material !== mat.id_material)
                         })}>
                         <Trash2 size={18} />
                         </IconButton>
@@ -484,8 +504,8 @@ if (!editedProduct) return;
                       {isEditable && (
                         <IconButton size="small" color="error"
                           onClick={() => setEditedProduct({
-                            ...editedProduct,
-                            colores: editedProduct.colores.filter(c => c.id_color !== col.id_color)
+                            ...currentProduct,
+                            colores: currentProduct.colores.filter(c => c.id_color !== col.id_color)
                           })}>
                           <Trash2 size={18} />
                         </IconButton>
@@ -527,25 +547,25 @@ if (!editedProduct) return;
                           <TextField
                             label="Ancho (cm)" type="number" size="small" value={tam.ancho}
                             onChange={(e) => {
-                              const updated = [...editedProduct.tamanos];
+                              const updated = [...currentProduct.tamanos];
                               updated[index] = { ...updated[index], ancho: Number(e.target.value) };
-                              setEditedProduct({ ...editedProduct, tamanos: updated });
+                              setEditedProduct({ ...currentProduct, tamanos: updated });
                             }}
                             sx={{ width: 120 }}
                           />
                           <TextField
                             label="Alto (cm)" type="number" size="small" value={tam.alto}
                             onChange={(e) => {
-                              const updated = [...editedProduct.tamanos];
+                              const updated = [...currentProduct.tamanos];
                               updated[index] = { ...updated[index], alto: Number(e.target.value) };
-                              setEditedProduct({ ...editedProduct, tamanos: updated });
+                              setEditedProduct({ ...currentProduct, tamanos: updated });
                             }}
                             sx={{ width: 120 }}
                           />
                           <IconButton size="small" color="error"
                             onClick={() => setEditedProduct({
-                              ...editedProduct,
-                              tamanos: editedProduct.tamanos.filter(s => s.id_tamano !== tam.id_tamano)
+                              ...currentProduct,
+                              tamanos: currentProduct.tamanos.filter(s => s.id_tamano !== tam.id_tamano)
                             })}>
                             <Trash2 size={18} />
                           </IconButton>
@@ -588,17 +608,17 @@ if (!editedProduct) return;
                           <TextField
                             label="Costo extra" type="number" size="small" value={per.costo_extra}
                             onChange={(e) => {
-                              const updated = [...editedProduct.personalizaciones];
+                              const updated = [...currentProduct.personalizaciones];
                               updated[index] = { ...updated[index], costo_extra: Number(e.target.value) };
-                              setEditedProduct({ ...editedProduct, personalizaciones: updated });
+                              setEditedProduct({ ...currentProduct, personalizaciones: updated });
                             }}
                             slotProps={{ input: { startAdornment: <InputAdornment position="start">S/.</InputAdornment> } }}
                             sx={{ width: 160 }}
                           />
                           <IconButton size="small" color="error"
                             onClick={() => setEditedProduct({
-                              ...editedProduct,
-                              personalizaciones: editedProduct.personalizaciones.filter(p => p.id_personalizacion !== per.id_personalizacion)
+                              ...currentProduct,
+                              personalizaciones: currentProduct.personalizaciones.filter(p => p.id_personalizacion !== per.id_personalizacion)
                             })}>
                             <Trash2 size={18} />
                           </IconButton>
