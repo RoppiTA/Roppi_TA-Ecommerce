@@ -12,8 +12,10 @@ class ProductosAPI {
     // Genericos
     this.router.get('/genericos', async (req, res) => this.hacerPeticion(req, res, 'GET', '/genericos'));
     this.router.get('/genericos/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/genericos/${req.params.id}`));
+
     this.router.post('/genericos', async (req, res) => this.hacerPeticion(req, res, 'POST', '/genericos', req.body));
     this.router.post('/genericos/:id', async (req, res) => this.hacerPeticion(req, res, 'POST', `/genericos/${req.params.id}`, req.body));
+
     this.router.delete('/genericos/:id/desactivar', async (req, res) => this.hacerPeticion(req, res, 'DELETE', `/genericos/${req.params.id}/desactivar`, req.body));
 
     // Colores
