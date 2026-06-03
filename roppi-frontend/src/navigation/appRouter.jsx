@@ -7,13 +7,15 @@
 // src/navigation/AppRouter.tsx
 import { Routes, Route } from 'react-router-dom';
 import ComercianteStack from './stacks/ComercianteStack';
+import Loggeo from '../views/autenticacion/main';
 
 export const AppRouter = () => {
   const SIMULATED_USER = { id: 104, role: 'MERCHANT' };
 
   return (
     <Routes>
-      <Route path="/*" element={<ComercianteStack userId={SIMULATED_USER.id} />} />
+      {/* <Route path="/*" element={<ComercianteStack userId={SIMULATED_USER.id} />} /> */}
+      <Route path="/*" element={<Loggeo/>} />
     </Routes>
   );
 };
