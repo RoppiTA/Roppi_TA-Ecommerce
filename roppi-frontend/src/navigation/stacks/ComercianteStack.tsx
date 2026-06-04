@@ -22,6 +22,7 @@ export const ComercianteStack = () => {
                 <Route path="products/new" element={<DetalleProducto/>}/>
                 <Route path="products/view/*" element={<DetalleProducto/>}/>
                 <Route path="products/edit" element={<DetalleProducto/>}/>
+                <Route path="descuentos" element={<div style={{padding:'40px'}}>💸 Pantalla de Descuentos (Próximamente)</div>} />
                 <Route path="orders" element={<div style={{padding:'40px'}}>📦 Pantalla de Pedidos (Próximamente)</div>} />
                 <Route path="clientes" element={<div style={{padding:'40px'}}>👥 Pantalla de Clientes (Próximamente)</div>} />
                 <Route path="reports" element={<div style={{padding:'40px'}}>📈 Pantalla de Reportes (Próximamente)</div>} />
