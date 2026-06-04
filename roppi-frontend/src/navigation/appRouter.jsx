@@ -14,8 +14,8 @@ export const AppRouter = () => {
 
   return (
     <Routes>
-      {/* <Route path="/*" element={<ComercianteStack userId={SIMULATED_USER.id} />} /> */}
-      <Route path="/*" element={<Loggeo/>} />
+      { <Route path="/*" element={<ComercianteStack userId={SIMULATED_USER.id} />} /> }
+      /* < Route path="/*" element={<Loggeo/>}  /> */
     </Routes>
   );
 };
