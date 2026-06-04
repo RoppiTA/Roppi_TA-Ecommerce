@@ -24,128 +24,168 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
   const catalogChildren = [
     { id: 'vista-general', label: 'Vista general', path: '/' },
-    { id: 'productos', label: 'Productos', path: '/products' },
-    { id: 'descuentos', label: 'Descuentos', path: '/descuentos' },
-    { id: 'categorias', label: 'Categorías', path: '/categorias' },
+    { id: 'productos',     label: 'Productos',     path: '/products' },
+    { id: 'descuentos',   label: 'Descuentos',    path: '/descuentos' },
+    { id: 'categorias',   label: 'Categorías',    path: '/categorias' },
   ];
 
   const topItems = [
-    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
-    { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
-    { id: 'clients', label: 'Clientes', icon: Users, path: '/clientes' },
-    { id: 'reports', label: 'Reportes', icon: BarChart3, path: '/reports' },
+    { id: 'orders',  label: 'Ordenes',      icon: ShoppingCart, path: '/orders' },
+    { id: 'quotes',  label: 'Cotizaciones', icon: FileText,     path: '/quotes' },
+    { id: 'clients', label: 'Clientes',     icon: Users,        path: '/clientes' },
+    { id: 'reports', label: 'Reportes',     icon: BarChart3,    path: '/reports' },
   ];
 
   const bottomItems = [
-    { id: 'support', label: 'Support', icon: HelpCircle, path: '/support' },
-    { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
+    { id: 'support',  label: 'Soporte',      icon: HelpCircle, path: '/support' },
+    { id: 'settings', label: 'Configuración', icon: Settings,   path: '/settings' },
   ];
+
+  // Clases comunes reutilizables
+  const itemBase = 'relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150';
+  const itemInactive = 'text-brand-dark hover:bg-primary-hover/10';
+  // Activo en teal medio (#409FA8) para una transición más suave sobre el fondo claro.
+  // Cambiar a bg-primary-hover (#006770) si se quiere mayor contraste.
+  const itemActive = 'bg-primary2 text-white';
 
   return (
     <aside
-      className={`h-full bg-white border-r border-border flex flex-col transition-all duration-300 flex-shrink-0 ${
+      className={`h-full flex flex-col transition-all duration-300 flex-shrink-0 bg-brand-light ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
-      {/* Header */}
-      <div className="p-4 border-b border-border flex items-center justify-between">
+      {/* ── Header ── */}
+      <div className="bg-primary-hover rounded-b-2xl px-4 pt-5 pb-4 flex items-center justify-between shadow-sm">
         {!isCollapsed && (
           <div>
-            <h2 className="font-bold text-2xl tracking-tight text-slate-950">Roppi</h2>
-            <p className="text-sm font-medium text-muted-foreground">Gestión de Negocios</p>
+            <h2 className="font-bold text-2xl tracking-tight text-white">Roppi</h2>
+            <p className="text-xs font-medium text-brand-light/70 mt-0.5">Gestión de Negocios</p>
           </div>
         )}
         <button
           onClick={onToggle}
-          className="p-2 hover:bg-accent rounded-lg transition-colors"
+          className="p-2 rounded-lg hover:bg-primary2/30 transition-colors text-white"
         >
           {isCollapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
         </button>
       </div>
 
-      {/* Navegación */}
-      <nav className="flex-1 p-3 overflow-y-auto">
-        <div className="space-y-1.5">
-          {/* Catálogo — solo despliega/pliega subopciones */}
+      {/* ── Navegación ── */}
+      <nav className="flex-1 p-3 overflow-y-auto mt-2">
+        <div className="space-y-1">
+
+          {/* Catálogo (grupo expandible) */}
           <div>
+            {!isCollapsed && (
+              <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted px-3 mb-1.5">
+                Catálogo
+              </p>
+            )}
             <button
               onClick={() => !isCollapsed && setCatalogExpanded(!catalogExpanded)}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-accent transition-colors font-medium"
+              className={`${itemBase} ${itemInactive}`}
               title={isCollapsed ? 'Catálogo' : undefined}
             >
-              <Boxes size={22} />
+              <Boxes size={20} className="text-primary2 shrink-0" />
               {!isCollapsed && (
                 <>
-                  <span className="text-base flex-1 text-left">Catálogo</span>
-                  {catalogExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  <span className="text-sm flex-1 text-left font-medium">Catálogo</span>
+                  {catalogExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </>
               )}
             </button>
 
             {!isCollapsed && catalogExpanded && (
-              <div className="ml-8 mt-1 space-y-1">
+              <div className="ml-7 mt-0.5 space-y-0.5 border-l-2 border-primary-hover/20 pl-3">
                 {catalogChildren.map((child) => (
                   <NavLink
                     key={child.id}
                     to={child.path}
+                    end={child.path === '/'}
                     className={({ isActive }) =>
-                      `block px-3 py-2 rounded-lg text-sm transition-colors ${
+                      `relative flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-150 font-medium ${
                         isActive
-                          ? 'bg-primary text-primary-foreground font-semibold'
-                          : 'hover:bg-accent text-foreground font-medium'
+                          ? 'bg-primary2 text-white'
+                          : 'text-brand-dark hover:bg-primary-hover/10'
                       }`
                     }
                   >
-                    {child.label}
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-brand-error rounded-r-full" />
+                        )}
+                        <span className="pl-1">{child.label}</span>
+                      </>
+                    )}
                   </NavLink>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Resto de ítems */}
+          {/* Separador visual */}
+          {!isCollapsed && (
+            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted px-3 pt-3 pb-1">
+              Operaciones
+            </p>
+          )}
+
+          {/* Ítems principales */}
           {topItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
                 key={item.id}
                 to={item.path}
-                className={({ isActive }) =>
-                  `w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-primary text-primary-foreground font-semibold'
-                      : 'hover:bg-accent text-foreground font-medium'
-                  }`
-                }
+                className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
                 title={isCollapsed ? item.label : undefined}
               >
-                <Icon size={22} />
-                {!isCollapsed && <span className="text-base">{item.label}</span>}
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-error rounded-r-full" />
+                    )}
+                    <Icon
+                      size={20}
+                      className={`shrink-0 ${isActive ? 'text-white' : 'text-primary2'}`}
+                    />
+                    {!isCollapsed && (
+                      <span className="text-sm font-medium">{item.label}</span>
+                    )}
+                  </>
+                )}
               </NavLink>
             );
           })}
         </div>
       </nav>
 
-      {/* Ítems inferiores */}
-      <div className="p-3 border-t border-border space-y-1.5">
+      {/* ── Ítems inferiores ── */}
+      <div className="p-3 border-t border-primary-hover/20 space-y-1">
         {bottomItems.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
               key={item.id}
               to={item.path}
-              className={({ isActive }) =>
-                `w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground font-semibold'
-                    : 'hover:bg-accent text-foreground font-medium'
-                }`
-              }
+              className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
               title={isCollapsed ? item.label : undefined}
             >
-              <Icon size={22} />
-              {!isCollapsed && <span className="text-base">{item.label}</span>}
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-error rounded-r-full" />
+                  )}
+                  <Icon
+                    size={20}
+                    className={`shrink-0 ${isActive ? 'text-white' : 'text-primary2'}`}
+                  />
+                  {!isCollapsed && (
+                    <span className="text-sm font-medium">{item.label}</span>
+                  )}
+                </>
+              )}
             </NavLink>
           );
         })}
