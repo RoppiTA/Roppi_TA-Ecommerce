@@ -54,16 +54,16 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       }`}
     >
       {/* ── Header ── */}
-      <div className="bg-primary-hover rounded-b-2xl px-4 pt-5 pb-4 flex items-center justify-between shadow-sm">
+      <div className="px-4 pt-5 pb-4 flex items-center justify-between">
         {!isCollapsed && (
           <div>
-            <h2 className="font-bold text-2xl tracking-tight text-white">Roppi</h2>
-            <p className="text-xs font-medium text-brand-light/70 mt-0.5">Gestión de Negocios</p>
+            <h2 className="font-bold text-2xl tracking-tight text-primary-hover">Roppi</h2>
+            <p className="text-xs font-medium text-brand-muted mt-0.5">Gestión de Negocios</p>
           </div>
         )}
         <button
           onClick={onToggle}
-          className="p-2 rounded-lg hover:bg-primary2/30 transition-colors text-white"
+          className="p-2 rounded-lg hover:bg-primary-hover/10 transition-colors text-brand-dark"
         >
           {isCollapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
         </button>
