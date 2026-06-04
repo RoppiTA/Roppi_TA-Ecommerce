@@ -1,4 +1,5 @@
-import { Bell, Search, Plus, Download } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, Search, Plus, Percent, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProductosGenericos, useDescuentos } from '../../hooks/useProductos';
 import { CreateDescuentoDTO } from '../../types/producto/descuento.types';
@@ -11,6 +12,8 @@ export const DefaultComerciante = () => {
   const navigate = useNavigate();
   const { productos, loading: loadingProductos, error: errorProductos } = useProductosGenericos();
   const { descuentos, loading: loadingDescuentos, addDescuento } = useDescuentos();
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
 
   const handleSaveDiscount = async (discount: CreateDescuentoDTO) => {
     try {
@@ -98,12 +101,15 @@ export const DefaultComerciante = () => {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button className="px-4 py-2 border border-primary2/40 text-primary2 rounded-lg hover:bg-primary2/10 flex items-center gap-2 text-sm transition-colors">
-                <Download size={16} />
-                Exportar en excel
+              <button
+                onClick={() => setShowDiscountModal(true)}
+                className="px-4 py-2 border border-primary2/40 text-primary2 rounded-lg hover:bg-primary2/10 flex items-center gap-2 text-sm transition-colors"
+              >
+                <Percent size={16} />
+                Agregar Descuento
               </button>
               <button
-                onClick={() => navigate('/products/new')}
+                onClick={() => setShowCategoryModal(true)}
                 className="px-4 py-2 bg-primary-hover text-white rounded-lg hover:bg-primary2 flex items-center gap-2 text-sm transition-colors"
               >
                 <Plus size={18} />
@@ -129,9 +135,46 @@ export const DefaultComerciante = () => {
             discountCount={loadingDescuentos ? 0 : descuentos.length}
           />
 
-          {/* Formularios */}
-          <div className="grid grid-cols-2 gap-6 mt-6">
+        </div>
+      </div>
+
+      {/* Modal: Agregar Producto */}
+      {showCategoryModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowCategoryModal(false)}
+        >
+          <div
+            className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto mx-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowCategoryModal(false)}
+              className="absolute top-3 right-3 z-10 text-white/70 hover:text-white transition-colors"
+            >
+              <X size={18} />
+            </button>
             <CategoryForm />
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Agregar Descuento */}
+      {showDiscountModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowDiscountModal(false)}
+        >
+          <div
+            className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowDiscountModal(false)}
+              className="absolute top-4 right-4 z-10 text-white/70 hover:text-white transition-colors"
+            >
+              <X size={18} />
+            </button>
             <DiscountForm
               products={productos}
               discounts={descuentos}
@@ -139,8 +182,7 @@ export const DefaultComerciante = () => {
             />
           </div>
         </div>
-      </div>
-
+      )}
     </div>
   );
 };

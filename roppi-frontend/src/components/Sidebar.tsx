@@ -26,7 +26,6 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
     { id: 'vista-general', label: 'Vista general', path: '/' },
     { id: 'productos',     label: 'Productos',     path: '/products' },
     { id: 'descuentos',   label: 'Descuentos',    path: '/descuentos' },
-    { id: 'categorias',   label: 'Categorías',    path: '/categorias' },
   ];
 
   const topItems = [
