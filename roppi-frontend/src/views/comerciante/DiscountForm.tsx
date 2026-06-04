@@ -48,8 +48,8 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
   );
 
   return (
-    <div className="bg-white rounded-lg border border-border overflow-hidden">
-      <div className="bg-[#001736] p-6">
+    <div className="bg-white rounded-lg border border-primary-hover/20 overflow-hidden">
+      <div className="bg-primary-hover p-6">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center">
             <Percent size={16} className="text-white" />
@@ -65,7 +65,7 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2 space-y-4">
             <div>
-              <label className="block text-[11px] font-bold text-[#43474f] uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-brand-muted uppercase tracking-wider mb-2">
                 Nombre de la regla
               </label>
               <input
@@ -73,12 +73,12 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
                 placeholder="e.g., SEASONAL_CLEARANCE"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                className="w-full px-3 py-2.5 bg-[#e6e8ea] border-0 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2.5 bg-brand-light/40 border border-primary2/25 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-[#43474f] uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-brand-muted uppercase tracking-wider mb-2">
                 Valor de descuento (%)
               </label>
               <div className="relative">
@@ -89,7 +89,7 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
                   onChange={(e) => setPorcentaje(e.target.value)}
                   min={0}
                   max={100}
-                  className="w-full px-3 py-2.5 bg-[#e6e8ea] border-0 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary pr-8"
+                  className="w-full px-3 py-2.5 bg-brand-light/40 border border-primary2/25 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40 pr-8"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#43474f] font-bold text-sm">
                   %
@@ -98,7 +98,7 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-[#43474f] uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-brand-muted uppercase tracking-wider mb-2">
                 Productos aplicables
               </label>
 
@@ -110,7 +110,7 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
                     return product ? (
                       <span
                         key={id}
-                        className="inline-flex items-center gap-1.5 bg-[#e0e3e5] text-[#001736] px-3 py-1.5 rounded-full text-xs font-semibold"
+                        className="inline-flex items-center gap-1.5 bg-brand-light text-primary-hover border border-primary2/30 px-3 py-1.5 rounded-full text-xs font-semibold"
                       >
                         {product.nombre}
                         <button onClick={() => removeProduct(id)} className="hover:opacity-70">
@@ -126,9 +126,9 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
               {!showSearch ? (
                 <button
                   onClick={() => setShowSearch(true)}
-                  className="w-8 h-8 border border-dashed border-[#747780] rounded-full flex items-center justify-center hover:bg-muted/50 transition-colors"
+                  className="w-8 h-8 border border-dashed border-primary2/50 rounded-full flex items-center justify-center hover:bg-primary2/10 transition-colors"
                 >
-                  <Plus size={14} className="text-[#43474f]" />
+                  <Plus size={14} className="text-primary2" />
                 </button>
               ) : (
                 <div className="relative">
@@ -139,15 +139,15 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
                     onChange={(e) => setProductSearch(e.target.value)}
                     onBlur={() => { setShowSearch(false); setProductSearch(''); }}
                     autoFocus
-                    className="w-full px-3 py-2 bg-[#e6e8ea] border-0 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-3 py-2 bg-brand-light/40 border border-primary2/25 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40"
                   />
                   {availableProducts.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg z-10 max-h-40 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-primary2/25 rounded-lg shadow-lg z-10 max-h-40 overflow-y-auto">
                       {availableProducts.map((p) => (
                         <button
                           key={p.id}
                           onMouseDown={() => addProduct(p.id)}
-                          className="w-full text-left px-3 py-2 text-xs hover:bg-muted/50"
+                          className="w-full text-left px-3 py-2 text-xs hover:bg-brand-light/50 text-brand-dark transition-colors"
                         >
                           {p.nombre}
                         </button>
@@ -155,7 +155,7 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
                     </div>
                   )}
                   {productSearch && availableProducts.length === 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-sm z-10 px-3 py-2 text-xs text-muted-foreground">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-primary2/25 rounded-lg shadow-sm z-10 px-3 py-2 text-xs text-brand-muted">
                       Sin resultados
                     </div>
                   )}
@@ -168,30 +168,27 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
 
         {discounts.length > 0 && (
           <div>
-            <label className="block text-[11px] font-bold text-[#43474f] uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-bold text-brand-muted uppercase tracking-wider mb-2">
               Descuentos activos
             </label>
             <div className="space-y-2 max-h-32 overflow-y-auto">
               {discounts.map((d) => (
                 <div
                   key={d.id}
-                  className="flex items-center justify-between bg-[#f2f4f6] rounded px-3 py-2"
+                  className="flex items-center justify-between bg-brand-light/40 rounded px-3 py-2"
                 >
-                  <span className="text-sm font-medium text-[#001736]">{d.nombre}</span>
-                  <span className="text-xs text-teal-600 font-bold">{d.porcentajeDescuento}%</span>
+                  <span className="text-sm font-medium text-brand-dark">{d.nombre}</span>
+                  <span className="text-xs text-primary2 font-bold">{d.porcentajeDescuento}%</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <div className="space-y-3 pt-2">
+        <div className="flex justify-end mt-4">
           <button
             onClick={handleActivar}
-            className="w-full py-3 rounded text-white font-bold shadow-lg hover:opacity-90 transition-opacity"
-            style={{
-              backgroundImage: 'linear-gradient(135deg, rgb(0, 23, 54) 0%, rgb(0, 43, 91) 100%)',
-            }}
+            className="px-5 py-2 bg-primary-hover text-white rounded-lg text-sm font-semibold hover:bg-primary2 transition-colors"
           >
             Activar Promoción
           </button>

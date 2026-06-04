@@ -27,7 +27,7 @@ export const DefaultComerciante = () => {
   if (loadingProductos) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-lg font-medium text-muted-foreground">
+        <p className="text-lg font-medium text-brand-muted">
           Cargando productos desde el catálogo...
         </p>
       </div>
@@ -50,28 +50,28 @@ export const DefaultComerciante = () => {
       {/* Contenido principal */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Header */}
-        <header className="bg-white border-b border-border px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+        <header className="bg-brand-light/40 border-b border-primary-hover/15 px-6 py-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm">
           <div className="flex-1 max-w-md relative">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-primary2"
               size={18}
             />
             <input
               type="text"
               placeholder="Buscar en el catálogo de productos..."
-              className="w-full pl-10 pr-4 py-2 bg-muted rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-primary2/25 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40"
             />
           </div>
           <div className="flex items-center gap-3">
-            <button className="p-2 hover:bg-accent rounded-lg relative">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+            <button className="p-2 hover:bg-primary2/10 rounded-lg relative transition-colors">
+              <Bell size={20} className="text-brand-dark" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-error rounded-full" />
             </button>
             <div className="flex items-center gap-2 ml-2">
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+              <div className="w-8 h-8 bg-primary-hover text-white rounded-full flex items-center justify-center text-sm font-medium">
                 RC
               </div>
-              <span className="text-sm font-medium hidden sm:block">Roppi Comerciante</span>
+              <span className="text-sm font-medium hidden sm:block text-brand-dark">Roppi Comerciante</span>
             </div>
           </div>
         </header>
@@ -80,31 +80,31 @@ export const DefaultComerciante = () => {
         <div className="p-6">
           {/* Encabezado de la página */}
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold mb-2">
+            <h1 className="text-2xl font-semibold mb-2 text-brand-dark">
               Administración de productos y descuentos
             </h1>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-brand-muted mb-4">
               Crea nuevas ofertas promocionales, ajusta el inventario y aplica estrategias
               de precios escalonados por categoría.
             </p>
 
             <div className="flex flex-wrap gap-3 mb-4">
-              <span className="px-2 py-1.5 bg-blue-100 text-blue-700 rounded text-xs">
+              <span className="px-2 py-1.5 bg-primary2/15 text-primary-hover font-semibold rounded text-xs">
                 {loadingDescuentos ? '...' : `${descuentos.length} descuentos activos`}
               </span>
-              <span className="px-2 py-1.5 bg-purple-100 text-purple-700 rounded text-xs">
+              <span className="px-2 py-1.5 bg-brand-light text-brand-dark font-semibold rounded text-xs">
                 {`${productos.length} productos en catálogo`}
               </span>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button className="px-4 py-2 border border-border rounded-lg hover:bg-accent flex items-center gap-2 text-sm">
+              <button className="px-4 py-2 border border-primary2/40 text-primary2 rounded-lg hover:bg-primary2/10 flex items-center gap-2 text-sm transition-colors">
                 <Download size={16} />
                 Exportar en excel
               </button>
               <button
                 onClick={() => navigate('/products/new')}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 flex items-center gap-2 text-sm"
+                className="px-4 py-2 bg-primary-hover text-white rounded-lg hover:bg-primary2 flex items-center gap-2 text-sm transition-colors"
               >
                 <Plus size={18} />
                 Agregar Producto
@@ -115,8 +115,8 @@ export const DefaultComerciante = () => {
           {/* Inventario activo */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Inventario activo</h2>
-              <button className="text-sm text-primary hover:underline">
+              <h2 className="text-lg font-semibold text-brand-dark">Inventario activo</h2>
+              <button className="text-sm text-primary2 hover:underline transition-colors">
                 VER CATÁLOGO COMPLETO →
               </button>
             </div>
