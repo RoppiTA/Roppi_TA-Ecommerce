@@ -1,5 +1,4 @@
 import {
-  LayoutDashboard,
   Users,
   ShoppingCart,
   FileText,
@@ -8,8 +7,11 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart3,
-  Boxes
+  Boxes,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 interface SidebarProps {
@@ -18,10 +20,16 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
-  
-  // 1. Catálogo ahora es un botón directo que apunta a /products
-  const menuItems = [
-    { id: 'catalog', label: 'Catálogo', icon: Boxes, path: '/products' }, 
+  const [catalogExpanded, setCatalogExpanded] = useState(true);
+
+  const catalogChildren = [
+    { id: 'vista-general', label: 'Vista general', path: '/' },
+    { id: 'productos', label: 'Productos', path: '/products' },
+    { id: 'descuentos', label: 'Descuentos', path: '/descuentos' },
+    { id: 'categorias', label: 'Categorías', path: '/categorias' },
+  ];
+
+  const topItems = [
     { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
     { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
     { id: 'clients', label: 'Clientes', icon: Users, path: '/clientes' },
@@ -35,8 +43,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
   return (
     <aside
-      // 🟢 min-h-screen asegura que cubra TODO el largo vertical de la página
-      className={`min-h-screen bg-white border-r border-border flex flex-col transition-all duration-300 ${
+      className={`h-full bg-white border-r border-border flex flex-col transition-all duration-300 flex-shrink-0 ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
@@ -44,9 +51,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       <div className="p-4 border-b border-border flex items-center justify-between">
         {!isCollapsed && (
           <div>
-            {/* 🟢 Título principal más grande (text-2xl) */}
             <h2 className="font-bold text-2xl tracking-tight text-slate-950">Roppi</h2>
-            {/* 🟢 Subtítulo más grande (text-sm) */}
             <p className="text-sm font-medium text-muted-foreground">Gestión de Negocios</p>
           </div>
         )}
@@ -58,12 +63,49 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         </button>
       </div>
 
-      {/* Menu Items */}
+      {/* Navegación */}
       <nav className="flex-1 p-3 overflow-y-auto">
         <div className="space-y-1.5">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
+          {/* Catálogo — solo despliega/pliega subopciones */}
+          <div>
+            <button
+              onClick={() => !isCollapsed && setCatalogExpanded(!catalogExpanded)}
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-accent transition-colors font-medium"
+              title={isCollapsed ? 'Catálogo' : undefined}
+            >
+              <Boxes size={22} />
+              {!isCollapsed && (
+                <>
+                  <span className="text-base flex-1 text-left">Catálogo</span>
+                  {catalogExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </>
+              )}
+            </button>
 
+            {!isCollapsed && catalogExpanded && (
+              <div className="ml-8 mt-1 space-y-1">
+                {catalogChildren.map((child) => (
+                  <NavLink
+                    key={child.id}
+                    to={child.path}
+                    className={({ isActive }) =>
+                      `block px-3 py-2 rounded-lg text-sm transition-colors ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground font-semibold'
+                          : 'hover:bg-accent text-foreground font-medium'
+                      }`
+                    }
+                  >
+                    {child.label}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Resto de ítems */}
+          {topItems.map((item) => {
+            const Icon = item.icon;
             return (
               <NavLink
                 key={item.id}
@@ -77,9 +119,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
                 }
                 title={isCollapsed ? item.label : undefined}
               >
-                {/* 🟢 Íconos ligeramente más grandes (size 22) para equilibrar el texto */}
                 <Icon size={22} />
-                {/* 🟢 Textos de opciones más grandes (text-base) */}
                 {!isCollapsed && <span className="text-base">{item.label}</span>}
               </NavLink>
             );
@@ -87,7 +127,7 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
         </div>
       </nav>
 
-      {/* Bottom Items */}
+      {/* Ítems inferiores */}
       <div className="p-3 border-t border-border space-y-1.5">
         {bottomItems.map((item) => {
           const Icon = item.icon;
@@ -97,8 +137,8 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
               to={item.path}
               className={({ isActive }) =>
                 `w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                  isActive 
-                    ? 'bg-primary text-primary-foreground font-semibold' 
+                  isActive
+                    ? 'bg-primary text-primary-foreground font-semibold'
                     : 'hover:bg-accent text-foreground font-medium'
                 }`
               }

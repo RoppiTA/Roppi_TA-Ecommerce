@@ -161,22 +161,22 @@ export const ProductosAPIService = {
 
 export const DescuentosAPIService = {
   getDescuentos: async (): Promise<Descuento[]> => {
-    const response = await apiClient.get<Descuento[]>('/api/descuentos');
+    const response = await apiClient.get('/descuentos');
     return response.data;
   },
 
   getDescuentoById: async (id: number): Promise<Descuento> => {
-    const response = await apiClient.get<Descuento>(`/api/descuentos/${id}`);
+    const response = await apiClient.get('/descuentos');
     return response.data;
   },
 
   createDescuento: async (dto: CreateDescuentoDTO): Promise<Descuento> => {
-    const response = await apiClient.post<Descuento>('/api/descuentos', dto);
+    const response = await apiClient.get('/descuentos');
     return response.data;
   },
 
   updateDescuento: async (id: number, dto: Partial<CreateDescuentoDTO>): Promise<Descuento> => {
-    const response = await apiClient.put<Descuento>(`/api/descuentos/${id}`, dto);
+    const response = await apiClient.get('/descuentos');
     return response.data;
   },
 

@@ -285,7 +285,8 @@ if (!currentProduct) {
 
   return (
     <>
-    <div className="size-full min-h-screen bg-gray-50 p-8">
+    <div className="flex-1 min-h-0 overflow-auto bg-gray-50">
+    <div className="p-8">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Gestión de Productos</h1>
@@ -646,6 +647,7 @@ if (!currentProduct) {
         </div>
       </div>
       </div>
+    </div>
     </div>
     </>
   );
