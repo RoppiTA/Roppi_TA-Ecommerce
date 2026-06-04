@@ -1,5 +1,5 @@
 // roppi.backend.modulos/roppi.backend.mod.productos/material.model.js
-
+// prueba commit espejo
 //atributo de auditoria
 class Material {
   constructor({ id, nombre, descripcion, activo,
