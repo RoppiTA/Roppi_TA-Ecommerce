@@ -26,7 +26,24 @@ services:
     ports:
       - "3000:3000" # Exponemos el puerto para pruebas directas si se requiere
     environment:
-      - PORT=3000
-      - HOST=0.0.0.0
-      # Aquí irían también las variables de tu DB (DB_HOST, DB_USER, etc)
-      # que el backend leerá para conectarse a PostgreSQL.
+      - PORT_API_SERVER=3000
+      - HOST_API_SERVER=0.0.0.0
+
+
+  usuarios-service:
+    build:
+      context: ./roppi-backend
+      dockerfile: Dockerfile
+    container_name: roppi-usuarios-service
+    ports:
+      - "3001:3000" # Exponemos el puerto para pruebas directas si se requiere
+    environment:
+      - PORT_API_SERVER=3000
+      - HOST_API_SERVER=0.0.0.0
+      - DB_HOST=roppita.cttmo7yq8px8.us-east-1.rds.amazonaws.com
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=Solo7SemanasMas!
+      - DB_NAME=postgres
+      - DB_MAX_CONNECTIONS=10
+      - DB_IDLE_TIMEOUT=30000

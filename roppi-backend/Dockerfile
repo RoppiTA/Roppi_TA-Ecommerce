@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 3000
 
 # Comando para iniciar el servicio
-CMD ["npm", "start"]
+CMD ["npm", "run", "start_api"]
