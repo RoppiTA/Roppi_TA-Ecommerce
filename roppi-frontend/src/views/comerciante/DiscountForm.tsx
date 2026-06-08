@@ -1,20 +1,39 @@
 import { Percent, X, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CreateDescuentoDTO, Descuento } from '../../types/producto/descuento.types';
 import { ProductoGenerico } from '../../types/producto/productoGen.types';
 
+// [feat] Props extendidas para soportar modo edición (initialData) y cierre modal (onClose) — 2025-06
 interface Props {
   products: ProductoGenerico[];
   discounts: Descuento[];
   onSave: (discount: CreateDescuentoDTO) => void;
+  onClose?: () => void;       // opcional: muestra botón X en el header cuando se usa como modal
+  initialData?: Descuento;    // opcional: precarga el formulario para edición
 }
 
-export function DiscountForm({ products, discounts, onSave }: Props) {
+export function DiscountForm({ products, discounts, onSave, onClose, initialData }: Props) {
   const [nombre, setNombre] = useState('');
   const [porcentaje, setPorcentaje] = useState('');
+  const [cantidad, setCantidad] = useState('0');
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [productSearch, setProductSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+
+  // [feat] Precarga de datos cuando se abre en modo edición — 2025-06
+  useEffect(() => {
+    if (initialData) {
+      setNombre(initialData.nombre);
+      setPorcentaje(String(initialData.porcentajeDescuento));
+      setCantidad(String(initialData.cantidad));
+      setSelectedProductIds(initialData.idGenericoVinculados);
+    } else {
+      setNombre('');
+      setPorcentaje('');
+      setCantidad('0');
+      setSelectedProductIds([]);
+    }
+  }, [initialData]);
 
   const removeProduct = (id: number) => {
     setSelectedProductIds(selectedProductIds.filter((pid) => pid !== id));
@@ -30,14 +49,16 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
 
   const handleActivar = () => {
     if (!nombre.trim()) return;
+    // [feat] cantidad ahora viene del campo de texto, no del conteo de productos — 2025-06
     onSave({
       nombre,
-      cantidad: selectedProductIds.length,
+      cantidad: Number(cantidad) || 0,
       porcentajeDescuento: Number(porcentaje) || 0,
       idGenericoVinculados: selectedProductIds,
     });
     setNombre('');
     setPorcentaje('');
+    setCantidad('0');
     setSelectedProductIds([]);
   };
 
@@ -49,7 +70,17 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
 
   return (
     <div className="bg-white rounded-lg border border-primary-hover/20 overflow-hidden">
-      <div className="bg-primary-hover p-6">
+      {/* [feat] onClose renderiza el botón X sobre el header para uso en modal — 2025-06 */}
+      <div className="bg-primary-hover p-6 relative">
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-3 right-3 text-white/70 hover:text-white transition-colors"
+          >
+            <X size={18} />
+          </button>
+        )}
         <div className="flex items-center gap-3 mb-1">
           <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center">
             <Percent size={16} className="text-white" />
@@ -95,6 +126,21 @@ export function DiscountForm({ products, discounts, onSave }: Props) {
                   %
                 </span>
               </div>
+            </div>
+
+            {/* [feat] Campo de cantidad mínima para eligibilidad — 2025-06 */}
+            <div>
+              <label className="block text-[11px] font-bold text-brand-muted uppercase tracking-wider mb-2">
+                Cantidad de productos mínimos para eligibilidad
+              </label>
+              <input
+                type="number"
+                placeholder="1"
+                value={cantidad}
+                onChange={(e) => setCantidad(e.target.value)}
+                min={0}
+                className="w-full px-3 py-2.5 bg-brand-light/40 border border-primary2/25 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40"
+              />
             </div>
 
             <div>

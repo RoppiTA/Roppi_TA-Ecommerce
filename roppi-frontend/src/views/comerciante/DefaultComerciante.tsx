@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Search, Plus, Percent, X } from 'lucide-react';
+import { Plus, Percent, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProductosGenericos, useDescuentos } from '../../hooks/useProductos';
 import { CreateDescuentoDTO } from '../../types/producto/descuento.types';
@@ -49,36 +49,7 @@ export const DefaultComerciante = () => {
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden">
-      {/* Contenido principal */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        {/* Header */}
-        <header className="bg-brand-light/40 border-b border-primary-hover/15 px-6 py-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm">
-          <div className="flex-1 max-w-md relative">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-primary2"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder="Buscar en el catálogo de productos..."
-              className="w-full pl-10 pr-4 py-2 bg-white border border-primary2/25 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40"
-            />
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="p-2 hover:bg-primary2/10 rounded-lg relative transition-colors">
-              <Bell size={20} className="text-brand-dark" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-error rounded-full" />
-            </button>
-            <div className="flex items-center gap-2 ml-2">
-              <div className="w-8 h-8 bg-primary-hover text-white rounded-full flex items-center justify-center text-sm font-medium">
-                RC
-              </div>
-              <span className="text-sm font-medium hidden sm:block text-brand-dark">Roppi Comerciante</span>
-            </div>
-          </div>
-        </header>
-
+    <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Contenido de la página */}
         <div className="p-6">
           {/* Encabezado de la página */}
@@ -103,7 +74,7 @@ export const DefaultComerciante = () => {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setShowDiscountModal(true)}
-                className="px-4 py-2 border border-primary2/40 text-primary2 rounded-lg hover:bg-primary2/10 flex items-center gap-2 text-sm transition-colors"
+                className="px-4 py-2 bg-primary-hover text-white rounded-lg hover:bg-primary2 flex items-center gap-2 text-sm transition-colors"
               >
                 <Percent size={16} />
                 Agregar Descuento
@@ -136,7 +107,6 @@ export const DefaultComerciante = () => {
           />
 
         </div>
-      </div>
 
       {/* Modal: Agregar Producto */}
       {showCategoryModal && (
@@ -166,19 +136,15 @@ export const DefaultComerciante = () => {
           onClick={() => setShowDiscountModal(false)}
         >
           <div
-            className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4"
+            className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4"
             onClick={e => e.stopPropagation()}
           >
-            <button
-              onClick={() => setShowDiscountModal(false)}
-              className="absolute top-4 right-4 z-10 text-white/70 hover:text-white transition-colors"
-            >
-              <X size={18} />
-            </button>
+            {/* [refactor] El X ahora lo gestiona DiscountForm via onClose — 2025-06 */}
             <DiscountForm
               products={productos}
               discounts={descuentos}
               onSave={handleSaveDiscount}
+              onClose={() => setShowDiscountModal(false)}
             />
           </div>
         </div>

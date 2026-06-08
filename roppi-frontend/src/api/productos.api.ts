@@ -159,6 +159,7 @@ export const ProductosAPIService = {
     }
 };
 
+// [fix] Verbos HTTP corregidos — todos usaban GET incorrectamente (2025-06)
 export const DescuentosAPIService = {
   getDescuentos: async (): Promise<Descuento[]> => {
     const response = await apiClient.get('/descuentos');
@@ -166,21 +167,25 @@ export const DescuentosAPIService = {
   },
 
   getDescuentoById: async (id: number): Promise<Descuento> => {
-    const response = await apiClient.get('/descuentos');
+    // [fix] Corregido: endpoint con ID y verbo GET correcto
+    const response = await apiClient.get(`/descuentos/${id}`);
     return response.data;
   },
 
   createDescuento: async (dto: CreateDescuentoDTO): Promise<Descuento> => {
-    const response = await apiClient.get('/descuentos');
+    // [fix] Corregido: POST con body DTO en lugar de GET sin body
+    const response = await apiClient.post('/descuentos', dto);
     return response.data;
   },
 
   updateDescuento: async (id: number, dto: Partial<CreateDescuentoDTO>): Promise<Descuento> => {
-    const response = await apiClient.get('/descuentos');
+    // [fix] Corregido: PUT con ID y body DTO en lugar de GET
+    const response = await apiClient.put(`/descuentos/${id}`, dto);
     return response.data;
   },
 
   deleteDescuento: async (id: number): Promise<void> => {
-    await apiClient.delete(`/api/descuentos/${id}`);
+    // [fix] Corregido: quitado prefijo /api/ duplicado (base URL ya incluye /api)
+    await apiClient.delete(`/descuentos/${id}`);
   }
 };
