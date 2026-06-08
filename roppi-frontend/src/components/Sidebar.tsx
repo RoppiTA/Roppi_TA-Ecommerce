@@ -43,7 +43,6 @@ function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
   const topItems = [
     { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
     { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
-    { id: 'clients', label: 'Clientes', icon: Users, path: '/clientes' },
     { id: 'reports', label: 'Reportes', icon: BarChart3, path: '/reports' },
   ];
 

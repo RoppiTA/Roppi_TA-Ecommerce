@@ -1,39 +1,35 @@
-/*Este archivo no se debe de modificar para el resto de la construcción
- de la prueba, version simplificada sin revision de rol completo
- para facilitar etapa de prueba de arquitectura
- path="*" element=<ComercianteStack userId={SIMULATED_USER.id} />
- */
-
 // src/navigation/AppRouter.tsx
 import { Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
 import ComercianteStack from './stacks/ComercianteStack';
 import ClienteStack from './stacks/ClienteStack';
-import Loggeo from '../views/autenticacion/main';
+import AuthStack from './stacks/AuthStack';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 
 export const AppRouter = () => {
-  const SIMULATED_USER = { id: 104, role: 'MERCHANT' };
-  //const SIMULATED_USER = { id: 104, role: 'CLIENT' };
+  //const const [user, setUser] = useState({ id: 104, role: 'MERCHANT' });
+  //const [user, setUser] = useState({ id: 104, role: 'CLIENT' });
+  const [user, setUser] = useState({ id: 104, role: 'GUEST' });
 
-  if (SIMULATED_USER.role === 'MERCHANT') {
-    return (
-      <Routes>
-        { <Route path="/*" element={<ComercianteStack userId={SIMULATED_USER.id} />} />}
-      </Routes>
-    );
-  }
-  else if (SIMULATED_USER.role === 'CLIENT') {
-    return (
-      <Routes>
-        { <Route path="/*" element={<ClienteStack userId={SIMULATED_USER.id} />} /> }
-      </Routes>
-    );
-  }
-  else {
-    return (
-      <Routes>
-        <Route path="/*" element={<Loggeo />} />
-      </Routes>
-    );
-  }
+  return (
+    <Routes>
+      {/* AUTH STACK: Público para todos */}
+      <Route path="/auth/*" element={<AuthStack />} />
+
+      {/* COMERCIANTE STACK: Protegido. Solo entra si el rol es MERCHANT */}
+      <Route 
+        path="/comerciante/*" 
+        element={
+          <ProtectedRoute isAllowed={user.role === 'MERCHANT'} redirectTo="/auth">
+            <ComercianteStack userId={user.id} />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* 3. CLIENTE STACK: Base de la app. Tiene partes públicas y privadas,
+          así que le pasamos el rol para que se proteja a sí mismo por dentro. */}
+      <Route path="/*" element={<ClienteStack user={user} />} />
+    </Routes>
+  );
 };
 export default AppRouter;
