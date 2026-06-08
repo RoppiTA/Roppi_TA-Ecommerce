@@ -2,12 +2,11 @@ import { Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { Sidebar } from '../../components/Sidebar';
-import DetalleProducto from '../../views/comerciante/DetalleProducto';
-import DefaultComerciante from '../../views/comerciante/DefaultComerciante';
-import ProductListPage from '../../views/comerciante/ProductListPage';
-import DiscountsPage from '../../views/comerciante/DiscountsPage';
+import DetalleProducto from '../../views/cliente/DetalleProducto';
+import DefaultCliente from '../../views/cliente/DefaultCliente';
+import ProductListPage from '../../views/cliente/ProductListPage';
 
-export const ComercianteStack = () => {
+export const ClienteStack = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
@@ -15,11 +14,11 @@ export const ComercianteStack = () => {
       <Sidebar
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
-        role="MERCHANT"
+        role="CLIENT"
       />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Barra superior compartida por todas las vistas del comerciante */}
+        {/* Barra superior compartida por todas las vistas del cliente */}
         <header className="bg-brand-light/40 border-b border-primary-hover/15 px-6 py-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm flex-shrink-0">
           <div className="flex items-center gap-3 ml-auto">
             <button className="p-2 hover:bg-primary2/10 rounded-lg relative transition-colors">
@@ -28,9 +27,9 @@ export const ComercianteStack = () => {
             </button>
             <div className="flex items-center gap-2 ml-2">
               <div className="w-8 h-8 bg-primary-hover text-white rounded-full flex items-center justify-center text-sm font-medium">
-                RC
+                C
               </div>
-              <span className="text-sm font-medium hidden sm:block text-brand-dark">Roppi Comerciante</span>
+              <span className="text-sm font-medium hidden sm:block text-brand-dark">Cliente</span>
             </div>
           </div>
         </header>
@@ -38,20 +37,17 @@ export const ComercianteStack = () => {
         {/* Área de contenido de cada vista */}
         <div className="flex-1 overflow-hidden">
           <Routes>
-            <Route path="descuentos" element={<DiscountsPage />} />
+            <Route path="*" element={<DefaultCliente />} />
             <Route path="products" element={<ProductListPage />} />
             <Route path="products/new" element={<DetalleProducto />} />
             <Route path="products/view/*" element={<DetalleProducto />} />
             <Route path="products/edit" element={<DetalleProducto />} />
             <Route path="orders" element={<div className="p-10 text-brand-muted">📦 Pantalla de Pedidos (Próximamente)</div>} />
-            <Route path="clientes" element={<div className="p-10 text-brand-muted">👥 Pantalla de Clientes (Próximamente)</div>} />
-            <Route path="reports" element={<div className="p-10 text-brand-muted">📈 Pantalla de Reportes (Próximamente)</div>} />
             <Route path="quotes" element={<div className="p-10 text-brand-muted">📝 Pantalla de Cotizaciones (Próximamente)</div>} />
-            <Route path="*" element={<DefaultComerciante />} />
           </Routes>
         </div>
       </main>
     </div>
   );
 };
-export default ComercianteStack;
+export default ClienteStack;
