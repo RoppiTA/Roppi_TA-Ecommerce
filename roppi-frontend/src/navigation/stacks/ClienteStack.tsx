@@ -5,9 +5,27 @@ import { Sidebar } from '../../components/Sidebar';
 import DetalleProducto from '../../views/cliente/DetalleProducto';
 import DefaultCliente from '../../views/cliente/DefaultCliente';
 import ProductListPage from '../../views/cliente/ProductListPage';
+import { ProtectedRoute } from '../../components/ProtectedRoute';
 
-export const ClienteStack = () => {
+interface ClienteStackProps {
+  user: {
+    id: number;
+    role: string;
+    name?: string; // Opcional, ya que un GUEST podría no tener nombre
+  };
+}
+
+export const ClienteStack = ({ user }: ClienteStackProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const isAuthenticated = user.role === 'CLIENT';
+
+  // Si está autenticado y tiene nombre, usamos su nombre. Si no, mostramos "Invitado".
+  const displayName = isAuthenticated && user.name ? user.name : 'Invitado';
+
+  // Obtenemos la inicial del primer nombre. Si es invitado, mostramos una "I".
+  const displayInitial = isAuthenticated && user.name 
+    ? user.name.trim().charAt(0).toUpperCase() 
+    : 'I';
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -27,23 +45,38 @@ export const ClienteStack = () => {
             </button>
             <div className="flex items-center gap-2 ml-2">
               <div className="w-8 h-8 bg-primary-hover text-white rounded-full flex items-center justify-center text-sm font-medium">
-                C
+                {displayInitial}
               </div>
-              <span className="text-sm font-medium hidden sm:block text-brand-dark">Cliente</span>
+              <span className="text-sm font-medium hidden sm:block text-brand-dark">{displayName}</span>
             </div>
           </div>
         </header>
 
         {/* Área de contenido de cada vista */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
           <Routes>
+            {/* === RUTAS PÚBLICAS (Acceso libre) === */}
             <Route path="*" element={<DefaultCliente />} />
             <Route path="products" element={<ProductListPage />} />
-            <Route path="products/new" element={<DetalleProducto />} />
             <Route path="products/view/*" element={<DetalleProducto />} />
-            <Route path="products/edit" element={<DetalleProducto />} />
-            <Route path="orders" element={<div className="p-10 text-brand-muted">📦 Pantalla de Pedidos (Próximamente)</div>} />
-            <Route path="quotes" element={<div className="p-10 text-brand-muted">📝 Pantalla de Cotizaciones (Próximamente)</div>} />
+
+            {/* === RUTAS PRIVADAS (Protegidas) === */}
+            <Route 
+              path="orders" 
+              element={
+                <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
+                  <div className="p-10 text-brand-muted">📦 Pantalla de Pedidos (Próximamente)</div>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="quotes" 
+              element={
+                <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
+                  <div className="p-10 text-brand-muted">📝 Pantalla de Cotizaciones (Próximamente)</div>
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </div>
       </main>

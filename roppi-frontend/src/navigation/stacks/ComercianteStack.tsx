@@ -7,7 +7,7 @@ import DefaultComerciante from '../../views/comerciante/DefaultComerciante';
 import ProductListPage from '../../views/comerciante/ProductListPage';
 import DiscountsPage from '../../views/comerciante/DiscountsPage';
 
-export const ComercianteStack = () => {
+export const ComercianteStack = ({ userId }: { userId: number }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
@@ -36,7 +36,7 @@ export const ComercianteStack = () => {
         </header>
 
         {/* Área de contenido de cada vista */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="descuentos" element={<DiscountsPage />} />
             <Route path="products" element={<ProductListPage />} />
@@ -44,7 +44,6 @@ export const ComercianteStack = () => {
             <Route path="products/view/*" element={<DetalleProducto />} />
             <Route path="products/edit" element={<DetalleProducto />} />
             <Route path="orders" element={<div className="p-10 text-brand-muted">📦 Pantalla de Pedidos (Próximamente)</div>} />
-            <Route path="clientes" element={<div className="p-10 text-brand-muted">👥 Pantalla de Clientes (Próximamente)</div>} />
             <Route path="reports" element={<div className="p-10 text-brand-muted">📈 Pantalla de Reportes (Próximamente)</div>} />
             <Route path="quotes" element={<div className="p-10 text-brand-muted">📝 Pantalla de Cotizaciones (Próximamente)</div>} />
             <Route path="*" element={<DefaultComerciante />} />
