@@ -11,8 +11,8 @@ import ClienteStack from './stacks/ClienteStack';
 import Loggeo from '../views/autenticacion/main';
 
 export const AppRouter = () => {
-  //const SIMULATED_USER = { id: 104, role: 'MERCHANT' };
-  const SIMULATED_USER = { id: 104, role: 'CLIENT' };
+  const SIMULATED_USER = { id: 104, role: 'MERCHANT' };
+  //const SIMULATED_USER = { id: 104, role: 'CLIENT' };
 
   if (SIMULATED_USER.role === 'MERCHANT') {
     return (
