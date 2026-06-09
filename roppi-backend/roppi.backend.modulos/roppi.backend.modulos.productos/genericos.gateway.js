@@ -21,17 +21,18 @@ class GenericosGateway {
     return result.rows[0];
   }
   
-  async createWithClient(client, { nombre, descripcion, precioBase, maximoStock, usuarioId }) {
+  async createWithClient(client, {nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId} ) {
+    console.log(nombre);
   const result = await client.query(`
     INSERT INTO "RoppiTA".GENERICOS
-      (NOMBRE, DESCRIPCION, PRECIO_BASE, MAXIMO_STOCK, USUARIO_CREACION, USUARIO_MODIFICACION)
-    VALUES ($1, $2, $3, $4, $5, $5)
+      (NOMBRE, DESCRIPCION, PRECIO_BASE, MAXIMO_STOCK, USUARIO_CREACION, USUARIO_MODIFICACION, URL_IMAGEN)
+    VALUES ($1, $2, $3, $4, $5, $5, $6)
     RETURNING *
-  `, [nombre, descripcion, precioBase, maximoStock, usuarioId]);
+  `, [nombre, descripcion, precioBase, maximoStock, usuarioId, urlImagen]);
   return result.rows[0];
   } 
 
-  async updateWithClient(client, id, { nombre, descripcion, precioBase, maximoStock, usuarioId }) {
+  async updateWithClient(client, id, { nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId }) {
   const result = await client.query(`
     UPDATE "RoppiTA".GENERICOS
     SET NOMBRE = $1,
@@ -39,10 +40,11 @@ class GenericosGateway {
         PRECIO_BASE = $3,
         MAXIMO_STOCK = $4,
         USUARIO_MODIFICACION = $5,
-        FECHA_MODIFICACION = CURRENT_TIMESTAMP
-    WHERE ID = $6
+        FECHA_MODIFICACION = CURRENT_TIMESTAMP,
+        URL_IMAGEN = $6
+    WHERE ID = $7
     RETURNING *
-  `, [nombre, descripcion, precioBase, maximoStock, usuarioId, id]);
+  `, [nombre, descripcion, precioBase, maximoStock, usuarioId, urlImagen, id]);
   return result.rows[0];
   }
 
@@ -87,6 +89,14 @@ class GenericosGateway {
   `, [idGenerico]);
   }
 
+  async removeParTamanoWithClient(client, idGenerico, idTamano) {
+  await client.query(`
+    DELETE FROM "RoppiTA".GENERICOSXTAMANOS
+    WHERE ID_GENERICO = $1
+    AND ID_TAMANO = $2
+  `, [idGenerico, idTamano]);
+  }
+
 
   // ─── GENERICOSXMATERIALES (materiales asociados al producto genérico)────────────────────────────────
 
@@ -118,6 +128,14 @@ class GenericosGateway {
     WHERE ID_GENERICO = $1
   `, [idGenerico]);
   }
+
+  async removeParMaterialWithClient(client, idGenerico, idMaterial) {
+  await client.query(`
+    DELETE FROM "RoppiTA".GENERICOSXMATERIALES
+    WHERE ID_GENERICO = $1
+    AND ID_MATERIAL = $2
+  `, [idGenerico, idMaterial]);
+  }
   // ─── GENERICOSXCOLORES (colores asociados al producto genérico)───────────────────────────────────
 
   async findColoresByGenerico(idGenerico) {
@@ -148,6 +166,14 @@ class GenericosGateway {
   `, [idGenerico]);
   }
 
+  async removeParColorWithClient(client, idGenerico, idColor) {
+  await client.query(`
+    DELETE FROM "RoppiTA".GENERICOSXCOLORES
+    WHERE ID_GENERICO = $1
+    AND ID_COLOR = $2
+  `, [idGenerico, idColor]);
+  }
+
   // ─── GENERICOSXPERSONALIZACIONES (personalizaciones asociadas al producto genérico)───────────────────────────────────
 
   async findPersonalizacionesByGenerico(idGenerico) {
@@ -176,6 +202,14 @@ class GenericosGateway {
     DELETE FROM "RoppiTA".GENERICOSXPERSONALIZACIONES
     WHERE ID_GENERICO = $1
   `, [idGenerico]);
+  }
+
+  async removeParPersonalizacionWithClient(client, idGenerico, idPersonalizacion) {
+  await client.query(`
+    DELETE FROM "RoppiTA".GENERICOSXPERSONALIZACIONES
+    WHERE ID_GENERICO = $1
+    AND ID_PERSONALIZACION = $2
+  `, [idGenerico, idPersonalizacion]);
   }
   // los métodos clientes "with client" son para ser usados dentro de transacciones manejadas a nivel de BO,
   //  para asegurar que si alguna inserción falla, se revierta toda la operación. 
