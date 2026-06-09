@@ -201,7 +201,7 @@ export default function DetalleProducto(){
   const handleCancel = () => {
     setEditedProduct(product);
     if (view === 'create') {
-      navigate('/products');
+      navigate('/comerciante/products');
     } else {
       setView('view');
     }
@@ -211,7 +211,7 @@ export default function DetalleProducto(){
     if (id_nav && window.confirm('¿Estás seguro de que quieres desactivar este producto?')) {
       try {
         await deleteProducto(id_nav);
-        navigate('/products');
+        navigate('/comerciante/products');
       } catch (error) {
         alert('Error al desactivar el producto.');
       }

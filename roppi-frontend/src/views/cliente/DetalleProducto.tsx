@@ -280,52 +280,6 @@ if (!currentProduct) {
     <div className="flex-1 min-h-0 overflow-auto bg-gray-50">
     <div className="p-8">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Gestión de Productos</h1>
-          <div className="flex gap-2">
-            {view === 'view' && (
-              <>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<Edit size={20} />}
-                  onClick={handleStartEdit}
-                >
-                  Editar
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<Trash2 size={20} />}
-                  onClick={handleDelete}
-                >
-                  Desactivar
-                </Button>
-              </>
-            )}
-            {isEditable && (
-              <>
-                <Button
-                  variant="contained"
-                  color="success"
-                  startIcon={<Save size={20} />}
-                  onClick={handleSave}
-                >
-                  Guardar
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<X size={20} />}
-                  onClick={handleCancel}
-                >
-                  Cancelar
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-
       <div className="grid grid-cols-[400px_1fr] gap-8">
         {/* Imagen del producto */}
         <div className="space-y-4">
