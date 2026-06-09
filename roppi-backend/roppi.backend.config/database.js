@@ -16,7 +16,6 @@ class DBManager {
         rejectUnauthorized: false, // esto es para pg que no verifique el certificado
         checkServerIdentity: () => undefined
     },                                    // la ecriptación la estoy bloqueando para probar la conexión
-
       // Pool settings
       max: Number(process.env.DB_MAX_CONNECTIONS) || 10,
       idleTimeoutMillis: Number(process.env.DB_IDLE_TIMEOUT) || 30000,
@@ -26,7 +25,8 @@ class DBManager {
         client.query('SET search_path TO "RoppiTA"');
         console.log('Conectados a PostgreQSL');
     });
-
+    console.log(process.env.password);
+    //console.log(process.cwd());
     this._registerEvents();
   }
 
