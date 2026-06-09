@@ -6,28 +6,20 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom';
 
 interface ProductListProps {
   products: ProductoGenerico[];
-  onAddProduct: () => void;
 }
 
-export function ProductList({ products, onAddProduct }: ProductListProps) {
+export function ProductList({ products }: ProductListProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
   const handleViewProduct = (id:number) => {
-    navigate('/comerciante/products/view/', { state: { productoId: id }});
+    navigate('/products/view/', { state: { productoId: id }});
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2>Productos</h2>
-        <Button
-          variant="contained"
-          startIcon={<Plus size={20} />}
-          onClick={onAddProduct}
-        >
-          Agregar Producto
-        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

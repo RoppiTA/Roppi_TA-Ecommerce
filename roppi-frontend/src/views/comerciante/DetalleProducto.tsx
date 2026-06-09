@@ -2,11 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { Button, TextField, IconButton, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
-import { Plus, Trash2, Save, Edit, X } from 'lucide-react';
-import { Material } from '../../types/producto/material.types';
-import { Color } from '../../types/producto/color.types';
-import { Tamano } from '../../types/producto/tamano.types';
-import { Personalizacion } from '../../types/producto/personalizacion.types';
+import { Trash2, Save, Edit, X } from 'lucide-react';
 import { GenericoXColor, GenericoXMaterial, GenericoXPersonalizacion, GenericoXTamano } from '../../types/producto/genericoAtributos.types';
 import { ProductoGenerico, CreateProductGenericoDTO } from '../../types/producto/productoGen.types';
 import assets from '../../assets/assets.js';
@@ -86,13 +82,20 @@ const getPersonalizacion= (id: number) => AVAILABLE_CUSTOMIZATIONS.find(p => p.i
 */
 
 export default function DetalleProducto(){
+    type ViewMode = 'view' | 'create' | 'edit';
+
     const location = useLocation();
     const navigate = useNavigate();
 
 // Sacamos el ID desde el estado oculto de la navegación
     const state = location.state as { productoId?: number } | null;
     const id_nav = state?.productoId;
-    console.log("Valor de id: ", id_nav);
+    
+    const [view, setView] = useState<ViewMode>(
+    location.pathname.includes('/new') ? 'create' : 'view');
+
+    const isEditable = view === 'create' || view === 'edit';
+
 // 1. Extraemos las funciones y catálogos necesarios del hook
 // Modifica la parte superior de DetalleProducto.tsx para que quede así:
     const { 
@@ -106,19 +109,10 @@ export default function DetalleProducto(){
       deleteProducto,
       loading: loadingHook 
     } = useProductosGenericos();
-    
-    const mode: Mode =
-    location.pathname.includes('/new')
-        ? 'create'
-        : location.pathname.includes('/edit')
-        ? 'edit'
-        : 'view';
 
   const [product, setProduct] = useState<ProductoGenerico | null>(null);
   const [editedProduct, setEditedProduct] = useState<ProductoGenerico | null>(null);
   const [loadingLocal, setLoadingLocal] = useState<boolean>(false);
-
-  const isEditable = mode === 'create' || mode === 'edit';
 
 // 4. Helpers dinámicos usando las listas maestras de la base de datos
   const getMaterial        = (idMat: number) => materiales.find(m => m.id === idMat);
@@ -128,7 +122,7 @@ export default function DetalleProducto(){
 
   useEffect(() => {
     // CREATE
-    if (mode === 'create') {
+    if (view === 'create') {
 
       const emptyproduct: ProductoGenerico = ({
         id: 0,
@@ -165,10 +159,10 @@ export default function DetalleProducto(){
     };
 
   fetchSingleProduct();
-  }, [mode, id_nav, getProductoById]);
+  }, [view, id_nav, getProductoById]);
 
   const handleStartEdit = () => {
-    navigate('/products/edit', { state: { productoId: id_nav } }); // navigate(`/products/edit/${id}`);
+    setView('edit');
   };
 
   const handleSave = async () => {
@@ -186,20 +180,18 @@ export default function DetalleProducto(){
         personalizaciones: editedProduct.personalizaciones
       };
 
-      console.log("Valor de id: ", id_nav);
-
-      if (mode === 'create') {
+      if (view === 'create') {
         console.log("por alguna razon estoy aca");
         const nuevo = await addProducto(productoDTO);
         // Redirección limpia tras crear
-        navigate('/products/view', { state: { productoId: nuevo.id } });
-      } else if (mode === 'edit' && id_nav) {
+        setView('view');
+      } else if (view === 'edit' && id_nav) {
         console.log("Estoy llegando a entrar acá");
         const actualizado = await updateProducto(id_nav, productoDTO);
         setProduct(actualizado);
         setEditedProduct(actualizado);
         // Redirección limpia tras editar
-        navigate('/products/view', { state: { productoId: id_nav } });
+        setView('view');
       }
     } catch (error) {
       alert('Error al intentar guardar el producto.');
@@ -208,10 +200,10 @@ export default function DetalleProducto(){
 
   const handleCancel = () => {
     setEditedProduct(product);
-    if (mode === 'create') {
-      navigate('/products');
+    if (view === 'create') {
+      navigate('/comerciante/products');
     } else {
-      navigate('/products/view', { state: { productoId: id_nav } });
+      setView('view');
     }
   };
 
@@ -219,7 +211,7 @@ export default function DetalleProducto(){
     if (id_nav && window.confirm('¿Estás seguro de que quieres desactivar este producto?')) {
       try {
         await deleteProducto(id_nav);
-        navigate('/products');
+        navigate('/comerciante/products');
       } catch (error) {
         alert('Error al desactivar el producto.');
       }
@@ -285,12 +277,13 @@ if (!currentProduct) {
 
   return (
     <>
-    <div className="size-full min-h-screen bg-gray-50 p-8">
+    <div className="flex-1 min-h-0 overflow-auto bg-gray-50">
+    <div className="p-8">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Gestión de Productos</h1>
           <div className="flex gap-2">
-            {mode === 'view' && (
+            {view === 'view' && (
               <>
                 <Button
                   variant="outlined"
@@ -646,6 +639,7 @@ if (!currentProduct) {
         </div>
       </div>
       </div>
+    </div>
     </div>
     </>
   );
