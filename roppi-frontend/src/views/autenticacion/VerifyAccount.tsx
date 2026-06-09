@@ -1,11 +1,27 @@
 import { Mail, CheckCircle } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface VerifyAccountProps {
-  email: string;
-  onBackToLogin: () => void;
+  email?: string;
+  onBackToLogin?: () => void;
 }
 
 export default function VerifyAccount({ email, onBackToLogin }: VerifyAccountProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  //Recueperación de email desde el estado de navegación
+  const emailFromState = location.state?.email || email || '';
+
+  //Funcion de navegación 
+  const handleBack = () => {
+    if (onBackToLogin) {
+      onBackToLogin(); // Por si se usa a la antigua en otro lado
+    } else {
+      navigate('/');   // Comportamiento del nuevo AuthStack
+    }
+  }
+  
   return (
     <div className="w-full max-w-md font-primary">
       <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-100">
@@ -28,7 +44,7 @@ export default function VerifyAccount({ email, onBackToLogin }: VerifyAccountPro
           </p>
 
           <p className="mb-6 px-4 py-3 rounded-lg bg-brand-light text-primary-hover font-bold">
-            {email}
+            {email || emailFromState}
           </p>
 
           <div className="text-left mb-6 space-y-3 text-text-dark">
@@ -48,7 +64,7 @@ export default function VerifyAccount({ email, onBackToLogin }: VerifyAccountPro
           </div>
 
           <button
-            onClick={onBackToLogin}
+            onClick={handleBack}
             className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md"
           >
             Ir al Inicio de Sesión

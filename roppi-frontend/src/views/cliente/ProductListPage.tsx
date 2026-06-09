@@ -29,7 +29,6 @@ const ProductListPage = () => {
     <div className="flex-1 min-h-0 overflow-y-auto p-8">
       <ProductList
         products={productos}
-        onAddProduct={() => navigate('/comerciante/products/new')}
       />
     </div>
   );
