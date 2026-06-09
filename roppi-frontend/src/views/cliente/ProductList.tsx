@@ -6,10 +6,9 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom';
 
 interface ProductListProps {
   products: ProductoGenerico[];
-  onAddProduct: () => void;
 }
 
-export function ProductList({ products, onAddProduct }: ProductListProps) {
+export function ProductList({ products }: ProductListProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
