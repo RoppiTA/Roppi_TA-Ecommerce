@@ -1,5 +1,4 @@
 import {
-  LayoutDashboard,
   Users,
   ShoppingCart,
   FileText,
@@ -8,107 +7,340 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart3,
-  Boxes
+  Boxes,
+  Shirt,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
+  role: 'MERCHANT' | 'CLIENT';
 }
 
-export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
-  
-  // 1. Catálogo ahora es un botón directo que apunta a /products
-  const menuItems = [
-    { id: 'catalog', label: 'Catálogo', icon: Boxes, path: '/products' }, 
+export function Sidebar({ isCollapsed, onToggle, role }: SidebarProps) {
+  if (role === 'MERCHANT') {
+    return merchant_sidebar(isCollapsed, onToggle);
+  }
+  else if (role === 'CLIENT') {
+    return client_sidebar(isCollapsed, onToggle);
+  }
+  else return default_sidebar(isCollapsed, onToggle);
+}
+
+function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
+  const [catalogExpanded, setCatalogExpanded] = useState(true);
+
+  const catalogChildren = [
+    { id: 'vista-general', label: 'Vista general', path: '/' },
+    { id: 'productos', label: 'Productos', path: '/products' },
+    { id: 'descuentos', label: 'Descuentos', path: '/descuentos' },
+  ];
+
+  const topItems = [
     { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
     { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
-    { id: 'clients', label: 'Clientes', icon: Users, path: '/clientes' },
     { id: 'reports', label: 'Reportes', icon: BarChart3, path: '/reports' },
   ];
 
   const bottomItems = [
-    { id: 'support', label: 'Support', icon: HelpCircle, path: '/support' },
-    { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
+    { id: 'support', label: 'Soporte', icon: HelpCircle, path: '/support' },
+    { id: 'settings', label: 'Configuración', icon: Settings, path: '/settings' },
   ];
+
+  // Clases comunes reutilizables
+  const itemBase = 'relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150';
+  const itemInactive = 'text-brand-dark hover:bg-primary-hover/10';
+  const itemActive = 'bg-primary2 text-white';
 
   return (
     <aside
-      // 🟢 min-h-screen asegura que cubra TODO el largo vertical de la página
-      className={`min-h-screen bg-white border-r border-border flex flex-col transition-all duration-300 ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
+      className={`h-full flex flex-col transition-all duration-300 flex-shrink-0 bg-brand-light ${isCollapsed ? 'w-20' : 'w-64'
+        }`}
     >
-      {/* Header */}
-      <div className="p-4 border-b border-border flex items-center justify-between">
+      {/* ── Header ── */}
+      <div className="px-4 pt-5 pb-4 flex items-center justify-between">
         {!isCollapsed && (
           <div>
-            {/* 🟢 Título principal más grande (text-2xl) */}
-            <h2 className="font-bold text-2xl tracking-tight text-slate-950">Roppi</h2>
-            {/* 🟢 Subtítulo más grande (text-sm) */}
-            <p className="text-sm font-medium text-muted-foreground">Gestión de Negocios</p>
+            <h2 className="font-bold text-2xl tracking-tight text-primary-hover">Roppi</h2>
+            <p className="text-xs font-medium text-brand-muted mt-0.5">Gestión de Negocios</p>
           </div>
         )}
         <button
           onClick={onToggle}
-          className="p-2 hover:bg-accent rounded-lg transition-colors"
+          className="p-2 rounded-lg hover:bg-primary-hover/10 transition-colors text-brand-dark"
         >
           {isCollapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
         </button>
       </div>
 
-      {/* Menu Items */}
-      <nav className="flex-1 p-3 overflow-y-auto">
-        <div className="space-y-1.5">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
+      {/* ── Navegación ── */}
+      <nav className="flex-1 p-3 overflow-y-auto mt-2">
+        <div className="space-y-1">
 
+          {/* Catálogo (grupo expandible) */}
+          <div>
+            {!isCollapsed && (
+              <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted px-3 mb-1.5">
+                Catálogo
+              </p>
+            )}
+            <button
+              onClick={() => !isCollapsed && setCatalogExpanded(!catalogExpanded)}
+              className={`${itemBase} ${itemInactive}`}
+              title={isCollapsed ? 'Catálogo' : undefined}
+            >
+              <Boxes size={20} className="text-primary2 shrink-0" />
+              {!isCollapsed && (
+                <>
+                  <span className="text-sm flex-1 text-left font-medium">Catálogo</span>
+                  {catalogExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </>
+              )}
+            </button>
+
+            {!isCollapsed && catalogExpanded && (
+              <div className="ml-7 mt-0.5 space-y-0.5 border-l-2 border-primary-hover/20 pl-3">
+                {catalogChildren.map((child) => (
+                  <NavLink
+                    key={child.id}
+                    to={child.path}
+                    end={child.path === '/'}
+                    className={({ isActive }) =>
+                      `relative flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-150 font-medium ${isActive
+                        ? 'bg-primary2 text-white'
+                        : 'text-brand-dark hover:bg-primary-hover/10'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-brand-error rounded-r-full" />
+                        )}
+                        <span className="pl-1">{child.label}</span>
+                      </>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Separador visual */}
+          {!isCollapsed && (
+            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted px-3 pt-3 pb-1">
+              Operaciones
+            </p>
+          )}
+
+          {/* Ítems principales */}
+          {topItems.map((item) => {
+            const Icon = item.icon;
             return (
               <NavLink
                 key={item.id}
                 to={item.path}
-                className={({ isActive }) =>
-                  `w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-primary text-primary-foreground font-semibold'
-                      : 'hover:bg-accent text-foreground font-medium'
-                  }`
-                }
+                className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
                 title={isCollapsed ? item.label : undefined}
               >
-                {/* 🟢 Íconos ligeramente más grandes (size 22) para equilibrar el texto */}
-                <Icon size={22} />
-                {/* 🟢 Textos de opciones más grandes (text-base) */}
-                {!isCollapsed && <span className="text-base">{item.label}</span>}
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-error rounded-r-full" />
+                    )}
+                    <Icon
+                      size={20}
+                      className={`shrink-0 ${isActive ? 'text-white' : 'text-primary2'}`}
+                    />
+                    {!isCollapsed && (
+                      <span className="text-sm font-medium">{item.label}</span>
+                    )}
+                  </>
+                )}
               </NavLink>
             );
           })}
         </div>
       </nav>
 
-      {/* Bottom Items */}
-      <div className="p-3 border-t border-border space-y-1.5">
+      {/* ── Ítems inferiores ── */}
+      <div className="p-3 border-t border-primary-hover/20 space-y-1">
         {bottomItems.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
               key={item.id}
               to={item.path}
-              className={({ isActive }) =>
-                `w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                  isActive 
-                    ? 'bg-primary text-primary-foreground font-semibold' 
-                    : 'hover:bg-accent text-foreground font-medium'
-                }`
-              }
+              className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
               title={isCollapsed ? item.label : undefined}
             >
-              <Icon size={22} />
-              {!isCollapsed && <span className="text-base">{item.label}</span>}
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-error rounded-r-full" />
+                  )}
+                  <Icon
+                    size={20}
+                    className={`shrink-0 ${isActive ? 'text-white' : 'text-primary2'}`}
+                  />
+                  {!isCollapsed && (
+                    <span className="text-sm font-medium">{item.label}</span>
+                  )}
+                </>
+              )}
             </NavLink>
           );
         })}
+      </div>
+    </aside>
+  );
+}
+
+function client_sidebar(isCollapsed: boolean, onToggle: () => void) {
+  const [catalogExpanded, setCatalogExpanded] = useState(true);
+
+  const topItems = [
+    { id: 'productos', label: 'Productos', icon: Shirt, path: '/products' },
+    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
+    { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
+  ];
+
+  const bottomItems = [
+    { id: 'support', label: 'Soporte', icon: HelpCircle, path: '/support' },
+    { id: 'settings', label: 'Configuración', icon: Settings, path: '/settings' },
+  ];
+
+  // Clases comunes reutilizables
+  const itemBase = 'relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150';
+  const itemInactive = 'text-brand-dark hover:bg-primary-hover/10';
+  const itemActive = 'bg-primary2 text-white';
+
+  return (
+    <aside
+      className={`h-full flex flex-col transition-all duration-300 flex-shrink-0 bg-brand-light ${isCollapsed ? 'w-20' : 'w-64'
+        }`}
+    >
+      {/* ── Header ── */}
+      <div className="px-4 pt-5 pb-4 flex items-center justify-between">
+        {!isCollapsed && (
+          <div>
+            <h2 className="font-bold text-2xl tracking-tight text-primary-hover">Roppi</h2>
+            <p className="text-xs font-medium text-brand-muted mt-0.5">Barra de Navegación</p>
+          </div>
+        )}
+        <button
+          onClick={onToggle}
+          className="p-2 rounded-lg hover:bg-primary-hover/10 transition-colors text-brand-dark"
+        >
+          {isCollapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
+        </button>
+      </div>
+
+      {/* ── Navegación ── */}
+      <nav className="flex-1 p-3 overflow-y-auto mt-2">
+        <div className="space-y-1">
+          {/* Separador visual */}
+          {!isCollapsed && (
+            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted px-3 pt-3 pb-1">
+              Operaciones
+            </p>
+          )}
+
+          {/* Ítems principales */}
+          {topItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.id}
+                to={item.path}
+                className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
+                title={isCollapsed ? item.label : undefined}
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-error rounded-r-full" />
+                    )}
+                    <Icon
+                      size={20}
+                      className={`shrink-0 ${isActive ? 'text-white' : 'text-primary2'}`}
+                    />
+                    {!isCollapsed && (
+                      <span className="text-sm font-medium">{item.label}</span>
+                    )}
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* ── Ítems inferiores ── */}
+      <div className="p-3 border-t border-primary-hover/20 space-y-1">
+        {bottomItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.id}
+              to={item.path}
+              className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
+              title={isCollapsed ? item.label : undefined}
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-error rounded-r-full" />
+                  )}
+                  <Icon
+                    size={20}
+                    className={`shrink-0 ${isActive ? 'text-white' : 'text-primary2'}`}
+                  />
+                  {!isCollapsed && (
+                    <span className="text-sm font-medium">{item.label}</span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          );
+        })}
+      </div>
+    </aside>
+  );
+}
+
+function default_sidebar(isCollapsed: boolean, onToggle: () => void) {
+  return (
+    <aside
+      className={`h-full flex flex-col transition-all duration-300 flex-shrink-0 bg-brand-light ${isCollapsed ? 'w-20' : 'w-64'
+        }`}
+    >
+      {/* ── Header ── */}
+      <div className="px-4 pt-5 pb-4 flex items-center justify-between">
+        {!isCollapsed && (
+          <div>
+            <h2 className="font-bold text-2xl tracking-tight text-primary-hover">Roppi</h2>
+            <p className="text-xs font-medium text-brand-muted mt-0.5">Gestión de Negocios</p>
+          </div>
+        )}
+        <button
+
+          onClick={onToggle}
+          className="p-2 rounded-lg hover:bg-primary-hover/10 transition-colors text-brand-dark"
+        >
+          {isCollapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
+        </button>
+      </div>
+      <div className="p-3 border-t border-primary-hover/20 space-y-1">
+      {!isCollapsed && (
+        <p className="text-sm font-medium text-brand-muted">
+          Error: Rol no reconocido.
+        </p>
+      )}
       </div>
     </aside>
   );

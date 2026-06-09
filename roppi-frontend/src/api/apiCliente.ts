@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 export const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:3000/api', // URL futura de backend
+  baseURL: 'http://localhost:3000/api', // URL futura de backend
   headers: {
      'Content-Type': 'application/json', 
      'Accept': 'application/json'
