@@ -21,9 +21,9 @@ class EmailService {
    */
   async enviarCorreoActivacion(correoDestino, token, nombre) {
     try {
-      // El host del backend donde está el verificador de rutas
-      const hostBackend = process.env.HOST_API_SERVER || 'localhost';
-      const puertoBackend = process.env.PORT_API_SERVER || 3000;
+      // Usamos el puerto público expuesto por Docker (3001) para el enlace
+      const hostBackend = 'localhost';
+      const puertoBackend = 3001;
       const urlActivacion = `http://${hostBackend}:${puertoBackend}/api/usuarios/activar/${token}`;
 
       const mensajeHtml = `

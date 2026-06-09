@@ -7,17 +7,13 @@ interface LoginFormProps {
   onRegister: () => void;
 }
 
-type ErrorType =
-  | 'none'
-  | 'account-not-found'
-  | 'not-activated'
-  | 'incorrect-credentials'
-  | 'account-locked';
+// Eliminamos ErrorType estricto para poder mostrar los mensajes reales del backend
 
 export default function LoginForm({ onForgotPassword, onRegister }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<ErrorType>('none');
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
 
   const location = useLocation();
@@ -25,31 +21,53 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
   const activado = queryParams.get('activado');
   const errorActivacion = queryParams.get('error_activacion');
 
-  const errorMessages: Record<ErrorType, string> = {
-    'none': '',
-    'account-not-found': 'Cuenta inexistente',
-    'not-activated': 'Falta activar su cuenta',
-    'incorrect-credentials': 'Correo o contraseña incorrecta',
-    'account-locked': 'Cuenta bloqueada, esperar 15 minutos para reintentar'
-  };
+  // Eliminamos errorMessages predefinidos ya que usaremos los del backend
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newAttemptCount = attemptCount + 1;
     setAttemptCount(newAttemptCount);
 
-    if (newAttemptCount >= 3) {
-      setError('account-locked');
-    } else if (email === 'inexistente@ejemplo.com') {
-      setError('account-not-found');
-    } else if (email === 'noactivado@ejemplo.com') {
-      setError('not-activated');
-    } else {
-      setError('incorrect-credentials');
+    if (newAttemptCount >= 5) {
+      setError('Cuenta temporalmente bloqueada por múltiples intentos fallidos');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:3001/api/usuarios/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          correo: email,
+          contraseña: password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.mensaje || 'Error al iniciar sesión');
+      }
+
+      // Login exitoso: Guardar token temporalmente en localStorage (para uso futuro)
+      localStorage.setItem('roppi_token', data.data.token);
+      localStorage.setItem('roppi_user', JSON.stringify(data.data.usuario));
+      
+      alert(`¡Bienvenido ${data.data.usuario.nombre}! Has iniciado sesión como ${data.data.usuario.rol === 1 ? 'ADMIN' : 'CLIENTE'}. \n\n(En el siguiente paso conectaremos esto con el enrutador de React)`);
+      
+    } catch (err: any) {
+      setError(err.message || 'Error de conexión con el servidor');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const isLocked = error === 'account-locked';
+  const isLocked = error.includes('bloqueada') || isLoading;
 
   return (
     <div className="w-full max-w-md font-primary">
@@ -86,7 +104,7 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLocked}
                 className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${
-                  error !== 'none' ? 'border-brand-error' : 'border-primary2'
+                  error ? 'border-brand-error' : 'border-primary2'
                 }`}
                 placeholder="tu@correo.com"
                 required
@@ -107,7 +125,7 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLocked}
                 className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${
-                  error !== 'none' ? 'border-brand-error' : 'border-primary2'
+                  error ? 'border-brand-error' : 'border-primary2'
                 }`}
                 placeholder="••••••••"
                 required
@@ -115,10 +133,10 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
             </div>
           </div>
 
-          {error !== 'none' && (
+          {error && (
             <div className="flex items-start gap-3 p-4 rounded-lg bg-brand-error text-white shadow-sm">
               <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
-              <p className="text-sm font-medium">{errorMessages[error]}</p>
+              <p className="text-sm font-medium">{error}</p>
             </div>
           )}
 
@@ -127,7 +145,7 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
             disabled={isLocked}
             className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md"
           >
-            Ingresar
+            {isLoading ? 'Ingresando...' : 'Ingresar'}
           </button>
 
           <div className="text-center">
@@ -151,9 +169,9 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
           </div>
         </form>
 
-        {attemptCount > 0 && attemptCount < 3 && error !== 'none' && (
+        {attemptCount > 0 && attemptCount < 5 && error && (
           <p className="text-center mt-4 text-sm text-text-muted">
-            Intento {attemptCount} de 3
+            Intento {attemptCount} de 5
           </p>
         )}
       </div>
