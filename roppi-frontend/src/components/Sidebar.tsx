@@ -35,20 +35,20 @@ function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
   const [catalogExpanded, setCatalogExpanded] = useState(true);
 
   const catalogChildren = [
-    { id: 'vista-general', label: 'Vista general', path: '/' },
-    { id: 'productos', label: 'Productos', path: '/products' },
-    { id: 'descuentos', label: 'Descuentos', path: '/descuentos' },
+    { id: 'vista-general', label: 'Vista general', path: '/comerciante' },
+    { id: 'productos', label: 'Productos', path: '/comerciante/products' },
+    { id: 'descuentos', label: 'Descuentos', path: '/comerciante/descuentos' },
   ];
 
   const topItems = [
-    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
-    { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
-    { id: 'reports', label: 'Reportes', icon: BarChart3, path: '/reports' },
+    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/comerciante/orders' },
+    { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/comerciante/quotes' },
+    { id: 'reports', label: 'Reportes', icon: BarChart3, path: '/comerciante/reports' },
   ];
 
   const bottomItems = [
-    { id: 'support', label: 'Soporte', icon: HelpCircle, path: '/support' },
-    { id: 'settings', label: 'Configuración', icon: Settings, path: '/settings' },
+    { id: 'support', label: 'Soporte', icon: HelpCircle, path: '/comerciante/support' },
+    { id: 'settings', label: 'Configuración', icon: Settings, path: '/comerciante/settings' },
   ];
 
   // Clases comunes reutilizables
@@ -108,7 +108,7 @@ function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
                   <NavLink
                     key={child.id}
                     to={child.path}
-                    end={child.path === '/'}
+                    end={child.path === '/comerciante'}
                     className={({ isActive }) =>
                       `relative flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-150 font-medium ${isActive
                         ? 'bg-primary2 text-white'

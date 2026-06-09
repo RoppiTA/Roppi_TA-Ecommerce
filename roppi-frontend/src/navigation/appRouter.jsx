@@ -7,9 +7,9 @@ import AuthStack from './stacks/AuthStack';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 
 export const AppRouter = () => {
-  //const const [user, setUser] = useState({ id: 104, role: 'MERCHANT' });
-  //const [user, setUser] = useState({ id: 104, role: 'CLIENT' });
-  const [user, setUser] = useState({ id: 104, role: 'GUEST' });
+  //const [user, setUser] = useState({ id: 104, role: 'MERCHANT', name: 'Juan Pérez' });
+  const [user, setUser] = useState({ id: 104, role: 'CLIENT' , name: 'María Gómez' });
+  //const [user, setUser] = useState({ id: 104, role: 'GUEST', name: 'Invitado' });
 
   return (
     <Routes>
@@ -21,7 +21,7 @@ export const AppRouter = () => {
         path="/comerciante/*" 
         element={
           <ProtectedRoute isAllowed={user.role === 'MERCHANT'} redirectTo="/auth">
-            <ComercianteStack userId={user.id} />
+            <ComercianteStack user={user} />
           </ProtectedRoute>
         } 
       />
