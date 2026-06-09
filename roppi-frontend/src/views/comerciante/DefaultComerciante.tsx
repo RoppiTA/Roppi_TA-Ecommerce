@@ -24,7 +24,7 @@ export const DefaultComerciante = () => {
   };
 
   const handleViewProduct = (id: number) => {
-    navigate('/products/view/', { state: { productoId: id } });
+    navigate('products/view/', { state: { productoId: id } });
   };
 
   if (loadingProductos) {
