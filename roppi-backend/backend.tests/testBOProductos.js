@@ -23,7 +23,38 @@ async function testObtenerPorId() {
   }
 }
 
-async function run() {
+async function testCrear(){
+  console.log('\nProbando crear una mochila:');
+  const generico = await genericosBO.crear( {nombre:'Mochila', descripcion:'Mochila', precioBase: 12,
+    maximoStock: 100, urlImagen: 'assets/maxwell.jpg',
+    tamanos:[{ id: 1, alto: 100, ancho: 50 },{ id: 2, alto: 200, ancho: 80 }],
+    materiales:[{id: 1, costoExtra: 10}],
+    colores:[{id: 3}],
+    personalizaciones:[{id: 1, costoExtra: 20}], usuarioId:1} );
+  if(generico){
+    console.log("ID de la mochila creada: ", generico);
+  }
+  else {
+    console.log('No se creó la mochila');
+  }
+}
+
+async function testActualizar(){
+  console.log('\nProbando actualizar la mochila previa:'); // Actualmente id = 17
+  const generico = await genericosBO.actualizar( 17, {nombre:'Mochila 2', descripcion:'Mochila actualizada',
+    precioBase: 120, maximoStock: 100, urlImagen: 'assets/maxwell.jpg',
+    tamanos:[{ id: 1, alto: 100, ancho: 50 },{ id: 3, alto: 400, ancho: 80 }],
+    materiales:[{id: 2, costoExtra: 20}], colores:[{id: 2}],
+    personalizaciones:[{id: 2, costoExtra: 30}], usuarioId:1} );
+  if(generico){
+    console.log("ID de la mochila creada: ", generico);
+  }
+  else {
+    console.log('No se creó la mochila');
+  }
+}
+
+async function runListar() {
   try {
     await testListar();
   } catch (error) {
@@ -33,4 +64,34 @@ async function run() {
   }
 }
 
-run();
+async function runID() {
+  try {
+    await testObtenerPorId();
+  } catch (error) {
+    console.error('Error:', error.message);
+  } finally {
+    process.exit();
+  }
+}
+
+async function runCrear(){
+  try {
+    await testCrear();
+  } catch (error) {
+    console.error('Error:', error.message);
+  } finally {
+    process.exit();
+  }
+}
+
+async function runActualizar(){
+  try {
+    await testActualizar();
+  } catch (error) {
+    console.error('Error:', error.message);
+  } finally {
+    process.exit();
+  }
+}
+
+runActualizar();
