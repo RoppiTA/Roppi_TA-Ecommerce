@@ -37,6 +37,8 @@ services:
     container_name: roppi-usuarios-service
     ports:
       - "3001:3000" # Exponemos el puerto para pruebas directas si se requiere
+    env_file:
+      - ./roppi-backend/.env
     environment:
       - PORT_API_SERVER=3000
       - HOST_API_SERVER=0.0.0.0

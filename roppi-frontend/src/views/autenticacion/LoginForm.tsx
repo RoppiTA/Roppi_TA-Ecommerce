@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -18,6 +19,11 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
   const [password, setPassword] = useState('');
   const [error, setError] = useState<ErrorType>('none');
   const [attemptCount, setAttemptCount] = useState(0);
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const activado = queryParams.get('activado');
+  const errorActivacion = queryParams.get('error_activacion');
 
   const errorMessages: Record<ErrorType, string> = {
     'none': '',
@@ -51,6 +57,20 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
         <h1 className="text-center text-2xl font-bold mb-8 text-primary-hover">
           Iniciar Sesión
         </h1>
+
+        {activado === 'true' && (
+          <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-[#D5E4E6] text-[#0E7490] shadow-sm border border-[#0E7490]">
+            <CheckCircle size={20} className="flex-shrink-0 mt-0.5" />
+            <p className="text-sm font-medium">¡Cuenta activada exitosamente! Ya puedes iniciar sesión.</p>
+          </div>
+        )}
+
+        {errorActivacion && (
+          <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-brand-error text-white shadow-sm">
+            <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
+            <p className="text-sm font-medium">Error al activar cuenta: {errorActivacion}</p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

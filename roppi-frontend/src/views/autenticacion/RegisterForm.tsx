@@ -19,6 +19,7 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
   });
 
   const [errors, setErrors] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const validatePassword = (password: string): string[] => {
     const validationErrors: string[] = [];
@@ -41,7 +42,7 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     return validationErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors: string[] = [];
 
@@ -58,7 +59,35 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     }
 
     setErrors([]);
-    onRegistrationComplete(formData.email);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:3001/api/usuarios/registro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre: formData.fullName,
+          correo: formData.email,
+          contraseña: formData.password,
+          tipoDocumento: formData.documentType,
+          numeroDocumento: formData.documentNumber
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.mensaje || 'Error al crear la cuenta');
+      }
+
+      onRegistrationComplete(formData.email);
+    } catch (err: any) {
+      setErrors([err.message || 'Error de conexión con el servidor']);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (field: string, value: string) => {
@@ -93,9 +122,8 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
                 type="text"
                 value={formData.fullName}
                 onChange={(e) => handleChange('fullName', e.target.value)}
-                className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${
-                  errors.length > 0 ? 'border-brand-error' : 'border-primary2'
-                }`}
+                className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${errors.length > 0 ? 'border-brand-error' : 'border-primary2'
+                  }`}
                 placeholder="Juan Pérez García"
                 required
               />
@@ -113,9 +141,8 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${
-                  errors.length > 0 ? 'border-brand-error' : 'border-primary2'
-                }`}
+                className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${errors.length > 0 ? 'border-brand-error' : 'border-primary2'
+                  }`}
                 placeholder="tu@correo.com"
                 required
               />
@@ -133,9 +160,8 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
                   id="documentType"
                   value={formData.documentType}
                   onChange={(e) => handleChange('documentType', e.target.value)}
-                  className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 appearance-none cursor-pointer text-text-dark ${
-                    errors.length > 0 ? 'border-brand-error' : 'border-primary2'
-                  }`}
+                  className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 appearance-none cursor-pointer text-text-dark ${errors.length > 0 ? 'border-brand-error' : 'border-primary2'
+                    }`}
                   required
                 >
                   <option value="DNI">DNI</option>
@@ -154,9 +180,8 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
                 type="text"
                 value={formData.documentNumber}
                 onChange={(e) => /^\d*$/.test(e.target.value) && handleChange('documentNumber', e.target.value)}
-                className={`w-full px-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${
-                  errors.length > 0 ? 'border-brand-error' : 'border-primary2'
-                }`}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${errors.length > 0 ? 'border-brand-error' : 'border-primary2'
+                  }`}
                 placeholder={formData.documentType === 'DNI' ? '12345678' : formData.documentType === 'CE' ? '123456789012' : '12345678901'}
                 required
               />
@@ -174,9 +199,8 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
                 type="password"
                 value={formData.password}
                 onChange={(e) => handleChange('password', e.target.value)}
-                className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${
-                  errors.length > 0 ? 'border-brand-error' : 'border-primary2'
-                }`}
+                className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${errors.length > 0 ? 'border-brand-error' : 'border-primary2'
+                  }`}
                 placeholder="••••••••"
                 required
               />
@@ -195,9 +219,8 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
                 type="password"
                 value={formData.confirmPassword}
                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${
-                  errors.length > 0 ? 'border-brand-error' : 'border-primary2'
-                }`}
+                className={`w-full pl-11 pr-4 py-3 rounded-lg border-2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 ${errors.length > 0 ? 'border-brand-error' : 'border-primary2'
+                  }`}
                 placeholder="••••••••"
                 required
               />
@@ -218,9 +241,10 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
 
           <button
             type="submit"
-            className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md"
+            disabled={isLoading}
+            className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Crear Cuenta
+            {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </button>
         </form>
       </div>
