@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const usuariosGateway = require('./usuario.gateway.js');
 const Usuario = require('./usuario.model.js');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_aqui';
+const JWT_SECRET = process.env.JWT_SECRET || 'roppita123456';
 const SALT_ROUNDS = 10;
 
 class UsuariosBO {
