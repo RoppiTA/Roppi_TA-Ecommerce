@@ -23,22 +23,22 @@ const mapearAProductoFrontend = (prod: any): ProductoGenerico => ({
 });
 
 const mapearAGenericoXColor = (c: any): GenericoXColor => ({
-    id_color: c.id,
+    id: c.id,
 });
 
 const mapearAGenericoXMaterial = (c: any): GenericoXMaterial => ({
-    id_material: c.id,
+    id: c.id,
     costo_extra: c.costoExtra
 });
 
 const mapearAGenericoXTamano = (c: any): GenericoXTamano => ({
-    id_tamano: c.id,
+    id: c.id,
     ancho: c.ancho,
     alto: c.alto
 });
 
 const mapearAGenericoXPersonalizacion = (c: any): GenericoXPersonalizacion => ({
-    id_personalizacion: c.id,
+    id: c.id,
     costo_extra: c.costoExtra
 });
 
