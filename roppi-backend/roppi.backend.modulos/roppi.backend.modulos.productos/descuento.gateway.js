@@ -20,7 +20,7 @@ class DescuentoGateway {
 
     async create({ nombre, cantidad, porcentaje, usuarioId }) {
         const result = await db.query(`
-            INSERT INTO "RoppiTA".DESCUENTOS (NOMBRE, CANTIDAD, PORCENTAJE, USUARIO_CREACION, USUARIO_MODIFICACION)
+            INSERT INTO "RoppiTA".DESCUENTOS (NOMBRE, CANTIDAD, PORCENTAJE_DESCUENTO, USUARIO_CREACION, USUARIO_MODIFICACION)
             VALUES ($1, $2, $3, $4, $4) 
             RETURNING *`, [nombre, cantidad, porcentaje, usuarioId]);
         return result.rows[0];
@@ -84,6 +84,15 @@ class DescuentoGateway {
             GROUP BY D.ID
         `);
         return result.rows;
+    }
+
+    async createProductoDescuento(idProducto, idDescuento, idUsuario) {
+        const result = await db.query(`
+            INSERT INTO "RoppiTA".GENERICOSXDESCUENTOS (ID_GENERICO, ID_DESCUENTO, USUARIO_CREACION, USUARIO_MODIFICACION)
+            VALUES ($1, $2, $3, $3)
+            RETURNING *
+        `, [idProducto, idDescuento, idUsuario]);
+        return result.rows[0];
     }
 }
 

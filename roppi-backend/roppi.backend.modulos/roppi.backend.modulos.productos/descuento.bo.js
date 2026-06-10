@@ -31,6 +31,17 @@ class DescuentoBO {
         });
     }
 
+    // Acá creamos un descuento asociado un Producto Genérico. Esto se debe generar en la tabla
+    // GENERICOSXDESCUENTOS y, adicionalmente, en DESCUENTOS usando el método de create en descuento.gateway.js
+    // Ejemplo: { nombre: "Descuento Por Invierno", cantidad: 100, porcentaje: 0.2, usuarioId: 2, idProductos: [10, 11, 12, 13] }
+    async crearDescuentoDeProducto({ nombre, cantidad, porcentaje, usuarioId, idProductos }) {
+        const descuento = await descuentoGateway.create({ nombre, cantidad, porcentaje, usuarioId });
+        const descuentoId = descuento.id;
+        for (const idProducto of idProductos) {
+            await descuentoGateway.createProductoDescuento(idProducto, descuentoId, usuarioId);
+        }
+    }
+
 }
 
 module.exports = new DescuentoBO();

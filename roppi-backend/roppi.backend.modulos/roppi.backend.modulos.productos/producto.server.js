@@ -49,6 +49,7 @@ class ProductoServer {
         // Descuentos por producto
         this.app.get('/descuentos/:id', async (req, res) => this.procesarConsultaDescuentos(req, res, 'obtenerPorIdProducto'));
         this.app.get('/descuentos', async (req, res) => this.procesarConsultaDescuentos(req, res, 'obtenerDescuentos'));
+        this.app.post('/descuentos', async (req, res) => this.procesarConsultaDescuentos(req, res, 'crearDescuentoDeProducto'));
 
         // Personalizados
         // this.app.get('/personalizados', async (req, res) => this.procesarConsultaPersonalizados(req, res, 'listarTodos'));
@@ -175,7 +176,10 @@ class ProductoServer {
                     resultado = await descuentosBO.obtenerDescuentosPorIdProducto(req.params.id);
                     break;
                 case 'obtenerDescuentos':
-                    resultado = await descuentosBO.obtenerDescuentos(req.body);
+                    resultado = await descuentosBO.obtenerDescuentos();
+                    break;
+                case 'crearDescuentoDeProducto':
+                    resultado = await descuentosBO.crearDescuentoDeProducto(req.body);
                     break;
                 default:
                     return this.devolverError(res, 400, 'Acción no válida en Descuentos');
