@@ -77,6 +77,8 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
                 </ProtectedRoute>
               } 
             />
+            <Route path="support" element={<div className="p-10 text-brand-muted">❓ Pantalla de Soporte (Próximamente)</div>} />
+            <Route path="settings" element={<div className="p-10 text-brand-muted">⚙️ Pantalla de Configuración (Próximamente)</div>} />
           </Routes>
         </div>
       </main>
