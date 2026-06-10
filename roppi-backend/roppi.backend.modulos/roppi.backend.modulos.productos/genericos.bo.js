@@ -57,16 +57,16 @@ class GenericosBO {
     // Insertar todas las relacinones de manera paralela
     await Promise.all([
       ...tamanos.map(t => genericosGateway.addTamanoWithClient(client, {
-        idGenerico: idGenerico, idTamano: t.id, alto: t.alto, ancho: t.ancho, usuarioId: usuarioId
+        idGenerico: idGenerico, idTamano: t.id_tamano, alto: t.alto, ancho: t.ancho, usuarioId: usuarioId
       })),
       ...materiales.map(m => genericosGateway.addMaterialWithClient(client, {
-        idGenerico: idGenerico, idMaterial: m.id, costoExtra: m.costoExtra, usuarioId: usuarioId
+        idGenerico: idGenerico, idMaterial: m.id_material, costoExtra: m.costo_extra, usuarioId: usuarioId
       })),
       ...colores.map(c => genericosGateway.addColorWithClient(client, {
-        idGenerico: idGenerico, idColor: c.id, usuarioId: usuarioId
+        idGenerico: idGenerico, idColor: c.id_color, usuarioId: usuarioId
       })),
       ...personalizaciones.map(p => genericosGateway.addPersonalizacionWithClient(client, {
-        idGenerico: idGenerico, idPersonalizacion: p.id, costoExtra: p.costoExtra, usuarioId: usuarioId
+        idGenerico: idGenerico, idPersonalizacion: p.id_personalizacion, costoExtra: p.costo_extra, usuarioId: usuarioId
       })),
     ]);
 
@@ -117,29 +117,32 @@ class GenericosBO {
       
       // Obtener los atributos a insertar y eliminar
 
-      const oldIdsT = new Set(tamanosActuales.map(x => x.id));
-      const newIdsT = new Set(tamanos.map(x => x.id));
+      const oldIdsT = new Set(tamanosActuales.map(x => Number(x.id)));
+      const newIdsT = new Set(tamanos.map(x => Number(x.id_tamano)));
+      
+      const tamanosBorrar = tamanosActuales.filter(x => !newIdsT.has(Number(x.id)));
+      const tamanosInsertar = tamanos.filter(x => !oldIdsT.has(Number(x.id_tamano)));
 
-      const tamanosBorrar = tamanosActuales.filter(x => !newIdsT.has(x.id));
-      const tamanosInsertar = tamanos.filter(x => !oldIdsT.has(x.id));
 
       const oldIdsM = new Set(materialesActuales.map(x => x.id));
-      const newIdsM = new Set(materiales.map(x => x.id));
+      const newIdsM = new Set(materiales.map(x => x.id_material));
 
       const materialesBorrar = materialesActuales.filter(x => !newIdsM.has(x.id));
-      const materialesInsertar = materiales.filter(x => !oldIdsM.has(x.id));
+      const materialesInsertar = materiales.filter(x => !oldIdsM.has(x.id_material));
+
 
       const oldIdsC = new Set(coloresActuales.map(x => x.id));
-      const newIdsC = new Set(colores.map(x => x.id));
+      const newIdsC = new Set(colores.map(x => x.id_color));
 
       const coloresBorrar = coloresActuales.filter(x => !newIdsC.has(x.id));
-      const coloresInsertar = colores.filter(x => !oldIdsC.has(x.id));
+      const coloresInsertar = colores.filter(x => !oldIdsC.has(x.id_color));
+
 
       const oldIdsP = new Set(personalizacionesActuales.map(x => x.id));
-      const newIdsP = new Set(personalizaciones.map(x => x.id));
+      const newIdsP = new Set(personalizaciones.map(x => x.id_personalizacion));
 
       const personalizacionesBorrar = personalizacionesActuales.filter(x => !newIdsP.has(x.id));
-      const personalizacionesInsertar = personalizaciones.filter(x => !oldIdsP.has(x.id));
+      const personalizacionesInsertar = personalizaciones.filter(x => !oldIdsP.has(x.id_personalizacion));
       
       // hacerlo
       const client = await db.getClient();
@@ -153,19 +156,19 @@ class GenericosBO {
 
           await Promise.all([
                 ...tamanosInsertar.map(t => genericosGateway.addTamanoWithClient(client, {
-                  idGenerico: id, idTamano: t.id, alto: t.alto, ancho: t.ancho, usuarioId: usuarioId
+                  idGenerico: id, idTamano: t.id_tamano, alto: t.alto, ancho: t.ancho, usuarioId: usuarioId
                 })),
                 ...tamanosBorrar.map(t => genericosGateway.removeParTamanoWithClient(client, id, t.id)),
                 ...materialesInsertar.map(m => genericosGateway.addMaterialWithClient(client, {
-                  idGenerico: id, idMaterial: m.id, costoExtra: m.costoExtra, usuarioId: usuarioId
+                  idGenerico: id, idMaterial: m.id_material, costoExtra: m.costo_extra, usuarioId: usuarioId
                 })),
                 ...materialesBorrar.map(m => genericosGateway.removeParMaterialWithClient(client, id, m.id)),
                 ...coloresInsertar.map(c => genericosGateway.addColorWithClient(client, {
-                  idGenerico: id, idColor: c.id, usuarioId: usuarioId
+                  idGenerico: id, idColor: c.id_color, usuarioId: usuarioId
                 })),
                 ...coloresBorrar.map(c => genericosGateway.removeParColorWithClient(client, id, c.id)),
                 ...personalizacionesInsertar.map(p => genericosGateway.addPersonalizacionWithClient(client, {
-                  idGenerico: id, idPersonalizacion: p.id, costoExtra: p.costoExtra, usuarioId: usuarioId
+                  idGenerico: id, idPersonalizacion: p.id_personalizacion, costoExtra: p.costo_extra, usuarioId: usuarioId
                 })),
                 ...personalizacionesBorrar.map(p => genericosGateway.removeParPersonalizacionWithClient(client, id, p.id)),
           ]);

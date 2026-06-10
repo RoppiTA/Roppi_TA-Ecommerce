@@ -14,6 +14,7 @@ const mapearAProductoFrontend = (prod: any): ProductoGenerico => ({
     descripcion: prod.descripcion,
     precio_base: Number(prod.precioBase),
     maximo_stock: prod.maximoStock,
+    imagen: prod.urlImagen,
     activo: prod.activo,
     colores: (prod.colores || []).map(mapearAGenericoXColor),
     materiales: (prod.materiales || []).map(mapearAGenericoXMaterial),
@@ -120,14 +121,15 @@ export const ProductosAPIService = {
             nombre: productoData.nombre,
             descripcion: productoData.descripcion,
             precioBase: productoData.precio_base,
-            maximoStock: productoData.maximo_stock
-            /*activo: productoData.activo,
-            tamanos: [],//productoData.tamanos,
-            materiales: [],//productoData.materiales,
-            colores: [],//productoData.colores,
-            personalizaciones: []//productoData.personalizaciones*/
+            maximoStock: productoData.maximo_stock,
+            activo: productoData.activo,
+            urlImagen: productoData.imagen,
+            tamanos: productoData.tamanos,
+            materiales: productoData.materiales,
+            colores: productoData.colores,
+            personalizaciones: productoData.personalizaciones
         };
-
+        console.log(dtoBackend);
         const response = await apiClient.post<{ exito: boolean; datos: any }>('/productos/genericos', dtoBackend);
         return mapearAProductoFrontend(response.data.datos);
     },
@@ -138,17 +140,18 @@ export const ProductosAPIService = {
             nombre: productoData.nombre,
             descripcion: productoData.descripcion,
             precioBase: productoData.precio_base,
-            maximoStock: productoData.maximo_stock
-            /*activo: productoData.activo,
-            tamanos: [],//productoData.tamanos,
-            materiales: [],//productoData.materiales,
-            colores: [],//productoData.colores,
-            personalizaciones: []//productoData.personalizaciones*/
+            maximoStock: productoData.maximo_stock,
+            activo: productoData.activo,
+            urlImagen: productoData.imagen,
+            tamanos: productoData.tamanos,
+            materiales: productoData.materiales,
+            colores: productoData.colores,
+            personalizaciones: productoData.personalizaciones
         };
 
-        console.log("3. Ver que tiene backend:", dtoBackend);
+        console.log(id, dtoBackend);
 
-        const response = await apiClient.put<{ exito: boolean; datos: any }>(`/productos/genericos/${id}`, dtoBackend);
+        const response = await apiClient.post<{ exito: boolean; datos: any }>(`/productos/genericos/${id}`, dtoBackend);
         return mapearAProductoFrontend(response.data.datos);
     },
 

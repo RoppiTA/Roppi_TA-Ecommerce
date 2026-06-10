@@ -64,7 +64,7 @@ class GenericosGateway {
 
   async findTamanosByGenerico(idGenerico) {
     const result = await db.query(`
-      SELECT t.*, gt.ALTO, gt.ANCHO
+      SELECT t.ID, gt.ALTO, gt.ANCHO
       FROM "RoppiTA".GENERICOSXTAMANOS gt
       JOIN "RoppiTA".TAMANOS t ON gt.ID_TAMANO = t.ID
       WHERE gt.ID_GENERICO = $1

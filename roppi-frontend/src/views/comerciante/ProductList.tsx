@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { Plus } from 'lucide-react';
 import { ProductoGenerico } from '../../types/producto/productoGen.types';
-import assets from '../../assets/assets.js';
+import assets from '../../assets/assets';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 
 interface ProductListProps {
@@ -17,6 +17,8 @@ export function ProductList({ products, onAddProduct }: ProductListProps) {
     navigate('/comerciante/products/view/', { state: { productoId: id }});
   };
 
+  
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -31,15 +33,17 @@ export function ProductList({ products, onAddProduct }: ProductListProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
-          <div
+        {products.map((product) => {
+          const imagenFiltrada = assets[product.imagen as keyof typeof assets];
+          
+          return(<div
             key={product.id}
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
             onClick={() => handleViewProduct(product.id)}
           >
             <div className="aspect-[4/3] overflow-hidden">
               <img
-                src={assets.maxwell}
+                src={imagenFiltrada}
                 alt={product.nombre}
                 className="w-full h-full object-cover"
               />
@@ -49,7 +53,8 @@ export function ProductList({ products, onAddProduct }: ProductListProps) {
               <p className="text-gray-600">{product.descripcion}</p>
             </div>
           </div>
-        ))}
+        )})
+        }
       </div>
     </div>  
   );
