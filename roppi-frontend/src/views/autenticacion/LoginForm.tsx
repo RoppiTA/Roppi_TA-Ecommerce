@@ -1,46 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { useAuth, AuthError } from '../../context/AuthContext';
 
 interface LoginFormProps {
   onForgotPassword: () => void;
   onRegister: () => void;
 }
 
-type ErrorType =
-  | 'none'
-  | 'account-not-found'
-  | 'not-activated'
-  | 'incorrect-credentials'
-  | 'account-locked';
-
 export default function LoginForm({ onForgotPassword, onRegister }: LoginFormProps) {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<ErrorType>('none');
+  const [error, setError] = useState<AuthError>('none');
+  const [isLoading, setIsLoading] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
 
-  const errorMessages: Record<ErrorType, string> = {
+  const errorMessages: Record<AuthError, string> = {
     'none': '',
-    'account-not-found': 'Cuenta inexistente',
-    'not-activated': 'Falta activar su cuenta',
+    'invalid-account': 'Cuenta inexistente o no activa', // Errores unificados
     'incorrect-credentials': 'Correo o contraseña incorrecta',
     'account-locked': 'Cuenta bloqueada, esperar 15 minutos para reintentar'
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newAttemptCount = attemptCount + 1;
-    setAttemptCount(newAttemptCount);
-
-    if (newAttemptCount >= 3) {
+  //Efecto para verificar bloqueo al cargar el componente
+  useEffect(() => {
+    const lockTime = localStorage.getItem('auth_lockout');
+    if (lockTime && Date.now() < parseInt(lockTime)) {
       setError('account-locked');
-    } else if (email === 'inexistente@ejemplo.com') {
-      setError('account-not-found');
-    } else if (email === 'noactivado@ejemplo.com') {
-      setError('not-activated');
-    } else {
-      setError('incorrect-credentials');
     }
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    // Llamamos al API simulado a través del Hook
+    const result = await login(email, password);
+    setError(result);
+    setIsLoading(false);
   };
 
   const isLocked = error === 'account-locked';
@@ -104,10 +101,10 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
 
           <button
             type="submit"
-            disabled={isLocked}
+            disabled={isLocked || isLoading}
             className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md"
           >
-            Ingresar
+            {isLoading ? 'Validando...' : 'Ingresar'}
           </button>
 
           <div className="text-center">

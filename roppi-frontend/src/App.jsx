@@ -1,4 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import AppRouter from './navigation/appRouter';
 
 
@@ -10,7 +11,9 @@ function App() {
    Confirmare con Max mas tarde*/
   return (
     <BrowserRouter>
-      <AppRouter />
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
