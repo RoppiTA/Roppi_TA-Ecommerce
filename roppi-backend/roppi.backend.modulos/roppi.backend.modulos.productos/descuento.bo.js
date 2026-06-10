@@ -8,9 +8,27 @@ class DescuentoBO {
     }
 
     async obtenerPorId(id) {
-        const rows = await descuentoGateway.findById(id);
-        if (!rows) return null;
+        const row = await descuentoGateway.findById(id);
+        if (!row) return null;
         return new Descuento(row);
+    }
+
+    // Obtiene solo los descuentos de un tipo de producto
+    async obtenerDescuentosPorIdProducto(id) {
+        const rows = await descuentoGateway.findByProductoId(id);
+        return rows.map(row => new Descuento(row));
+    }
+
+    // Obtiene todos los descuentos de todos los productos. Es decir,
+    // obtiene una lista de descuentos y cada descuento esta vinculado a 
+    // una lista de productos.
+    async obtenerDescuentos() {
+        const rows = await descuentoGateway.findAllWithProductos();
+        return rows.map(row => {
+            const descuento = new Descuento(row);
+            descuento.productos = row.productos; // Asignamos el array de productos generado en el SQL
+            return descuento;
+        });
     }
 
 }

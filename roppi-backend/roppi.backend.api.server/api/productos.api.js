@@ -34,6 +34,10 @@ class ProductosAPI {
     this.router.get('/personalizaciones', async (req, res) => this.hacerPeticion(req, res, 'GET', '/personalizaciones'));
     this.router.get('/personalizaciones/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/personalizaciones/${req.params.id}`));
 
+    // Descuentos
+    this.router.get('/descuentos', async (req, res) => this.hacerPeticion(req, res, 'GET', '/descuentos'));
+    this.router.get('/descuentos/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/descuentos/${req.params.id}`));
+
     // Personalizados
     // this.router.get('/personalizados', async (req, res) => this.hacerPeticion(req, res, 'GET', '/personalizados'));
     // this.router.get('/personalizados/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/personalizados/${req.params.id}`));

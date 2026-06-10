@@ -5,6 +5,7 @@ const coloresBO = require('./colores.bo.js');
 const materialesBO = require('./materiales.bo.js');
 const tamanosBO = require('./tamanos.bo.js');
 const personalizacionesBO = require('./personalizaciones.bo.js');
+const descuentosBO = require('./descuento.bo.js')
 // const personalizadosBO = require('./personalizados.bo.js');
 
 class ProductoServer {
@@ -43,6 +44,11 @@ class ProductoServer {
         // Personalizaciones
         this.app.get('/personalizaciones', async (req, res) => this.procesarConsultaPersonalizaciones(req, res, 'listarTodos'));
         this.app.get('/personalizaciones/:id', async (req, res) => this.procesarConsultaPersonalizaciones(req, res, 'obtenerPorId'));
+
+
+        // Descuentos por producto
+        this.app.get('/descuentos/:id', async (req, res) => this.procesarConsultaDescuentos(req, res, 'obtenerPorIdProducto'));
+        this.app.get('/descuentos', async (req, res) => this.procesarConsultaDescuentos(req, res, 'obtenerDescuentos'));
 
         // Personalizados
         // this.app.get('/personalizados', async (req, res) => this.procesarConsultaPersonalizados(req, res, 'listarTodos'));
@@ -158,6 +164,27 @@ class ProductoServer {
         } catch (error) {
             console.error(`[ProductoServer Error] Personalizaciones - ${accion}:`, error);
             return this.devolverError(res, 500, 'Error interno procesando Personalizaciones.');
+        }
+    }
+
+    async procesarConsultaDescuentos(req, res, accion) {
+        let resultado = null;
+        try {
+            switch (accion) {
+                case 'obtenerPorIdProducto':
+                    resultado = await descuentosBO.obtenerDescuentosPorIdProducto(req.params.id);
+                    break;
+                case 'obtenerDescuentos':
+                    resultado = await descuentosBO.obtenerDescuentos(req.body);
+                    break;
+                default:
+                    return this.devolverError(res, 400, 'Acción no válida en Descuentos');
+            }
+            return this.retornarRespuesta(res, 200, resultado);
+        }
+        catch (error) {
+            console.error(`[ProductoServer Error] Descuentos - ${accion}:`, error);
+            return this.devolverError(res, 500, 'Error interno procesando Descuentos.');
         }
     }
 
