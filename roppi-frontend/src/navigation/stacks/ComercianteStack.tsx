@@ -6,6 +6,7 @@ import DetalleProducto from '../../views/comerciante/DetalleProducto';
 import DefaultComerciante from '../../views/comerciante/DefaultComerciante';
 import ProductListPage from '../../views/comerciante/ProductListPage';
 import DiscountsPage from '../../views/comerciante/DiscountsPage';
+import { Header } from '../../components/Header';
 
 //Prop para tener los datos del usuario logueado, como su id y rol, para mostrar información personalizada en el sidebar y otras partes de la interfaz del comerciante
 interface ComercianteStackProps {
@@ -32,20 +33,7 @@ export const ComercianteStack = ({ user }: ComercianteStackProps) => {
 
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Barra superior compartida por todas las vistas del comerciante */}
-        <header className="bg-brand-light/40 border-b border-primary-hover/15 px-6 py-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm flex-shrink-0">
-          <div className="flex items-center gap-3 ml-auto">
-            <button className="p-2 hover:bg-primary2/10 rounded-lg relative transition-colors">
-              <Bell size={20} className="text-brand-dark" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-error rounded-full" />
-            </button>
-            <div className="flex items-center gap-2 ml-2">
-              <div className="w-8 h-8 bg-primary-hover text-white rounded-full flex items-center justify-center text-sm font-medium">
-                {displayInitial}
-              </div>
-              <span className="text-sm font-medium hidden sm:block text-brand-dark">{displayName}</span>
-            </div>
-          </div>
-        </header>
+        <Header />
 
         {/* Área de contenido de cada vista */}
         <div className="flex-1 overflow-y-auto">
