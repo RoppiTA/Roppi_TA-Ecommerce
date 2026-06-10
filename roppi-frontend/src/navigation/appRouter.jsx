@@ -7,8 +7,11 @@ import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useAuth } from '../context/AuthContext'; // Importamos el hook
 
 export const AppRouter = () => {
-  // Extraemos el usuario dinámico desde el estado global
-  const { user } = useAuth();
+  //const [user, setUser] = useState({ id: 104, role: 'MERCHANT', name: 'Juan Pérez' });
+  //const [user, setUser] = useState({ id: 104, role: 'CLIENT' , name: 'María Gómez' });
+  //const [user, setUser] = useState({ id: 104, role: 'GUEST', name: 'Invitado' });
+
+   const { user } = useAuth();
 
   return (
     <Routes>

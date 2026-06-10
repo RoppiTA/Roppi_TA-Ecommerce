@@ -7,6 +7,7 @@ export interface ProductoGenerico {
   precio_base: number;
   activo: number;
   maximo_stock: number;
+  imagen: string;
   // Agregados relacionales que el frontend leerá/escribirá
   colores: GenericoXColor[];
   materiales: GenericoXMaterial[];
