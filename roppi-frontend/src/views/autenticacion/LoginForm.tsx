@@ -7,9 +7,8 @@ interface LoginFormProps {
   onRegister: () => void;
 }
 
-// Eliminamos ErrorType estricto para poder mostrar los mensajes reales del backend
-
 export default function LoginForm({ onForgotPassword, onRegister }: LoginFormProps) {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>('');
@@ -65,12 +64,13 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
     } finally {
       setIsLoading(false);
     }
-  };
-
+  }
+  
   const isLocked = error.includes('bloqueada') || isLoading;
 
   return (
-    <div className="w-full max-w-md font-primary">
+    <div className=  // Eliminamos errorMessages predefinidos ya que usaremos los del backend
+"w-full max-w-md font-primary">
       <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-100">
         <h1 className="text-center text-2xl font-bold mb-8 text-primary-hover">
           Iniciar Sesión
@@ -142,7 +142,7 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
 
           <button
             type="submit"
-            disabled={isLocked}
+            disabled={isLocked || isLoading}
             className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md"
           >
             {isLoading ? 'Ingresando...' : 'Ingresar'}

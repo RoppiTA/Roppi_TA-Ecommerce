@@ -1,17 +1,28 @@
 import { useState } from 'react';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface ForgotPasswordProps {
   onBack: () => void;
 }
 
 export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
+  const { forgotPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setIsLoading(true);
+    try {
+      await forgotPassword(email);
+      setSubmitted(true);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (submitted) {
@@ -27,8 +38,15 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
               Hemos enviado un enlace de recuperación a <strong className="text-primary font-bold">{email}</strong>
             </p>
             <p className="text-sm mb-6 text-text-muted">
-              Revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña.
+              Revisa tu bandeja de entrada y sigue las instrucciones. (Nota: Para la simulación, haz clic en continuar abajo).
             </p>
+            {/* Botón temporal de simulación para poder ver la vista de Reset */}
+            <a
+              href={`/auth/reset-password?email=${email}`}
+              className="block w-full py-3 mb-3 rounded-lg text-primary2 font-medium border-2 border-primary2 hover:bg-primary2/10 transition-colors"
+            >
+              [Simular clic en el correo]
+            </a>
             <button
               onClick={onBack}
               className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md"
@@ -72,7 +90,8 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-lg border-2 border-primary2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40"
+                disabled={isLoading}
+                className="w-full pl-11 pr-4 py-3 rounded-lg border-2 border-primary2 bg-white transition-colors outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-60"
                 placeholder="tu@correo.com"
                 required
               />
@@ -81,9 +100,10 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md"
+            disabled={isLoading}
+            className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md disabled:opacity-60"
           >
-            Enviar Enlace de Recuperación
+            {isLoading ? 'Enviando...' : 'Enviar Enlace de Recuperación'}
           </button>
         </form>
       </div>

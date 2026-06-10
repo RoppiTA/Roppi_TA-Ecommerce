@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { Button, TextField, IconButton, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
-import { Trash2, Save, Edit, X } from 'lucide-react';
+import { Trash2, Save, Edit, X, Upload, ImageMinus } from 'lucide-react';
 import { GenericoXColor, GenericoXMaterial, GenericoXPersonalizacion, GenericoXTamano } from '../../types/producto/genericoAtributos.types';
 import { ProductoGenerico, CreateProductGenericoDTO } from '../../types/producto/productoGen.types';
 import assets from '../../assets/assets.js';
@@ -10,84 +10,16 @@ import { useProductosGenericos } from '../../hooks/useProductos';
 
 type Mode = 'view' | 'create' | 'edit';
 
-// Listas predefinidas
-/*const AVAILABLE_MATERIALS: Material[] = [
-  { id: 1, nombre: 'Algodón', descripcion: '', activo:1},
-  { id: 2, nombre: 'Poliéster', descripcion: '', activo:1 },
-  { id: 3, nombre: 'Lino', descripcion: '', activo:1 },
-  { id: 4, nombre: 'Seda', descripcion: '', activo:1 },
-  { id: 5, nombre: 'Lana', descripcion: '', activo:1 }
-];
-
-const AVAILABLE_COLORS: Color[] = [
-  { id: 1, nombre: 'Negro', pantone: '#000000', activo:1 },
-  { id: 2, nombre: 'Blanco', pantone: '#FFFFFF', activo:1},
-  { id: 3, nombre: 'Rojo', pantone: '#FF0000', activo:1},
-  { id: 4, nombre: 'Azul', pantone: '#0000FF', activo:1},
-  { id: 5, nombre: 'Verde', pantone: '#00FF00', activo:1},
-  { id: 6, nombre: 'Amarillo', pantone: '#FFFF00', activo:1 },
-  { id: 7, nombre: 'Gris', pantone: '#808080', activo:1 },
-  { id: 8, nombre: 'Rosa', pantone: '#FFC0CB', activo:1 }
-];
-
-const AVAILABLE_SIZES: Tamano[] = [
-  { id: 1, nombre: 'XS', descripcion:'', activo:1},
-  { id: 2, nombre: 'S', descripcion:'', activo:1 },
-  { id: 3, nombre: 'M', descripcion:'', activo:1 },
-  { id: 4, nombre: 'L', descripcion:'', activo:1 },
-  { id: 5, nombre: 'XL', descripcion:'', activo:1 },
-  { id: 6, nombre: 'XXL', descripcion:'', activo:1 }
-];
-
-const AVAILABLE_CUSTOMIZATIONS: Personalizacion[] = [
-  { id: 1, nombre: 'Bordado nombre', descripcion:'', activo:1 },
-  { id: 2, nombre: 'Estampado personalizado', descripcion:'', activo:1 },
-  { id: 3, nombre: 'Bordado logo', descripcion:'', activo:1 },
-  { id: 4, nombre: 'Parche personalizado', descripcion:'', activo:1 },
-  { id: 5, nombre: 'Serigrafía', descripcion:'', activo:1 }
-];
-
-const defaultProduct: ProductoGenerico = {
-  id: 1,
-  nombre: 'Camiseta Premium',
-  activo: 1,
-  precio_base: 299,
-  maximo_stock: 100,
-  descripcion: 'Camiseta de alta calidad con diseño moderno',
-  materiales: [
-    { id_material: 1, costo_extra: 150 },
-    { id_material: 2, costo_extra: 50 }
-  ],
-  colores: [
-    { id_color: 1},
-    { id_color: 2}
-  ],
-  tamanos: [
-    { id_tamano: 1, ancho: 45, alto: 65 },
-    { id_tamano: 2, ancho: 50, alto: 70 },
-    { id_tamano: 3, ancho: 55, alto: 75 }
-  ],
-  personalizaciones: [
-    { id_personalizacion: 1, costo_extra: 100 },
-    { id_personalizacion: 2, costo_extra: 150 }
-  ]
-};
-
-// ─── Helpers: resuelven un ID a su objeto maestro ──────────────────────────
-// Devuelven el objeto completo o undefined si no se encuentra.
-const getMaterial       = (id: number) => AVAILABLE_MATERIALS.find(m => m.id === id);
-const getColor          = (id: number) => AVAILABLE_COLORS.find(c => c.id === id);
-const getTamano         = (id: number) => AVAILABLE_SIZES.find(s => s.id === id);
-const getPersonalizacion= (id: number) => AVAILABLE_CUSTOMIZATIONS.find(p => p.id === id);
-*/
-
 export default function DetalleProducto(){
     type ViewMode = 'view' | 'create' | 'edit';
 
     const location = useLocation();
     const navigate = useNavigate();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-// Sacamos el ID desde el estado oculto de la navegación
+    // Estado local para la previsualización de la imagen (Base64 local)
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+
     const state = location.state as { productoId?: number } | null;
     const id_nav = state?.productoId;
     
@@ -96,12 +28,10 @@ export default function DetalleProducto(){
 
     const isEditable = view === 'create' || view === 'edit';
 
-// 1. Extraemos las funciones y catálogos necesarios del hook
-// Modifica la parte superior de DetalleProducto.tsx para que quede así:
     const { 
-      colores = [],           // Si por algún motivo llega undefined, se inicializa como array vacío
-      materiales = [],        // ¡Esto asegura que materiales.find() NUNCA falle!
-      tamano = [],           // Ahora directo en plural, alineado con el hook
+      colores = [],           
+      materiales = [],        
+      tamano = [],           
       personalizaciones = [], 
       getProductoById, 
       addProducto, 
@@ -114,16 +44,30 @@ export default function DetalleProducto(){
   const [editedProduct, setEditedProduct] = useState<ProductoGenerico | null>(null);
   const [loadingLocal, setLoadingLocal] = useState<boolean>(false);
 
-// 4. Helpers dinámicos usando las listas maestras de la base de datos
   const getMaterial        = (idMat: number) => materiales.find(m => m.id === idMat);
   const getColor           = (idCol: number) => colores.find(c => c.id === idCol);
   const getTamano          = (idTam: number) => tamano.find(s => s.id === idTam);
   const getPersonalizacion = (idPer: number) => personalizaciones.find(p => p.id === idPer);
 
+  // Helper para resolver la imagen a mostrar
+  const renderImage = () => {
+    // Si hay una previsualización en progreso (bucle de edición/creación), mostramos esa
+    if (isEditable && imagePreview) return imagePreview;
+    
+    const currentImgName = isEditable ? editedProduct?.imagen : product?.imagen;
+    
+    // Si tiene un nombre asignado, intentamos buscarlo en assets
+    if (currentImgName) {
+      return assets[currentImgName as keyof typeof assets] || assets["maxwell"];
+    }
+    
+    // Fallback por defecto si no hay imagen
+    return assets["maxwell"];
+  };
+
   useEffect(() => {
     // CREATE
     if (view === 'create') {
-
       const emptyproduct: ProductoGenerico = ({
         id: 0,
         nombre: '',
@@ -131,6 +75,7 @@ export default function DetalleProducto(){
         precio_base: 0,
         maximo_stock: 0,
         descripcion: '',
+        imagen: 'maxwell', // Nombre por defecto por si no suben nada
         materiales: [],
         colores: [],
         tamanos: [],
@@ -138,19 +83,20 @@ export default function DetalleProducto(){
       });
       setEditedProduct(emptyproduct);
       setProduct(null);
+      setImagePreview(null);
       return;
     }
 
     // EDIT / VIEW
-    // aquí luego irá tu fetch por id
     const fetchSingleProduct = async () => {
       if (!id_nav) return;
       try {
         setLoadingLocal(true);
-        const data = await getProductoById(Number(id_nav)); // Llamada directa a tu API
+        const data = await getProductoById(Number(id_nav)); 
 
         setProduct(data);
         setEditedProduct(data);
+        setImagePreview(null); // Reseteamos la preview local al cargar un nuevo producto
       } catch (err) {
         console.error("No se pudo cargar el producto", err);
       } finally {
@@ -160,6 +106,36 @@ export default function DetalleProducto(){
 
   fetchSingleProduct();
   }, [view, id_nav, getProductoById]);
+
+  // Manejador del cambio de archivo (Input File)
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editedProduct) return;
+
+    // 1. Guardamos SOLAMENTE el nombre del archivo en el DTO/Estado
+    setEditedProduct({
+      ...editedProduct,
+      imagen: file.name
+    });
+
+    // 2. Generamos una URL temporal local para renderizar la preview en el cliente
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Quitar la imagen actual del formulario
+  const handleRemoveImage = () => {
+    if (!editedProduct) return;
+    setEditedProduct({
+      ...editedProduct,
+      imagen: '' // Enviará un string vacío o puedes mapearlo a null/default según tu BD
+    });
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = ''; // Limpiar el input file
+  };
 
   const handleStartEdit = () => {
     setView('edit');
@@ -174,6 +150,7 @@ export default function DetalleProducto(){
         precio_base: editedProduct.precio_base,
         activo: editedProduct.activo,
         maximo_stock: editedProduct.maximo_stock,
+        imagen: editedProduct.imagen, // Aquí ya viaja solo el string "nombre_archivo.jpg"
         colores: editedProduct.colores,
         materiales: editedProduct.materiales,
         tamanos: editedProduct.tamanos,
@@ -181,16 +158,12 @@ export default function DetalleProducto(){
       };
 
       if (view === 'create') {
-        console.log("por alguna razon estoy aca");
         const nuevo = await addProducto(productoDTO);
-        // Redirección limpia tras crear
         setView('view');
       } else if (view === 'edit' && id_nav) {
-        console.log("Estoy llegando a entrar acá");
         const actualizado = await updateProducto(id_nav, productoDTO);
         setProduct(actualizado);
         setEditedProduct(actualizado);
-        // Redirección limpia tras editar
         setView('view');
       }
     } catch (error) {
@@ -200,6 +173,7 @@ export default function DetalleProducto(){
 
   const handleCancel = () => {
     setEditedProduct(product);
+    setImagePreview(null);
     if (view === 'create') {
       navigate('/comerciante/products');
     } else {
@@ -228,8 +202,6 @@ if (!currentProduct) {
     return <div className="p-8 text-center text-red-500">Producto no encontrado o sesión expirada (F5).</div>;
   }
   
-/* Manejo para añadir relaciones del producto generico */
-
   const handleAddMaterial = (materialId: number) => {
     if (materiales.find(m => m.id === materialId) && !currentProduct.materiales.find(m => m.id_material === materialId)) {
       const materialgen: GenericoXMaterial = { id_material: materialId, costo_extra: 0 };
@@ -327,22 +299,55 @@ if (!currentProduct) {
         </div>
 
       <div className="grid grid-cols-[400px_1fr] gap-8">
-        {/* Imagen del producto */}
+        {/* Sección de Imagen del producto */}
         <div className="space-y-4">
-          <img
-            src={assets.maxwell}
-            alt={"maxwell sorpresa"}
-            className="w-full h-[600px] object-cover rounded-lg border-2 border-gray-200"
-          />
-          {/*{isEditable && (
-            <TextField
-              fullWidth
-              label="URL de imagen"
-              value={assets.maxwell}
-              //onChange={(e) => setEditedProduct({ ...editedProduct, imageUrl: e.target.value })} por ahora no va porque no estamos viendo imágenes
-              size="small"
+          <div className="relative group">
+            <img
+              src={renderImage()}
+              alt={currentProduct.nombre || "Previsualización"}
+              className="w-full h-[600px] object-cover rounded-lg border-2 border-gray-200"
             />
-          )}*/}
+            
+            {/* Overlay interactivo si está en modo creación o edición */}
+            {isEditable && (
+              <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  component="label"
+                  startIcon={<Upload size={16} />}
+                  size="small"
+                >
+                  {currentProduct.imagen ? 'Cambiar' : 'Subir'}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                  />
+                </Button>
+                {currentProduct.imagen && (
+                  <Button
+                    variant="contained"
+                    color="error"
+                    startIcon={<ImageMinus size={16} />}
+                    size="small"
+                    onClick={handleRemoveImage}
+                  >
+                    Eliminar
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Muestra informativa del nombre del archivo en modo edición */}
+          {isEditable && (
+            <p className="text-xs text-gray-500 break-all text-center">
+              Archivo asignado: <span className="font-mono font-bold">{currentProduct.imagen || '(Ninguno)'}</span>
+            </p>
+          )}
         </div>
 
         {/* Atributos del producto */}
@@ -381,7 +386,7 @@ if (!currentProduct) {
                 slotProps={{ input: {startAdornment: <InputAdornment position="start">S/.</InputAdornment>} }}
               />
             ) : (
-              <p className="text-xl font-semibold">${currentProduct.precio_base}</p>
+              <p className="text-xl font-semibold">S/. {currentProduct.precio_base}</p>
             )}
           </div>
 
@@ -427,11 +432,9 @@ if (!currentProduct) {
              <h3 className="font-semibold text-lg mb-3">Materiales</h3>
              <div className="space-y-2">
                {currentProduct.materiales.map((mat, index) => {
-                  // Resolvemos el ID al objeto maestro para mostrar nombre/descripción
                   const info = getMaterial(mat.id_material);
                   return (
                     <div key={mat.id_material} className="flex gap-3 items-center p-3 bg-gray-50 rounded">
-                    {/* Nombre y descripción provienen del objeto maestro */}
                     <div className="flex-1">
                       <p className="font-medium">{info?.nombre ?? `Material #${mat.id_material}`}</p>
                       {info?.descripcion && <p className="text-xs text-gray-500">{info.descripcion}</p>}
@@ -444,7 +447,6 @@ if (!currentProduct) {
                           size="small"
                           value={mat.costo_extra}
                           onChange={(e) => {
-                            // Actualizamos solo el atributo extra; el id_material no cambia
                             const updated = [...currentProduct.materiales];
                             updated[index] = { ...updated[index], costo_extra: Number(e.target.value) };
                             setEditedProduct({ ...currentProduct, materiales: updated });
@@ -524,6 +526,7 @@ if (!currentProduct) {
               </div>
             </div>
 
+            {/* Tamaños */}
             <div className="border-t pt-6">
               <h3 className="font-semibold text-lg mb-3">Tamaños</h3>
               <div className="space-y-2">
@@ -584,7 +587,7 @@ if (!currentProduct) {
               </div>
             </div>
 
-          {/* Personalizaciones */}
+            {/* Personalizaciones */}
             <div className="border-t pt-6">
               <h3 className="font-semibold text-lg mb-3">Personalizaciones</h3>
               <div className="space-y-2">
@@ -643,4 +646,4 @@ if (!currentProduct) {
     </div>
     </>
   );
-};
+}

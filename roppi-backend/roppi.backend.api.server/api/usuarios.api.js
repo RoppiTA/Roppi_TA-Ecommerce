@@ -5,6 +5,7 @@ const emailService = require('../../roppi.backend.modulos/roppi.backend.modulos.
 class UsuariosAPI {
   constructor() {
     this.router = express.Router();
+
     this._configurarRutas();
   }
 

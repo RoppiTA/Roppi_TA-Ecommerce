@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Mail, Lock, User, FileText, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface RegisterFormProps {
   onBack: () => void;
@@ -9,6 +10,10 @@ interface RegisterFormProps {
 type DocumentType = 'DNI' | 'CE' | 'RUC';
 
 export default function RegisterForm({ onBack, onRegistrationComplete }: RegisterFormProps) {
+  const { register } = useAuth();
+  const [errors, setErrors] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -18,8 +23,7 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     confirmPassword: ''
   });
 
-  const [errors, setErrors] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
 
   const validatePassword = (password: string): string[] => {
     const validationErrors: string[] = [];
@@ -62,7 +66,10 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/usuarios/registro', {
+      // Se usa import.meta.env.VITE_API_URL para que funcione en producción y localmente
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      
+      const response = await fetch(`${API_URL}/api/usuarios/registro`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
