@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Buscar usuario
-    const foundUser = simulatedDB.find(u => u.email === email);
+    const foundUser = simulatedDB.find(u => u.email === email); //llamar api de buscar usuario (id, rol nombre y token)
     if (!foundUser || foundUser.pass !== pass) {
       handleFailedAttempt();
       return 'incorrect-credentials';
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Éxito: Guardar sesión y JWT Simulado
     const mockJWT = `eyJhbGciOiJIUzI1NiIsIn...simulacion...${foundUser.user.id}`;
-    setToken(mockJWT);
+    setToken(mockJWT); // guardar el token
     setUser(foundUser.user);
     localStorage.removeItem('auth_attempts'); // Reiniciar intentos
 
@@ -136,6 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       pass: data.password,
       user: { id: Date.now(), role: 'CLIENT' as UserRole, name: data.fullName }
     };
+    // llamar a la api que crea el usuario
     setSimulatedDB(prev => [...prev, newUser]);
     
     return true;
