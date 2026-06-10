@@ -159,7 +159,7 @@ export default function DetalleProducto(){
 
       if (view === 'create') {
         const nuevo = await addProducto(productoDTO);
-        setView('view');
+        navigate('/comerciante/products');
       } else if (view === 'edit' && id_nav) {
         const actualizado = await updateProducto(id_nav, productoDTO);
         setProduct(actualizado);
@@ -203,8 +203,8 @@ if (!currentProduct) {
   }
   
   const handleAddMaterial = (materialId: number) => {
-    if (materiales.find(m => m.id === materialId) && !currentProduct.materiales.find(m => m.id_material === materialId)) {
-      const materialgen: GenericoXMaterial = { id_material: materialId, costo_extra: 0 };
+    if (materiales.find(m => m.id === materialId) && !currentProduct.materiales.find(m => m.id === materialId)) {
+      const materialgen: GenericoXMaterial = { id: materialId, costo_extra: 0 };
       setEditedProduct({
         ...currentProduct,
         materiales: [...currentProduct.materiales, materialgen]
@@ -213,8 +213,8 @@ if (!currentProduct) {
   };
 
   const handleAddColor = (colorId: number) => {
-    if (colores.find(c => c.id === colorId) && !currentProduct.colores.find(c => c.id_color === colorId)) {
-      const colorgen: GenericoXColor = { id_color: colorId };
+    if (colores.find(c => c.id === colorId) && !currentProduct.colores.find(c => c.id === colorId)) {
+      const colorgen: GenericoXColor = { id: colorId };
       setEditedProduct({
         ...currentProduct,
         colores: [...currentProduct.colores, colorgen]
@@ -223,8 +223,8 @@ if (!currentProduct) {
   };
 
   const handleAddSize = (sizeId: number) => {
-    if (tamano.find(s => s.id === sizeId) && !currentProduct.tamanos.find(s => s.id_tamano === sizeId)) {
-      const tamanogen: GenericoXTamano = { id_tamano: sizeId, ancho: 0, alto: 0 };
+    if (tamano.find(s => s.id === sizeId) && !currentProduct.tamanos.find(s => s.id === sizeId)) {
+      const tamanogen: GenericoXTamano = { id: sizeId, ancho: 0, alto: 0 };
       setEditedProduct({
         ...currentProduct,
         tamanos: [...currentProduct.tamanos, tamanogen]
@@ -233,8 +233,8 @@ if (!currentProduct) {
   };
 
   const handleAddCustomization = (customizationId: number) => {
-    if (personalizaciones.find(c => c.id === customizationId) && !currentProduct.personalizaciones.find(c => c.id_personalizacion === customizationId)) {
-      const personalizaciongen: GenericoXPersonalizacion = { id_personalizacion: customizationId, costo_extra: 0 };
+    if (personalizaciones.find(c => c.id === customizationId) && !currentProduct.personalizaciones.find(c => c.id === customizationId)) {
+      const personalizaciongen: GenericoXPersonalizacion = { id: customizationId, costo_extra: 0 };
       setEditedProduct({
         ...currentProduct,
         personalizaciones: [...currentProduct.personalizaciones, personalizaciongen]
@@ -242,10 +242,10 @@ if (!currentProduct) {
     }
   };
 
-  const getAvailableMaterials = () => materiales.filter(m => !currentProduct.materiales.find(em => em.id_material === m.id));
-  const getAvailableColors = () => colores.filter(c => !currentProduct.colores.find(ec => ec.id_color === c.id));
-  const getAvailableSizes = () => tamano.filter(s => !currentProduct.tamanos.find(es => es.id_tamano === s.id));
-  const getAvailableCustomizations = () => personalizaciones.filter(c => !currentProduct.personalizaciones.find(ec => ec.id_personalizacion === c.id));
+  const getAvailableMaterials = () => materiales.filter(m => !currentProduct.materiales.find(em => em.id === m.id));
+  const getAvailableColors = () => colores.filter(c => !currentProduct.colores.find(ec => ec.id === c.id));
+  const getAvailableSizes = () => tamano.filter(s => !currentProduct.tamanos.find(es => es.id === s.id));
+  const getAvailableCustomizations = () => personalizaciones.filter(c => !currentProduct.personalizaciones.find(ec => ec.id === c.id));
 
   return (
     <>
@@ -432,11 +432,11 @@ if (!currentProduct) {
              <h3 className="font-semibold text-lg mb-3">Materiales</h3>
              <div className="space-y-2">
                {currentProduct.materiales.map((mat, index) => {
-                  const info = getMaterial(mat.id_material);
+                  const info = getMaterial(mat.id);
                   return (
-                    <div key={mat.id_material} className="flex gap-3 items-center p-3 bg-gray-50 rounded">
+                    <div key={mat.id} className="flex gap-3 items-center p-3 bg-gray-50 rounded">
                     <div className="flex-1">
-                      <p className="font-medium">{info?.nombre ?? `Material #${mat.id_material}`}</p>
+                      <p className="font-medium">{info?.nombre ?? `Material #${mat.id}`}</p>
                       {info?.descripcion && <p className="text-xs text-gray-500">{info.descripcion}</p>}
                     </div>
                     {isEditable ? (
@@ -457,7 +457,7 @@ if (!currentProduct) {
                         <IconButton size="small" color="error"
                           onClick={() => setEditedProduct({
                             ...currentProduct,
-                          materiales: currentProduct.materiales.filter(m => m.id_material !== mat.id_material)
+                          materiales: currentProduct.materiales.filter(m => m.id !== mat.id)
                         })}>
                         <Trash2 size={18} />
                         </IconButton>
@@ -488,19 +488,19 @@ if (!currentProduct) {
               <h3 className="font-semibold text-lg mb-3">Colores</h3>
               <div className="space-y-2">
                 {currentProduct.colores.map((col) => {
-                  const info = getColor(col.id_color);
+                  const info = getColor(col.id);
                   return (
-                    <div key={col.id_color} className="flex gap-3 items-center p-3 bg-gray-50 rounded">
+                    <div key={col.id} className="flex gap-3 items-center p-3 bg-gray-50 rounded">
                       <div className="w-8 h-8 rounded border-2 border-gray-300 flex-shrink-0"
                         style={{ backgroundColor: info?.pantone ?? '#ccc' }} />
                       <div className="flex-1">
-                        <p className="font-medium">{info?.nombre ?? `Color #${col.id_color}`}</p>
+                        <p className="font-medium">{info?.nombre ?? `Color #${col.id}`}</p>
                       </div>
                       {isEditable && (
                         <IconButton size="small" color="error"
                           onClick={() => setEditedProduct({
                             ...currentProduct,
-                            colores: currentProduct.colores.filter(c => c.id_color !== col.id_color)
+                            colores: currentProduct.colores.filter(c => c.id !== col.id)
                           })}>
                           <Trash2 size={18} />
                         </IconButton>
@@ -531,11 +531,11 @@ if (!currentProduct) {
               <h3 className="font-semibold text-lg mb-3">Tamaños</h3>
               <div className="space-y-2">
                 {currentProduct.tamanos.map((tam, index) => {
-                  const info = getTamano(tam.id_tamano);
+                  const info = getTamano(tam.id);
                   return (
-                    <div key={tam.id_tamano} className="flex gap-3 items-center p-3 bg-gray-50 rounded">
+                    <div key={tam.id} className="flex gap-3 items-center p-3 bg-gray-50 rounded">
                       <div className="w-24 flex-shrink-0">
-                        <p className="font-medium">{info?.nombre ?? `Talla #${tam.id_tamano}`}</p>
+                        <p className="font-medium">{info?.nombre ?? `Talla #${tam.id}`}</p>
                         {info?.descripcion && <p className="text-xs text-gray-500">{info.descripcion}</p>}
                       </div>
                       {isEditable ? (
@@ -561,7 +561,7 @@ if (!currentProduct) {
                           <IconButton size="small" color="error"
                             onClick={() => setEditedProduct({
                               ...currentProduct,
-                              tamanos: currentProduct.tamanos.filter(s => s.id_tamano !== tam.id_tamano)
+                              tamanos: currentProduct.tamanos.filter(s => s.id !== tam.id)
                             })}>
                             <Trash2 size={18} />
                           </IconButton>
@@ -592,11 +592,11 @@ if (!currentProduct) {
               <h3 className="font-semibold text-lg mb-3">Personalizaciones</h3>
               <div className="space-y-2">
                 {currentProduct.personalizaciones.map((per, index) => {
-                  const info = getPersonalizacion(per.id_personalizacion);
+                  const info = getPersonalizacion(per.id);
                   return (
-                    <div key={per.id_personalizacion} className="flex gap-3 items-center p-3 bg-gray-50 rounded">
+                    <div key={per.id} className="flex gap-3 items-center p-3 bg-gray-50 rounded">
                       <div className="flex-1">
-                        <p className="font-medium">{info?.nombre ?? `Personalización #${per.id_personalizacion}`}</p>
+                        <p className="font-medium">{info?.nombre ?? `Personalización #${per.id}`}</p>
                         {info?.descripcion && <p className="text-xs text-gray-500">{info.descripcion}</p>}
                       </div>
                       {isEditable ? (
@@ -614,7 +614,7 @@ if (!currentProduct) {
                           <IconButton size="small" color="error"
                             onClick={() => setEditedProduct({
                               ...currentProduct,
-                              personalizaciones: currentProduct.personalizaciones.filter(p => p.id_personalizacion !== per.id_personalizacion)
+                              personalizaciones: currentProduct.personalizaciones.filter(p => p.id !== per.id)
                             })}>
                             <Trash2 size={18} />
                           </IconButton>

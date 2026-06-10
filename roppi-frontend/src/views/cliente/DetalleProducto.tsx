@@ -119,11 +119,11 @@ useEffect(() => {
                     <h3 className="font-semibold text-lg mb-2 text-brand-dark">Materiales Disponibles</h3>
                     <div className="space-y-1.5">
                       {product.materiales.map((mat) => {
-                        const info = getMaterial(mat.id_material);
+                        const info = getMaterial(mat.id);
                         return (
-                          <div key={mat.id_material} className="flex justify-between items-center p-2.5 bg-gray-50 rounded-lg">
+                          <div key={mat.id} className="flex justify-between items-center p-2.5 bg-gray-50 rounded-lg">
                             <div>
-                              <p className="font-medium text-sm text-brand-dark">{info?.nombre ?? `Material #${mat.id_material}`}</p>
+                              <p className="font-medium text-sm text-brand-dark">{info?.nombre ?? `Material #${mat.id}`}</p>
                               {info?.descripcion && <p className="text-xs text-gray-500">{info.descripcion}</p>}
                             </div>
                             <p className="text-xs font-semibold text-gray-600">+S/. {mat.costo_extra}</p>
@@ -140,14 +140,14 @@ useEffect(() => {
                     <h3 className="font-semibold text-lg mb-2 text-brand-dark">Colores Disponibles</h3>
                     <div className="flex flex-wrap gap-3">
                       {product.colores.map((col) => {
-                        const info = getColor(col.id_color);
+                        const info = getColor(col.id);
                         return (
-                          <div key={col.id_color} className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
+                          <div key={col.id} className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200">
                             <div 
                               className="w-4 h-4 rounded-full border border-gray-400 flex-shrink-0"
                               style={{ backgroundColor: info?.pantone ?? '#ccc' }} 
                             />
-                            <span className="text-xs font-medium text-brand-dark">{info?.nombre ?? `Color #${col.id_color}`}</span>
+                            <span className="text-xs font-medium text-brand-dark">{info?.nombre ?? `Color #${col.id}`}</span>
                           </div>
                         );
                       })}
@@ -161,11 +161,11 @@ useEffect(() => {
                     <h3 className="font-semibold text-lg mb-2 text-brand-dark">Guía de Tamaños</h3>
                     <div className="grid grid-cols-2 gap-2">
                       {product.tamanos.map((tam) => {
-                        const info = getTamano(tam.id_tamano);
+                        const info = getTamano(tam.id);
                         return (
-                          <div key={tam.id_tamano} className="p-2.5 bg-gray-50 rounded-lg flex justify-between items-center">
+                          <div key={tam.id} className="p-2.5 bg-gray-50 rounded-lg flex justify-between items-center">
                             <div>
-                              <p className="font-semibold text-sm text-brand-dark">{info?.nombre ?? `Talla #${tam.id_tamano}`}</p>
+                              <p className="font-semibold text-sm text-brand-dark">{info?.nombre ?? `Talla #${tam.id}`}</p>
                               {info?.descripcion && <p className="text-xs text-gray-500">{info.descripcion}</p>}
                             </div>
                             <p className="text-xs text-brand-muted">{tam.ancho} cm × {tam.alto} cm</p>
@@ -182,11 +182,11 @@ useEffect(() => {
                     <h3 className="font-semibold text-lg mb-2 text-brand-dark">Opciones de Personalización</h3>
                     <div className="space-y-1.5">
                       {product.personalizaciones.map((per) => {
-                        const info = getPersonalizacion(per.id_personalizacion);
+                        const info = getPersonalizacion(per.id);
                         return (
-                          <div key={per.id_personalizacion} className="flex justify-between items-center p-2.5 bg-gray-50 rounded-lg">
+                          <div key={per.id} className="flex justify-between items-center p-2.5 bg-gray-50 rounded-lg">
                             <div>
-                              <p className="font-medium text-sm text-brand-dark">{info?.nombre ?? `Personalización #${per.id_personalizacion}`}</p>
+                              <p className="font-medium text-sm text-brand-dark">{info?.nombre ?? `Personalización #${per.id}`}</p>
                               {info?.descripcion && <p className="text-xs text-gray-500">{info.descripcion}</p>}
                             </div>
                             <p className="text-xs font-semibold text-gray-600">+S/. {per.costo_extra}</p>

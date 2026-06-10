@@ -18,7 +18,7 @@ const assets = {
     "maxwell": maxwell,
     "gorra_simple": gorra_simple,
     "jean": jean,
-    "mochila": mochila,
+    "mochila.jpeg": mochila,
     "polo_comercial": polo_comercial,
     "chaqueta.jpg": chaqueta
 };
