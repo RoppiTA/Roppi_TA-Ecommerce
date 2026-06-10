@@ -11,9 +11,9 @@ type DocumentType = 'DNI' | 'CE' | 'RUC';
 
 export default function RegisterForm({ onBack, onRegistrationComplete }: RegisterFormProps) {
   const { register } = useAuth();
-  const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [errors, setErrors] = useState<string[]>([]);
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -22,8 +22,6 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     password: '',
     confirmPassword: ''
   });
-
-
 
   const validatePassword = (password: string): string[] => {
     const validationErrors: string[] = [];
@@ -65,10 +63,10 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     setErrors([]);
     setIsLoading(true);
 
+    //esto es la parte que deberia ir a la otra capa, la de apis
     try {
-      // Se usa import.meta.env.VITE_API_URL para que funcione en producción y localmente
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      
+
       const response = await fetch(`${API_URL}/api/usuarios/registro`, {
         method: 'POST',
         headers: {
@@ -249,7 +247,7 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md disabled:opacity-60"
           >
             {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </button>
