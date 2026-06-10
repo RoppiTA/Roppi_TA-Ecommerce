@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Simulación del endpoint de Login
   const login = async (email: string, pass: string): Promise<AuthError> => {
-    // 1. Validar bloqueo previo
+    // Validar bloqueo previo
     const lockTime = localStorage.getItem('auth_lockout');
     if (lockTime && Date.now() < parseInt(lockTime)) return 'account-locked';
     if (lockTime) localStorage.removeItem('auth_lockout'); // Ya pasó el tiempo
@@ -43,25 +43,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Simular latencia de red
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    // 2. Validar "Cuenta inexistente o no activa" (Unificados)
+    // Validar "Cuenta inexistente o no activa" (Unificados)
     if (email === 'inexistente@ejemplo.com' || email === 'noactivado@ejemplo.com') {
       return 'invalid-account';
     }
 
-    // 3. Buscar usuario
+    // Buscar usuario
     const foundUser = SIMULATED_DB.find(u => u.email === email);
     if (!foundUser || foundUser.pass !== pass) {
       handleFailedAttempt();
       return 'incorrect-credentials';
     }
 
-    // 4. Éxito: Guardar sesión y JWT Simulado
+    // Éxito: Guardar sesión y JWT Simulado
     const mockJWT = `eyJhbGciOiJIUzI1NiIsIn...simulacion...${foundUser.user.id}`;
     setToken(mockJWT);
     setUser(foundUser.user);
     localStorage.removeItem('auth_attempts'); // Reiniciar intentos
 
-    // 5. Redirección por rol
+    // Redirección por rol
     if (foundUser.user.role === 'MERCHANT') navigate('/comerciante');
     else navigate('/');
     

@@ -17,7 +17,7 @@ export const AppRouter = () => {
       <Route 
         path="/comerciante/*" 
         element={
-          <ProtectedRoute isAllowed={user.role === 'MERCHANT'} redirectTo="/auth">
+          <ProtectedRoute isAllowed={user.role === 'MERCHANT'} redirectTo="/">
             <ComercianteStack user={user} />
           </ProtectedRoute>
         } 
