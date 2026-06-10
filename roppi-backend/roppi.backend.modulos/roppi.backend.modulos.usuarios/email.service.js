@@ -23,7 +23,8 @@ class EmailService {
         try {
 
             const hostBackend = process.env.HOST_API_SERVER || 'localhost';
-            const puertoBackend = process.env.PORT_API_SERVER || 3000;
+            // Se usa el puerto 3001 porque es el puerto expuesto al exterior para usuarios-service
+            const puertoBackend = 3001;
             const urlActivacion = `http://${hostBackend}:${puertoBackend}/api/usuarios/activar/${token}`;
 
             const mensajeHtml = `

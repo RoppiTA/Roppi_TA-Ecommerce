@@ -274,16 +274,13 @@ class UsuariosBO {
         throw new Error('La contraseña debe tener al menos 8 caracteres, 1 mayúscula, 1 minúscula y 1 número');
       }
 
-      // Verificar que el usuario existe
       const usuarioBD = await usuariosGateway.findById(usuarioId);
       if (!usuarioBD) {
         throw new Error('Usuario no encontrado');
       }
 
-      // Hash nueva contraseña
       const contraseñaHash = await this.hashContraseña(contraseñaNueva);
 
-      // Actualizar en BD
       const usuarioActualizado = await usuariosGateway.actualizarContraseña(usuarioId, contraseñaHash);
       const usuario = new Usuario(usuarioActualizado);
 
