@@ -6,6 +6,7 @@ import { Pencil, Percent, Trash2 } from 'lucide-react';
 import { useProductosGenericos, useDescuentos } from '../../hooks/useProductos';
 import { Descuento } from '../../types/producto/descuento.types';
 import { DiscountForm } from './DiscountForm';
+import { MensajeModal } from '../../components/MensajeModal';
 
 export function DiscountsPage() {
   const { productos } = useProductosGenericos();
@@ -14,20 +15,43 @@ export function DiscountsPage() {
   // [feat] Estado del modal: null = cerrado, undefined = nuevo, Descuento = edición — 2025-06
   const [editingDiscount, setEditingDiscount] = useState<Descuento | undefined | null>(null);
 
+  //Mensaje de error o éxito de registro
+  const [mensajeModal, setMensajeModal] = useState<{ texto: string; tipo: 'exito' | 'error' } | null>(null);
+
   const isModalOpen = editingDiscount !== null;
 
   const handleAdd = () => setEditingDiscount(undefined);
   const handleEdit = (d: Descuento) => setEditingDiscount(d);
   const handleClose = () => setEditingDiscount(null);
 
-  // [feat] onSave delega a addDescuento o updateDescuento según si hay initialData — 2025-06
+  // Stub para probar modals
+  // Se llama así: await stubDescuentoExito(data)  → simula operación exitosa
+  // Se llama así: await stubDescuentoError(data)  → simula operación con error
+  // Se pone el texto así: setMensajeModal({ texto: 'Mi mensaje aquí', tipo: 'exito' | 'error' })
+  const stubDescuentoExito = async (_data: Omit<Descuento, 'id'>): Promise<void> => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  };
+
+  const stubDescuentoError = async (_data: Omit<Descuento, 'id'>): Promise<void> => {
+    await new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Error simulado al guardar el descuento')), 300)
+    );
+  };
+
+  //Mensaje de error o éxito de registro
   const handleSave = async (data: Omit<Descuento, 'id'>) => {
-    if (editingDiscount?.id) {
-      await updateDescuento(editingDiscount.id, data);
-    } else {
-      await addDescuento(data);
-    }
     handleClose();
+    try {
+      // FALTA REEMPLAZAR stubDescuentoExito/stubDescuentoError con addDescuento/updateDescuento
+      if (editingDiscount?.id) {
+        await stubDescuentoExito(data);
+      } else {
+        await stubDescuentoExito(data);
+      }
+      setMensajeModal({ texto: 'Descuento registrado exitosamente', tipo: 'exito' });
+    } catch {
+      setMensajeModal({ texto: 'Error al registrar descuento', tipo: 'error' });
+    }
   };
 
   const getProductNames = (ids: number[]) =>
@@ -148,6 +172,15 @@ export function DiscountsPage() {
             />
           </div>
         </div>
+      )}
+
+      {/* ── Modal de mensaje (éxito / error) ── */}
+      {mensajeModal && (
+        <MensajeModal
+          mensaje={mensajeModal.texto}
+          tipo={mensajeModal.tipo}
+          onClose={() => setMensajeModal(null)}
+        />
       )}
     </div>
   );
