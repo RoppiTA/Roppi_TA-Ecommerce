@@ -95,9 +95,9 @@ export const ProductosAPIService = {
         if (!response.data || !response.data.datos) return [];
         return response.data.datos.map(mapearAPersonalizacion);
     },
-    
+
     /* --- CRUD DE PRODUCTOS GENÉRICOS --- */
-    
+
     // 1. OBTENER TODOS LOS PRODUCTOS
     getProductosGenericos: async (): Promise<ProductoGenerico[]> => {
         const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/genericos');
@@ -113,7 +113,7 @@ export const ProductosAPIService = {
         }
         return mapearAProductoFrontend(response.data.datos);
     },
-    
+
     // 3. CREAR PRODUCTO
     createProductoGenerico: async (productoData: CreateProductGenericoDTO): Promise<ProductoGenerico> => {
         // Transformamos de regreso al enviar al backend si este espera CamelCase
@@ -164,31 +164,31 @@ export const ProductosAPIService = {
 
 // [fix] Verbos HTTP corregidos — todos usaban GET incorrectamente (2025-06)
 export const DescuentosAPIService = {
-  getDescuentos: async (): Promise<Descuento[]> => {
-    const response = await apiClient.get('/descuentos');
-    return response.data;
-  },
+    getDescuentos: async (): Promise<Descuento[]> => {
+        const response = await apiClient.get('/descuentos');
+        return response.data;
+    },
 
-  getDescuentoById: async (id: number): Promise<Descuento> => {
-    // [fix] Corregido: endpoint con ID y verbo GET correcto
-    const response = await apiClient.get(`/descuentos/${id}`);
-    return response.data;
-  },
+    getDescuentoById: async (id: number): Promise<Descuento> => {
+        // [fix] Corregido: endpoint con ID y verbo GET correcto
+        const response = await apiClient.get(`/descuentos/${id}`);
+        return response.data;
+    },
 
-  createDescuento: async (dto: CreateDescuentoDTO): Promise<Descuento> => {
-    // [fix] Corregido: POST con body DTO en lugar de GET sin body
-    const response = await apiClient.post('/descuentos', dto);
-    return response.data;
-  },
+    createDescuento: async (dto: CreateDescuentoDTO): Promise<Descuento> => {
+        // [fix] Corregido: POST con body DTO en lugar de GET sin body
+        const response = await apiClient.post('/descuentos', dto);
+        return response.data;
+    },
 
-  updateDescuento: async (id: number, dto: Partial<CreateDescuentoDTO>): Promise<Descuento> => {
-    // [fix] Corregido: PUT con ID y body DTO en lugar de GET
-    const response = await apiClient.put(`/descuentos/${id}`, dto);
-    return response.data;
-  },
+    updateDescuento: async (id: number, dto: Partial<CreateDescuentoDTO>): Promise<Descuento> => {
+        // [fix] Corregido: PUT con ID y body DTO en lugar de GET
+        const response = await apiClient.put(`/descuentos/${id}`, dto);
+        return response.data;
+    },
 
-  deleteDescuento: async (id: number): Promise<void> => {
-    // [fix] Corregido: quitado prefijo /api/ duplicado (base URL ya incluye /api)
-    await apiClient.delete(`/descuentos/${id}`);
-  }
+    deleteDescuento: async (id: number): Promise<void> => {
+        // [fix] Corregido: quitado prefijo /api/ duplicado (base URL ya incluye /api)
+        await apiClient.delete(`/descuentos/${id}`);
+    }
 };
