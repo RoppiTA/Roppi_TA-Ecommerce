@@ -12,9 +12,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^4.22.2",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.13",
     "pg": "^8.21.0"
   }
 }
