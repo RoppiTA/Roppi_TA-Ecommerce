@@ -18,7 +18,7 @@ export default function VerifyAccount({ email, onBackToLogin }: VerifyAccountPro
     if (onBackToLogin) {
       onBackToLogin(); // Por si se usa a la antigua en otro lado
     } else {
-      navigate('/');   // Comportamiento del nuevo AuthStack
+      navigate('/auth');   // Comportamiento del nuevo AuthStack
     }
   }
   

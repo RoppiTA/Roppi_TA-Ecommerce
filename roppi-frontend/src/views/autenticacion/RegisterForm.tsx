@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Mail, Lock, User, FileText, ArrowLeft, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface RegisterFormProps {
   onBack: () => void;
@@ -9,6 +10,10 @@ interface RegisterFormProps {
 type DocumentType = 'DNI' | 'CE' | 'RUC';
 
 export default function RegisterForm({ onBack, onRegistrationComplete }: RegisterFormProps) {
+  const { register } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -17,8 +22,6 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     password: '',
     confirmPassword: ''
   });
-
-  const [errors, setErrors] = useState<string[]>([]);
 
   const validatePassword = (password: string): string[] => {
     const validationErrors: string[] = [];
@@ -41,7 +44,7 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     return validationErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors: string[] = [];
 
@@ -58,7 +61,17 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     }
 
     setErrors([]);
-    onRegistrationComplete(formData.email);
+    setIsLoading(true);
+
+    try {
+      // Llamada al AuthContext
+      await register(formData);
+      onRegistrationComplete(formData.email);
+    } catch (error) {
+      setErrors(['Hubo un error al procesar el registro. Inténtalo más tarde.']);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (field: string, value: string) => {
@@ -218,9 +231,10 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
 
           <button
             type="submit"
-            className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md"
+            disabled={isLoading}
+            className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md disabled:opacity-60"
           >
-            Crear Cuenta
+            {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </button>
         </form>
       </div>

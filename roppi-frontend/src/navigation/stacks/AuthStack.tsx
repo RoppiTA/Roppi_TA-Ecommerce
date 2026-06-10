@@ -4,48 +4,50 @@ import LoginForm from '../../views/autenticacion/LoginForm';
 import ForgotPassword from '../../views/autenticacion/ForgotPassword';
 import RegisterForm from '../../views/autenticacion/RegisterForm';
 import VerifyAccount from '../../views/autenticacion/VerifyAccount';
+import ResetPassword from '../../views/autenticacion/ResetPassword'; // 💡 Importamos la nueva vista
 
 export const AuthStack = () => {
   const navigate = useNavigate();
 
-  // Reemplaza la lógica de estado enviando el email de manera segura en el historial de navegación
   const handleRegistrationComplete = (email: string) => {
-    navigate('verify', { state: { email } });
+    navigate('/auth/verify', { state: { email } });
   };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center" style={{ backgroundColor: '#D5E4E6' }}>
       <Routes>
-        {/* Vista por defecto: Login */}
         <Route 
           index 
           element={
             <LoginForm
-              onForgotPassword={() => navigate('forgot-password')}
-              onRegister={() => navigate('register')}
+              onForgotPassword={() => navigate('/auth/forgot-password')}
+              onRegister={() => navigate('/auth/register')}
             />
           } 
         />
 
-        {/* Vista: Recuperar contraseña */}
         <Route 
           path="forgot-password" 
           element={<ForgotPassword onBack={() => navigate('/auth')} />} 
         />
 
-        {/* Vista: Registro */}
+        {/* 💡 Agregamos la ruta de restablecimiento de contraseña */}
+        <Route 
+          path="reset-password" 
+          element={<ResetPassword />} 
+        />
+
         <Route 
           path="register" 
           element={
-            <RegisterForm onBack={() => navigate('/')} 
-             onRegistrationComplete={handleRegistrationComplete}
+            <RegisterForm 
+              onBack={() => navigate('/auth')} 
+              onRegistrationComplete={handleRegistrationComplete}
             />
           } 
         />
 
-        {/* Vista: Verificación de cuenta */}
-        <Route path="verify" element={<VerifyAccount />} 
-        />
+        <Route path="verify" element={<VerifyAccount />} />
       </Routes>
     </div>
   );
