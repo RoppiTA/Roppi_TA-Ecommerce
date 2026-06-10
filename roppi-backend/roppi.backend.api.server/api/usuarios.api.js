@@ -60,6 +60,17 @@ class UsuariosAPI {
         res.status(401).json({ exito: false, mensaje: error.message });
       }
     });
+
+    // Cambiar / Resetear contraseña
+    this.router.put('/contrasena', async (req, res) => {
+      try {
+        const { usuarioId, nuevaContrasena } = req.body;
+        const resultado = await usuariosBO.resetearContraseña(usuarioId, nuevaContrasena);
+        res.status(200).json({ exito: true, data: resultado });
+      } catch (error) {
+        res.status(400).json({ exito: false, mensaje: error.message });
+      }
+    });
   }
 }
 

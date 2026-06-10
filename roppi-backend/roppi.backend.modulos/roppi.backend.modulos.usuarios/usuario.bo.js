@@ -51,11 +51,12 @@ class UsuariosBO {
   /**
    * Generar JWT token
    */
-  generarJWT(usuarioId, rol = 'cliente') {
+  generarJWT(usuarioId, nombre, rol = 'cliente') {
     try {
       const token = jwt.sign(
         {
           sub: usuarioId,           // ID del usuario
+          nombre: nombre,           // Nombre del usuario
           rol: rol,                 // Rol del usuario
           iat: Math.floor(Date.now() / 1000),
         },
@@ -213,7 +214,7 @@ class UsuariosBO {
       }
 
       // Generar JWT
-      const token = this.generarJWT(usuarioBD.id);
+      const token = this.generarJWT(usuarioBD.id, usuarioBD.nombre);
       const usuario = new Usuario(usuarioBD);
 
       // NO devolver la contraseña
