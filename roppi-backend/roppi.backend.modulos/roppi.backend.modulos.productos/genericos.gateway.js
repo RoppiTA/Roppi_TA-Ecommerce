@@ -64,7 +64,7 @@ class GenericosGateway {
 
   async findTamanosByGenerico(idGenerico) {
     const result = await db.query(`
-      SELECT t.ID, gt.ALTO, gt.ANCHO
+      SELECT t.*, gt.ALTO, gt.ANCHO
       FROM "RoppiTA".GENERICOSXTAMANOS gt
       JOIN "RoppiTA".TAMANOS t ON gt.ID_TAMANO = t.ID
       WHERE gt.ID_GENERICO = $1
@@ -79,6 +79,20 @@ class GenericosGateway {
       VALUES ($1, $2, $3, $4, $5, $5)
       RETURNING *
     `, [idGenerico, idTamano, alto, ancho, usuarioId]);
+    return result.rows[0];
+  }
+
+  async updateTamanoWithClient(client, { idGenerico, idTamano, alto, ancho, usuarioId }) {
+    const result = await client.query(`
+      UPDATE "RoppiTA".GENERICOSXTAMANOS
+      SET ALTO = $1,
+          ANCHO = $2,
+          USUARIO_MODIFICACION = $3,
+          FECHA_MODIFICACION = CURRENT_TIMESTAMP
+      WHERE ID_GENERICO = $4
+      AND ID_TAMANO = $5
+      RETURNING *
+    `, [alto, ancho, usuarioId, idGenerico, idTamano]);
     return result.rows[0];
   }
 
@@ -121,6 +135,18 @@ class GenericosGateway {
   return result.rows[0];
   }
 
+  async updateMaterialWithClient(client, { idGenerico, idMaterial, costoExtra, usuarioId }) {
+    const result = await client.query(`
+      UPDATE "RoppiTA".GENERICOSXMATERIALES
+      SET COSTO_EXTRA = $1,
+          USUARIO_MODIFICACION = $2,
+          FECHA_MODIFICACION = CURRENT_TIMESTAMP
+      WHERE ID_GENERICO = $3
+      AND ID_MATERIAL = $4
+      RETURNING *
+    `, [costoExtra, usuarioId, idGenerico, idMaterial]);
+    return result.rows[0];
+  }
 
   async removeTodosLosMaterialesWithClient(client, idGenerico) {
   await client.query(`
@@ -196,6 +222,18 @@ class GenericosGateway {
   return result.rows[0];
   }
 
+  async updatePersonalizacionWithClient(client, { idGenerico, idPersonalizacion, costoExtra, usuarioId }) {
+    const result = await client.query(`
+      UPDATE "RoppiTA".GENERICOSXPERSONALIZACIONES
+      SET COSTO_EXTRA = $1,
+          USUARIO_MODIFICACION = $2,
+          FECHA_MODIFICACION = CURRENT_TIMESTAMP
+      WHERE ID_GENERICO = $3
+      AND ID_PERSONALIZACION = $4
+      RETURNING *
+    `, [costoExtra, usuarioId, idGenerico, idPersonalizacion]);
+    return result.rows[0];
+  }
  
   async removeTodosLasPersonalizacionesWithClient(client, idGenerico) {
   await client.query(`
