@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -36,7 +37,7 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3001/api/usuarios/login', {
+      const response = await fetch('http://localhost:3000/api/usuarios/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
