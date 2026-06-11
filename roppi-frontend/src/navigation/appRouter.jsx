@@ -5,13 +5,15 @@ import ClienteStack from './stacks/ClienteStack';
 import AuthStack from './stacks/AuthStack';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useAuth } from '../context/AuthContext'; // Importamos el hook
+import { useState } from 'react';
+
 
 export const AppRouter = () => {
-  //const [user, setUser] = useState({ id: 104, role: 'MERCHANT', name: 'Juan Pérez' });
+  const [user, setUser] = useState({ id: 104, role: 'MERCHANT', name: 'Juan Pérez' });
   //const [user, setUser] = useState({ id: 104, role: 'CLIENT' , name: 'María Gómez' });
   //const [user, setUser] = useState({ id: 104, role: 'GUEST', name: 'Invitado' });
 
-   const { user } = useAuth();
+  //const { user } = useAuth();
 
   return (
     <Routes>

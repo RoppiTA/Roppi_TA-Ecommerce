@@ -2,7 +2,7 @@
 // Reemplaza el uso de MUI (DiscountTable + DiscountModal) por componentes Tailwind propios
 // y reutiliza DiscountForm (extendido) como modal de creación/edición.
 import { useState } from 'react';
-import { Pencil, Percent, Trash2 } from 'lucide-react';
+import { Filter, Pencil, Percent, Trash2 } from 'lucide-react';
 import { useProductosGenericos, useDescuentos } from '../../hooks/useProductos';
 import { Descuento } from '../../types/producto/descuento.types';
 import { DiscountForm } from './DiscountForm';
@@ -21,6 +21,15 @@ export function DiscountsPage() {
   const isModalOpen = editingDiscount !== null;
 
   const handleAdd = () => setEditingDiscount(undefined);
+  const handleFilter = () => {
+    // Mostrar el listado de productos genericos
+
+    // Permitir seleccionar uno (su id)
+
+    // Enviar a backend para ejecutar funcion: obtenerDescuentosPorIdProducto
+
+    alert('Funcionalidad de filtrado aún no implementada');
+  };
   const handleEdit = (d: Descuento) => setEditingDiscount(d);
   const handleClose = () => setEditingDiscount(null);
 
@@ -42,11 +51,10 @@ export function DiscountsPage() {
   const handleSave = async (data: Omit<Descuento, 'id'>) => {
     handleClose();
     try {
-      // FALTA REEMPLAZAR stubDescuentoExito/stubDescuentoError con addDescuento/updateDescuento
       if (editingDiscount?.id) {
-        await stubDescuentoExito(data);
+        await updateDescuento(editingDiscount.id, data);
       } else {
-        await stubDescuentoExito(data);
+        await addDescuento(data);
       }
       setMensajeModal({ texto: 'Descuento registrado exitosamente', tipo: 'exito' });
     } catch {
@@ -54,11 +62,13 @@ export function DiscountsPage() {
     }
   };
 
-  const getProductNames = (ids: number[]) =>
-    ids
-      .map((id) => productos.find((p) => p.id === id)?.nombre)
-      .filter(Boolean)
-      .join(', ') || '—';
+  const getProductNames = (ids?: number[]) =>
+    ids && ids.length > 0
+      ? ids
+          .map((id) => productos.find((p) => p.id === id)?.nombre)
+          .filter(Boolean)
+          .join(', ') || '—'
+      : '—';
 
   if (loading) {
     return (
@@ -86,6 +96,13 @@ export function DiscountsPage() {
         </div>
 
         {/* [feat] Mismo estilo de botón secundario que DefaultComerciante — 2025-06 */}
+        <button
+          onClick={handleFilter}
+          className="px-4 py-2 bg-primary-hover text-white rounded-lg hover:bg-primary2 flex items-center gap-2 text-sm transition-colors"
+        >
+          <Filter size={16} />
+          Filtrar Descuentos
+        </button>
         <button
           onClick={handleAdd}
           className="px-4 py-2 bg-primary-hover text-white rounded-lg hover:bg-primary2 flex items-center gap-2 text-sm transition-colors"

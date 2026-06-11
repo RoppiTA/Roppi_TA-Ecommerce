@@ -19,6 +19,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [productSearch, setProductSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // [feat] Precarga de datos cuando se abre en modo edición — 2025-06
   useEffect(() => {
@@ -33,6 +34,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
       setCantidad('0');
       setSelectedProductIds([]);
     }
+    setErrors({});
   }, [initialData]);
 
   const removeProduct = (id: number) => {
@@ -47,19 +49,47 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
     setShowSearch(false);
   };
 
+  // Validar datos del formulario
+  const validarFormulario = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!nombre.trim()) {
+      newErrors.nombre = 'El nombre es requerido';
+    }
+
+    const porcentajeNum = Number(porcentaje);
+    if (!porcentaje || porcentajeNum <= 0 || porcentajeNum > 100) {
+      newErrors.porcentaje = 'El porcentaje debe ser mayor a 0 y menor o igual a 100';
+    }
+
+    const cantidadNum = Number(cantidad);
+    if (!Number.isInteger(cantidadNum) || cantidadNum <= 0) {
+      newErrors.cantidad = 'La cantidad debe ser un número entero positivo';
+    }
+
+    if (selectedProductIds.length === 0) {
+      newErrors.productos = 'Se debe seleccionar al menos una categoría';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleActivar = () => {
-    if (!nombre.trim()) return;
+    if (!validarFormulario()) return;
+
     // [feat] cantidad ahora viene del campo de texto, no del conteo de productos — 2025-06
     onSave({
       nombre,
-      cantidad: Number(cantidad) || 0,
-      porcentajeDescuento: Number(porcentaje) || 0,
+      cantidad: Number(cantidad),
+      porcentajeDescuento: Number(porcentaje),
       idGenericoVinculados: selectedProductIds,
     });
     setNombre('');
     setPorcentaje('');
     setCantidad('0');
     setSelectedProductIds([]);
+    setErrors({});
   };
 
   const availableProducts = products.filter(
@@ -104,8 +134,13 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                 placeholder="e.g., SEASONAL_CLEARANCE"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                className="w-full px-3 py-2.5 bg-brand-light/40 border border-primary2/25 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40"
+                className={`w-full px-3 py-2.5 bg-brand-light/40 border rounded text-sm focus:outline-none focus:ring-2 ${
+                  errors.nombre
+                    ? 'border-brand-error/50 focus:ring-brand-error/40'
+                    : 'border-primary2/25 focus:ring-primary2/40'
+                }`}
               />
+              {errors.nombre && <p className="text-xs text-brand-error mt-1">{errors.nombre}</p>}
             </div>
 
             <div>
@@ -120,12 +155,17 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                   onChange={(e) => setPorcentaje(e.target.value)}
                   min={0}
                   max={100}
-                  className="w-full px-3 py-2.5 bg-brand-light/40 border border-primary2/25 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40 pr-8"
+                  className={`w-full px-3 py-2.5 bg-brand-light/40 border rounded text-sm focus:outline-none focus:ring-2 pr-8 ${
+                    errors.porcentaje
+                      ? 'border-brand-error/50 focus:ring-brand-error/40'
+                      : 'border-primary2/25 focus:ring-primary2/40'
+                  }`}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#43474f] font-bold text-sm">
                   %
                 </span>
               </div>
+              {errors.porcentaje && <p className="text-xs text-brand-error mt-1">{errors.porcentaje}</p>}
             </div>
 
             {/* [feat] Campo de cantidad mínima para eligibilidad — 2025-06 */}
@@ -139,8 +179,13 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                 value={cantidad}
                 onChange={(e) => setCantidad(e.target.value)}
                 min={0}
-                className="w-full px-3 py-2.5 bg-brand-light/40 border border-primary2/25 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40"
+                className={`w-full px-3 py-2.5 bg-brand-light/40 border rounded text-sm focus:outline-none focus:ring-2 ${
+                  errors.cantidad
+                    ? 'border-brand-error/50 focus:ring-brand-error/40'
+                    : 'border-primary2/25 focus:ring-primary2/40'
+                }`}
               />
+              {errors.cantidad && <p className="text-xs text-brand-error mt-1">{errors.cantidad}</p>}
             </div>
 
             <div>
@@ -207,6 +252,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                   )}
                 </div>
               )}
+              {errors.productos && <p className="text-xs text-brand-error mt-1">{errors.productos}</p>}
             </div>
           </div>
 
