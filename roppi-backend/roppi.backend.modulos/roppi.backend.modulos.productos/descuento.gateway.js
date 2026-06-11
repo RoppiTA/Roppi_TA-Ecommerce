@@ -62,6 +62,34 @@ class DescuentoGateway {
         return result.rows;
     }
 
+    async findByDescuentoIdActivo(idDescuento) {
+        const result = await db.query(`
+            SELECT 
+                D.ID, 
+                D.NOMBRE, 
+                D.CANTIDAD, 
+                D.PORCENTAJE_DESCUENTO AS PORCENTAJE
+            FROM "RoppiTA".DESCUENTOS D
+            INNER JOIN "RoppiTA".GENERICOSXDESCUENTOS GD ON D.ID = GD.ID_DESCUENTO
+            WHERE D.ID = $1 AND GD.ACTIVO = 1
+        `, [idDescuento]);
+        return result.rows;
+    }
+
+    async findByDescuentoIdInactivo(idDescuento) {
+        const result = await db.query(`
+            SELECT 
+                D.ID, 
+                D.NOMBRE, 
+                D.CANTIDAD, 
+                D.PORCENTAJE_DESCUENTO AS PORCENTAJE
+            FROM "RoppiTA".DESCUENTOS D
+            INNER JOIN "RoppiTA".GENERICOSXDESCUENTOS GD ON D.ID = GD.ID_DESCUENTO
+            WHERE D.ID = $1 AND GD.ACTIVO = 0
+        `, [idDescuento]);
+        return result.rows;
+    }
+
     async findAllWithProductos() {
         const result = await db.query(`
             SELECT 
@@ -93,6 +121,13 @@ class DescuentoGateway {
             RETURNING *
         `, [idProducto, idDescuento, idUsuario]);
         return result.rows[0];
+    }
+
+    async deleteInactivos(id) {
+        const result = await db.query(`
+            DELETE FROM "RoppiTA".GENERICOSXDESCUENTOS
+            WHERE ID_DESCUENTO = $1
+            AND ACTIVO = 0`, [id]);
     }
 }
 
