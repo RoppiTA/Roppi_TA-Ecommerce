@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') }); // Datos de conexión, etc...
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const APIServer = require('./api.server');
 
 async function main() {
