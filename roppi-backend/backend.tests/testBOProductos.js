@@ -25,7 +25,7 @@ async function testObtenerPorId() {
 
 async function testCrear(){
   console.log('\nProbando crear una mochila:');
-  const generico = await genericosBO.crear( {nombre:'Mochila', descripcion:'Mochila', precioBase: 12,
+  const generico = await genericosBO.crear( {nombre:'Mochilita', descripcion:'Mochila', precioBase: 12,
     maximoStock: 100, urlImagen: 'assets/maxwell.jpg',
     tamanos:[{ id: 1, alto: 100, ancho: 50 },{ id: 2, alto: 200, ancho: 80 }],
     materiales:[{id: 1, costoExtra: 10}],
@@ -41,16 +41,16 @@ async function testCrear(){
 
 async function testActualizar(){
   console.log('\nProbando actualizar la mochila previa:'); // Actualmente id = 17
-  const generico = await genericosBO.actualizar( 17, {nombre:'Mochila 2', descripcion:'Mochila actualizada',
-    precioBase: 120, maximoStock: 100, urlImagen: 'assets/maxwell.jpg',
-    tamanos:[{ id: 1, alto: 100, ancho: 50 },{ id: 3, alto: 400, ancho: 80 }],
-    materiales:[{id: 2, costoExtra: 20}], colores:[{id: 2}],
-    personalizaciones:[{id: 2, costoExtra: 30}], usuarioId:1} );
+  const generico = await genericosBO.actualizar( 17, {nombre:'Mochila Final?', descripcion:'Mochila actualizada',
+    precioBase: 100, maximoStock: 100, urlImagen: 'assets/maxwell.jpg',
+    tamanos:[{ id: 1, alto: 100, ancho: 6 },{ id: 3, alto: 400, ancho: 80 }],
+    materiales:[{id: 2, costoExtra: 40}], colores:[{id: 2}],
+    personalizaciones:[{id: 2, costoExtra: 50}], usuarioId:1} );
   if(generico){
-    console.log("ID de la mochila creada: ", generico);
+    console.log("ID de la mochila modificada: ", generico);
   }
   else {
-    console.log('No se creó la mochila');
+    console.log('No se modificó la mochila');
   }
 }
 

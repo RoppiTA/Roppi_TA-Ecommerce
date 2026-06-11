@@ -5,11 +5,14 @@ class Personalizado {
                 fecha_creacion, usuario_creacion,
                 fecha_modificacion, usuario_modificacion }) {
     this.id = id;
+    // Comentado por ahora porque ya se pasa los atributos seleccionados en la parte de abajo
+    /*
     this.idGenerico = id_generico;
     this.idTamano = id_tamano;
     this.idColor = id_color;
     this.idMaterial = id_material;
     this.idPersonalizacion = id_personalizacion;
+    */
     this.sku = sku;
     this.precio = precio;
     // Campos de la tabla relación
