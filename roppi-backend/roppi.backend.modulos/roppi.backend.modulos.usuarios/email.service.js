@@ -23,7 +23,7 @@ class EmailService {
         try {
 
             // Se usa PUBLIC_BACKEND_URL desde el .env para que en producción apunte a tu dominio real
-            const backendUrl = process.env.PUBLIC_BACKEND_URL || 'http://localhost:3001';
+            const backendUrl = process.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
             const urlActivacion = `${backendUrl}/api/usuarios/activar/${token}`;
 
             const mensajeHtml = `
