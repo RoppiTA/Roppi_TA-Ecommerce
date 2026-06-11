@@ -4,6 +4,7 @@ import LoginForm from '../../views/autenticacion/LoginForm';
 import ForgotPassword from '../../views/autenticacion/ForgotPassword';
 import RegisterForm from '../../views/autenticacion/RegisterForm';
 import VerifyAccount from '../../views/autenticacion/VerifyAccount';
+import ActivatedAccount from '../../views/autenticacion/ActivatedAccount';
 import ResetPassword from '../../views/autenticacion/ResetPassword'; // 💡 Importamos la nueva vista
 
 export const AuthStack = () => {
@@ -48,6 +49,7 @@ export const AuthStack = () => {
         />
 
         <Route path="verify" element={<VerifyAccount />} />
+        <Route path="activated" element={<ActivatedAccount />} />
       </Routes>
     </div>
   );

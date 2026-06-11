@@ -22,10 +22,9 @@ class EmailService {
     async enviarCorreoActivacion(correoDestino, token, nombre) {
         try {
 
-            const hostBackend = process.env.HOST_API_SERVER || 'localhost';
-            // Se usa el puerto 3001 porque es el puerto expuesto al exterior para usuarios-service
-            const puertoBackend = 3001;
-            const urlActivacion = `http://${hostBackend}:${puertoBackend}/api/usuarios/activar/${token}`;
+            // Se usa PUBLIC_BACKEND_URL desde el .env para que en producción apunte a tu dominio real
+            const backendUrl = process.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
+            const urlActivacion = `${backendUrl}/api/usuarios/activar/${token}`;
 
             const mensajeHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
