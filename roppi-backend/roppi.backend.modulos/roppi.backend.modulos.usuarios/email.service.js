@@ -22,7 +22,6 @@ class EmailService {
     async enviarCorreoActivacion(correoDestino, token, nombre) {
         try {
 
-            // Se usa PUBLIC_BACKEND_URL desde el .env para que en producción apunte a tu dominio real
             const backendUrl = process.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
             const urlActivacion = `${backendUrl}/api/usuarios/activar/${token}`;
 
@@ -46,7 +45,7 @@ class EmailService {
             const opcionesCorreo = {
                 from: `"Equipo Roppi" <${process.env.SMTP_USER}>`,
                 to: correoDestino,
-                subject: 'Activa tu cuenta de Roppi ✔',
+                subject: 'Activa tu cuenta de Roppi',
                 html: mensajeHtml,
             };
 
