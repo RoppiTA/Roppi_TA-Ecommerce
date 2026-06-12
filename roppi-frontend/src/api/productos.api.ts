@@ -210,7 +210,7 @@ export const DescuentosAPIService = {
     },
 
     getDescuentosPorIdProducto: async (idProducto: number): Promise<Descuento[]> => {
-        const response = await apiClient.get<{ exito: boolean; datos: any[] }>(`/productos/descuentos/producto/${idProducto}`);
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>(`/productos/descuentos/${idProducto}`);
         if (!response.data || !response.data.datos) return [];
         return response.data.datos.map(mapearADescuentoFrontend);
     }

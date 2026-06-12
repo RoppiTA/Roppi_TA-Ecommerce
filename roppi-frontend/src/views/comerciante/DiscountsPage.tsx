@@ -11,7 +11,7 @@ import { DiscountFilterModal } from './DiscountFilterModal';
 
 export function DiscountsPage() {
   const { productos } = useProductosGenericos();
-  const { descuentos, loading, addDescuento, updateDescuento, deleteDescuento, getDescuentosPorIdProducto } = useDescuentos();
+  const { descuentos, loading, fetchDescuentos, addDescuento, updateDescuento, deleteDescuento, getDescuentosPorIdProducto } = useDescuentos();
 
   // [feat] Estado del modal: null = cerrado, undefined = nuevo, Descuento = edición — 2025-06
   const [editingDiscount, setEditingDiscount] = useState<Descuento | undefined | null>(null);
@@ -33,21 +33,18 @@ export function DiscountsPage() {
   const [descuentosMostrados, setDescuentosMostrados] = useState<Descuento[]>([]);
 
   useEffect(() => {
-    if (!selectedProductFilter) {
-      setDescuentosMostrados(descuentos);
+    if (selectedProductFilter === null) {
+      setDescuentosMostrados(descuentos ?? []);
     }
   }, [descuentos, selectedProductFilter]);
+
   const handleSelectProductFilter = async (
     productId: number
   ) => {
     try {
-      const descuentosFiltrados =
-        await getDescuentosPorIdProducto(productId);
-
+      const descuentosFiltrados = await getDescuentosPorIdProducto(productId);
       setSelectedProductFilter(productId);
-
-      setDescuentosMostrados(descuentosFiltrados);
-
+      setDescuentosMostrados(descuentosFiltrados ?? []);
       setFilterModalOpen(false);
     } catch {
       setMensajeModal({
@@ -57,8 +54,9 @@ export function DiscountsPage() {
     }
   };
 
-  const clearFilter = () => {
+  const clearFilter = async () => {
     setSelectedProductFilter(null);
+     const todosLosDescuentos = await fetchDescuentos();
     setDescuentosMostrados(descuentos);
   };
 
@@ -129,21 +127,22 @@ export function DiscountsPage() {
           )}
         </div>
 
-        {/* [feat] Mismo estilo de botón secundario que DefaultComerciante — 2025-06 */}
-        <button
-          onClick={handleFilter}
-          className="px-4 py-2 bg-primary-hover text-white rounded-lg hover:bg-primary2 flex items-center gap-2 text-sm transition-colors"
-        >
-          <Filter size={16} />
-          Filtrar Descuentos
-        </button>
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-primary-hover text-white rounded-lg hover:bg-primary2 flex items-center gap-2 text-sm transition-colors"
-        >
-          <Percent size={16} />
-          Agregar Descuento
-        </button>
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={handleFilter}
+            className="px-4 py-2 bg-primary-hover text-white rounded-lg hover:bg-primary2 flex items-center gap-2 text-sm transition-colors"
+          >
+            <Filter size={16} />
+            Filtrar Descuentos
+          </button>
+          <button
+            onClick={handleAdd}
+            className="px-4 py-2 bg-primary-hover text-white rounded-lg hover:bg-primary2 flex items-center gap-2 text-sm transition-colors"
+          >
+            <Percent size={16} />
+            Agregar Descuento
+          </button>
+        </div>
       </div>
 
       {/* ── Tabla de descuentos ── */}

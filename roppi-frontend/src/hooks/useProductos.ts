@@ -183,6 +183,7 @@ export const useDescuentos = () => {
             const data = await DescuentosAPIService.getDescuentosPorIdProducto(idProducto);
             setDescuentos(data);
             setError(null);
+            return data;
         } catch (err) {
             setError('Error al cargar la lista de descuentos.');
             console.error(err);
@@ -200,6 +201,7 @@ export const useDescuentos = () => {
         descuentos,
         loading,
         error,
+        fetchDescuentos,
         addDescuento,
         updateDescuento,
         deleteDescuento,
