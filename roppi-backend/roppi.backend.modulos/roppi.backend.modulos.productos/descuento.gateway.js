@@ -129,6 +129,44 @@ class DescuentoGateway {
             WHERE ID_DESCUENTO = $1
             AND ACTIVO = 0`, [id]);
     }
+
+    async actualizarProductosConDescuento(id, idProductos, usuarioId) {
+
+        // Obtenemos todos los IDs de los productos asociados con este descuento 
+        let idProductosActuales = await db.query(`
+            SELECT ID_GENERICO
+            FROM "RoppiTA".GENERICOSXDESCUENTOS 
+            WHERE ID_DESCUENTO = $1 AND ACTIVO = 1
+        `, [id]);
+        idProductosActuales = idProductosActuales.rows.map(row => row.id_generico);
+
+        // Ahora identifiquemos los IDs de los productos actuales que no están incluidos en la lista de los nuevos
+        const idProductosEliminar = idProductosActuales.filter(id => !idProductos.includes(id));
+
+        // Ahora identifiquemos los IDs de los productos nuevos que no están incluidos en la lista de los actuales
+        const idProductosAgregar = idProductos.filter(id => !idProductosActuales.includes(id));
+
+        if (idProductosEliminar.length == 0 && idProductosAgregar.length == 0) return 1;
+
+        // Actualizamos los productos que ya no están incluidos en el descuento (SET ACTIVO = 0)
+        for (const id_prod of idProductosEliminar) {
+            await db.query(`
+                UPDATE "RoppiTA".GENERICOSXDESCUENTOS
+                SET ACTIVO = 0, USUARIO_MODIFICACION = $3
+                WHERE ID_GENERICO = $1 AND ID_DESCUENTO = $2
+            `, [id_prod, id, usuarioId]);
+        }
+
+        // Agregamos los productos que ahora tendrán descuento
+        for (const id_prod of idProductosAgregar) {
+            await db.query(`
+                INSERT INTO "RoppiTA".GENERICOSXDESCUENTOS (ID_GENERICO, ID_DESCUENTO, USUARIO_CREACION, USUARIO_MODIFICACION)
+                VALUES ($1, $2, $3, $3)
+            `, [id_prod, id, usuarioId]);
+        }
+        return 1;
+
+    }
 }
 
 module.exports = new DescuentoGateway();
