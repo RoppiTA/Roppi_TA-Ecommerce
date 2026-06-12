@@ -28,7 +28,7 @@ const mapearAGenericoXColor = (c: any): GenericoXColor => ({
 
 const mapearAGenericoXMaterial = (c: any): GenericoXMaterial => ({
     id: c.id,
-    costo_extra: c.costoExtra
+    costoExtra: c.costoExtra
 });
 
 const mapearAGenericoXTamano = (c: any): GenericoXTamano => ({
@@ -39,7 +39,7 @@ const mapearAGenericoXTamano = (c: any): GenericoXTamano => ({
 
 const mapearAGenericoXPersonalizacion = (c: any): GenericoXPersonalizacion => ({
     id: c.id,
-    costo_extra: c.costoExtra
+    costoExtra: c.costoExtra
 });
 
 const mapearAColor = (c: any): Color => ({
