@@ -45,7 +45,6 @@ class DescuentoBO {
 
     async eliminarDescuento(idDescuento) {
         const existenActivos = await descuentoGateway.findByDescuentoIdActivo(idDescuento);
-        console.log(existenActivos);
         const existenInactivos = await descuentoGateway.findByDescuentoIdInactivo(idDescuento);
         //const client = await db.getClient();
         if (existenActivos[0]) {
@@ -63,10 +62,8 @@ class DescuentoBO {
                 //await client.query('ROLLBACK');
                 throw error;
             }
-            finally {
-                return 1;
-            }
         }
+        return 1;
     }
 
     async actualizarDescuento(id, { nombre, cantidad, porcentaje, usuarioId }) {
