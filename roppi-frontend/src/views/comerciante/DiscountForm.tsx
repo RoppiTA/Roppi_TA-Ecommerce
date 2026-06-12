@@ -79,7 +79,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleActivar = () => {
+  const handleUpdate = () => {
     const newErrors: { nombre?: string; porcentaje?: string } = {};
     if (!nombre.trim()) newErrors.nombre = 'Debe completar este campo';
     if (!porcentaje.trim()) newErrors.porcentaje = 'Debe completar este campo';
@@ -276,10 +276,10 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
 
         <div className="flex justify-end mt-4">
           <button
-            onClick={handleActivar}
+            onClick={handleUpdate}
             className="px-5 py-2 bg-primary-hover text-white rounded-lg text-sm font-semibold hover:bg-primary2 transition-colors"
           >
-            Activar Promoción
+            Actualizar Descuento
           </button>
         </div>
       </div>
