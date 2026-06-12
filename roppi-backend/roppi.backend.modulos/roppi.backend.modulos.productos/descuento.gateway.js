@@ -32,7 +32,7 @@ class DescuentoGateway {
             SET 
                 NOMBRE = $2,
                 CANTIDAD = $3,
-                PORCENTAJE = $4,
+                PORCENTAJE_DESCUENTO = $4,
                 USUARIO_MODIFICACION = $5,
                 FECHA_MODIFICACION = CURRENT_TIMESTAMP
             WHERE ID = $1
