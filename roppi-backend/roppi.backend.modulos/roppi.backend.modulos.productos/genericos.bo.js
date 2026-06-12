@@ -57,16 +57,16 @@ class GenericosBO {
     // Insertar todas las relacinones de manera paralela
     await Promise.all([
       ...tamanos.map(t => genericosGateway.addTamanoWithClient(client, {
-        idGenerico: idGenerico, idTamano: t.id_tamano, alto: t.alto, ancho: t.ancho, usuarioId: usuarioId
+        idGenerico: idGenerico, idTamano: t.id, alto: t.alto, ancho: t.ancho, usuarioId: usuarioId
       })),
       ...materiales.map(m => genericosGateway.addMaterialWithClient(client, {
-        idGenerico: idGenerico, idMaterial: m.id_material, costoExtra: m.costo_extra, usuarioId: usuarioId
+        idGenerico: idGenerico, idMaterial: m.id, costoExtra: m.costoExtra, usuarioId: usuarioId
       })),
       ...colores.map(c => genericosGateway.addColorWithClient(client, {
-        idGenerico: idGenerico, idColor: c.id_color, usuarioId: usuarioId
+        idGenerico: idGenerico, idColor: c.id, usuarioId: usuarioId
       })),
       ...personalizaciones.map(p => genericosGateway.addPersonalizacionWithClient(client, {
-        idGenerico: idGenerico, idPersonalizacion: p.id_personalizacion, costoExtra: p.costo_extra, usuarioId: usuarioId
+        idGenerico: idGenerico, idPersonalizacion: p.id, costoExtra: p.costoExtra, usuarioId: usuarioId
       })),
     ]);
 
@@ -144,6 +144,22 @@ class GenericosBO {
       const personalizacionesBorrar = personalizacionesActuales.filter(x => !newIdsP.has(x.id));
       const personalizacionesInsertar = personalizaciones.filter(x => !oldIdsP.has(x.id));
       
+      const tamanosActualizar = tamanos.filter(t => {
+        const actual = tamanosActuales.find(a => Number(a.id) === Number(t.id));
+        if (!actual) return false;
+        return (Number(actual.alto) !== Number(t.alto) || Number(actual.ancho) !== Number(t.ancho));
+      });
+      const materialesActualizar = materiales.filter(m => {
+        const actual = materialesActuales.find(a => Number(a.id) === Number(m.id));
+        if (!actual) return false;
+        return (Number(actual.costoExtra) !== Number(m.costoExtra));
+      });
+      const personalizacionesActualizar = personalizaciones.filter(p => {
+        const actual = personalizacionesActuales.find(a => Number(a.id) === Number(p.id));
+        if (!actual) return false;
+        return (Number(actual.costoExtra) !== Number(p.costoExtra));
+      });
+
       // hacerlo
       const client = await db.getClient();
       try {
@@ -171,6 +187,18 @@ class GenericosBO {
                   idGenerico: id, idPersonalizacion: p.id, costoExtra: p.costo_extra, usuarioId: usuarioId
                 })),
                 ...personalizacionesBorrar.map(p => genericosGateway.removeParPersonalizacionWithClient(client, id, p.id)),
+          ]);
+
+           await Promise.all([
+            ...tamanosActualizar.map(t => genericosGateway.updateTamanoWithClient(client, {
+                  idGenerico: id, idTamano: t.id, alto: t.alto, ancho: t.ancho, usuarioId: usuarioId
+                })),
+            ...materialesActualizar.map(m => genericosGateway.updateMaterialWithClient(client, {
+                  idGenerico: id, idMaterial: m.id, costoExtra: m.costoExtra, usuarioId: usuarioId
+                })),
+            ...personalizacionesActualizar.map(p => genericosGateway.updatePersonalizacionWithClient(client, {
+                  idGenerico: id, idPersonalizacion: p.id, costoExtra: p.costoExtra, usuarioId: usuarioId
+                })),
           ]);
           await client.query('COMMIT');
           return await this.obtenerPorId(id);

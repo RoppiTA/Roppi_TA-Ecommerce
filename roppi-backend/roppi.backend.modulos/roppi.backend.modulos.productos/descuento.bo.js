@@ -40,6 +40,35 @@ class DescuentoBO {
         for (const idProducto of idProductos) {
             await descuentoGateway.createProductoDescuento(idProducto, descuentoId, usuarioId);
         }
+        return descuento;
+    }
+
+    async eliminarDescuento(idDescuento) {
+        const existenActivos = await descuentoGateway.findByDescuentoIdActivo(idDescuento);
+        const existenInactivos = await descuentoGateway.findByDescuentoIdInactivo(idDescuento);
+        //const client = await db.getClient();
+        if (existenActivos[0]) {
+            return 0;
+        }
+        else {
+            try {
+                //await client.query('BEGIN');
+                if (existenInactivos[0]) {
+                    descuentoGateway.deleteInactivos(idDescuento);
+                }
+                await descuentoGateway.delete(idDescuento);
+            }
+            catch (error) {
+                //await client.query('ROLLBACK');
+                throw error;
+            }
+        }
+        return 1;
+    }
+
+    async actualizarDescuento(id, { nombre, cantidad, porcentaje, usuarioId }) {
+        const descuentoActualizado = await descuentoGateway.update(id, { nombre, cantidad, porcentaje, usuarioId });
+        return descuentoActualizado;
     }
 
 }

@@ -14,7 +14,7 @@ class APIServer {
     this._configurarMiddlewares();
     this._distribuirRecursos();
     this.app.use(cors({
-      origin: 'http://localhost:5173', // Cambia esto al origen de tu frontend
+      origin: 'http://localhost:5173',
       credentials: true
     }));
   }
