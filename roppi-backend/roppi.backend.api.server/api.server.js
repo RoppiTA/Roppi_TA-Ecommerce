@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
+// Faltan los demás ServiciosAPI
 const ProductosAPI = require('./api/productos.api.js');
 const UsuariosAPI = require('./api/usuarios.api.js');
 
@@ -13,7 +14,7 @@ class APIServer {
     this._configurarMiddlewares();
     this._distribuirRecursos();
     this.app.use(cors({
-      origin: 'http://localhost:5173', // Cambia esto al origen de tu frontend
+      origin: 'http://localhost:5173',
       credentials: true
     }));
   }
@@ -28,10 +29,14 @@ class APIServer {
     // Instanciamos nuestras APIs
     const productosAPI = new ProductosAPI();
     const usuariosAPI = new UsuariosAPI();
+    //TODO: Acá faltan las demás APIs (pedidos, etc.)
 
     // Distribuimos las peticiones HTTP a la clase correspondiente
     this.app.use('/api/productos', productosAPI.router);
     this.app.use('/api/usuarios', usuariosAPI.router);
+
+    // Podemos preparar la distribución de otras rutas para el futuro
+    // this.app.use('/api/pedidos', pedidosAPI.router);
   }
 
   startServer() {
