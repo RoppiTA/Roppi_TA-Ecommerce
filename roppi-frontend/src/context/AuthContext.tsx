@@ -89,9 +89,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (lockTime && Date.now() < parseInt(lockTime)) return 'account-locked';
     if (lockTime) localStorage.removeItem('auth_lockout'); // Ya pasó el tiempo
 
-    // Simular latencia de red
-    await new Promise(resolve => setTimeout(resolve, 800));
-
     // Validar "Cuenta inexistente o no activa" (Unificados)
     if (email === 'inexistente@ejemplo.com' || email === 'noactivado@ejemplo.com') {
       return 'invalid-account';
@@ -153,9 +150,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const nuevo = await AuthAPIService.createUsuario(data.fullName, data.email, data.password, data.documentNumber, data.documentType);
       return true;
-    } catch (err){
-        console.error("Error al crear cuenta", err);
-        throw err;
+    } catch (err: any){
+        const backendMessage = err.response?.data?.mensaje || err.response?.data?.message || 'Error de autenticación';
+        throw new Error(backendMessage);
     }
     
     /*{// llamar a la api que crea el usuario

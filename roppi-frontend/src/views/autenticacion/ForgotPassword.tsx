@@ -41,7 +41,7 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
               Hemos enviado un enlace de recuperación a <strong className="text-primary font-bold">{email}</strong>
             </p>
             <p className="text-sm mb-6 text-text-muted">
-              Revisa tu bandeja de entrada y sigue las instrucciones.
+              Si la cuenta existe, revisa tu bandeja de entrada y sigue las instrucciones.
             </p>
             <button
               onClick={onBack}

@@ -28,7 +28,7 @@ export const ComercianteStack = ({ user }: ComercianteStackProps) => {
       <Sidebar
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
-        role="MERCHANT"
+        role="COMERCIANTE"
       />
 
       <main className="flex-1 flex flex-col overflow-hidden">

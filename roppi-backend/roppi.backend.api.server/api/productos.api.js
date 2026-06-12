@@ -9,14 +9,12 @@ class ProductosAPI {
   }
 
   _configurarRutas() {
-    // Genericos
+
+    //Rutas públicas
+
+    //Genericos
     this.router.get('/genericos', async (req, res) => this.hacerPeticion(req, res, 'GET', '/genericos'));
     this.router.get('/genericos/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/genericos/${req.params.id}`));
-
-    this.router.post('/genericos', async (req, res) => this.hacerPeticion(req, res, 'POST', '/genericos', req.body));
-    this.router.post('/genericos/:id', async (req, res) => this.hacerPeticion(req, res, 'POST', `/genericos/${req.params.id}`, req.body));
-
-    this.router.delete('/genericos/:id/desactivar', async (req, res) => this.hacerPeticion(req, res, 'DELETE', `/genericos/${req.params.id}/desactivar`, req.body));
 
     // Colores
     this.router.get('/colores', async (req, res) => this.hacerPeticion(req, res, 'GET', '/colores'));
@@ -34,6 +32,15 @@ class ProductosAPI {
     this.router.get('/personalizaciones', async (req, res) => this.hacerPeticion(req, res, 'GET', '/personalizaciones'));
     this.router.get('/personalizaciones/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/personalizaciones/${req.params.id}`));
 
+    //Rutas protegidas
+    //this.router.use(authMiddleware);
+
+    // Genericos
+    this.router.post('/genericos', async (req, res) => this.hacerPeticion(req, res, 'POST', '/genericos', req.body));
+    this.router.post('/genericos/:id', async (req, res) => this.hacerPeticion(req, res, 'POST', `/genericos/${req.params.id}`, req.body));
+
+    this.router.delete('/genericos/:id/desactivar', async (req, res) => this.hacerPeticion(req, res, 'DELETE', `/genericos/${req.params.id}/desactivar`, req.body));
+    
     // Descuentos
     this.router.get('/descuentos', async (req, res) => this.hacerPeticion(req, res, 'GET', '/descuentos'));
     this.router.get('/descuentos/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/descuentos/${req.params.id}`));
