@@ -15,8 +15,7 @@ export function DiscountsPage() {
   // [feat] Estado del modal: null = cerrado, undefined = nuevo, Descuento = edición — 2025-06
   const [editingDiscount, setEditingDiscount] = useState<Descuento | undefined | null>(null);
 
-  //Mensaje de error o éxito de registro
-  const [mensajeModal, setMensajeModal] = useState<{ texto: string; tipo: 'exito' | 'error' } | null>(null);
+  const [mensajeModal, setMensajeModal] = useState<{ texto?: string; tipo: 'exito' | 'error' | 'cargando' } | null>(null);
 
   const isModalOpen = editingDiscount !== null;
 
@@ -38,9 +37,9 @@ export function DiscountsPage() {
     );
   };
 
-  //Mensaje de error o éxito de registro
   const handleSave = async (data: Omit<Descuento, 'id'>) => {
     handleClose();
+    setMensajeModal({ tipo: 'cargando', texto: 'Guardando descuento...' });
     try {
       // FALTA REEMPLAZAR stubDescuentoExito/stubDescuentoError con addDescuento/updateDescuento
       if (editingDiscount?.id) {
@@ -174,11 +173,10 @@ export function DiscountsPage() {
         </div>
       )}
 
-      {/* ── Modal de mensaje (éxito / error) ── */}
       {mensajeModal && (
         <MensajeModal
-          mensaje={mensajeModal.texto}
           tipo={mensajeModal.tipo}
+          mensaje={mensajeModal.texto}
           onClose={() => setMensajeModal(null)}
         />
       )}
