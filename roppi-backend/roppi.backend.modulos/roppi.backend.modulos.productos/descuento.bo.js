@@ -16,7 +16,14 @@ class DescuentoBO {
     // Obtiene solo los descuentos de un tipo de producto
     async obtenerDescuentosPorIdProducto(id) {
         const rows = await descuentoGateway.findByProductoId(id);
-        return rows.map(row => new Descuento(row));
+        const descuentos = rows.map(row => new Descuento(row));
+
+        for (let i = 0; i < descuentos.length; i++) {
+            const ids = await descuentoGateway.obtenerIdsProductosPorIdDescuento(descuentos[i].id);
+            // Convertimos el resultado a un array
+            descuentos[i].idProductos = ids.map(row => row.id_generico);
+        }
+        return descuentos;
     }
 
     // Obtiene todos los descuentos de todos los productos. Es decir,

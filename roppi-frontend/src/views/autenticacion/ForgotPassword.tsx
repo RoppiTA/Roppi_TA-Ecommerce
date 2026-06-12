@@ -8,6 +8,7 @@ interface ForgotPasswordProps {
 
 export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
   const { forgotPassword } = useAuth();
+  const [error, setError] = useState<string>('');
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -15,11 +16,13 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     try {
-      await forgotPassword(email);
+      const resultado = await forgotPassword(email);
       setSubmitted(true);
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Error de conexión con el servidor');
     } finally {
       setIsLoading(false);
     }
@@ -38,15 +41,8 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
               Hemos enviado un enlace de recuperación a <strong className="text-primary font-bold">{email}</strong>
             </p>
             <p className="text-sm mb-6 text-text-muted">
-              Revisa tu bandeja de entrada y sigue las instrucciones. (Nota: Para la simulación, haz clic en continuar abajo).
+              Si la cuenta existe, revisa tu bandeja de entrada y sigue las instrucciones.
             </p>
-            {/* Botón temporal de simulación para poder ver la vista de Reset */}
-            <a
-              href={`/auth/reset-password?email=${email}`}
-              className="block w-full py-3 mb-3 rounded-lg text-primary2 font-medium border-2 border-primary2 hover:bg-primary2/10 transition-colors"
-            >
-              [Simular clic en el correo]
-            </a>
             <button
               onClick={onBack}
               className="w-full py-3 rounded-lg text-white font-medium bg-primary2 hover:bg-primary-hover transition-colors cursor-pointer shadow-md"
