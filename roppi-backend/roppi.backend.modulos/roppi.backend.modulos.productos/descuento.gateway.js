@@ -159,10 +159,24 @@ class DescuentoGateway {
 
         // Agregamos los productos que ahora tendrán descuento
         for (const id_prod of idProductosAgregar) {
-            await db.query(`
-                INSERT INTO "RoppiTA".GENERICOSXDESCUENTOS (ID_GENERICO, ID_DESCUENTO, USUARIO_CREACION, USUARIO_MODIFICACION)
-                VALUES ($1, $2, $3, $3)
-            `, [id_prod, id, usuarioId]);
+            // Veamos si ya existe pero está inactivo
+            const existeInactivo = await db.query(`
+                SELECT ID_DESCUENTO, ID_GENERICO
+                FROM "RoppiTA".GENERICOSXDESCUENTOS 
+                WHERE ID_DESCUENTO = $1 AND ID_GENERICO = $2 AND ACTIVO = 0
+            `, [id, id_prod]);
+            if (existeInactivo.rows.length > 0) {
+                await db.query(`
+                    UPDATE "RoppiTA".GENERICOSXDESCUENTOS
+                    SET ACTIVO = 1, USUARIO_MODIFICACION = $3
+                    WHERE ID_DESCUENTO = $1 AND ID_GENERICO = $2
+                `, [id, id_prod, usuarioId]);
+            } else {
+                await db.query(`
+                    INSERT INTO "RoppiTA".GENERICOSXDESCUENTOS (ID_GENERICO, ID_DESCUENTO, USUARIO_CREACION, USUARIO_MODIFICACION)
+                    VALUES ($1, $2, $3, $3)
+                `, [id_prod, id, usuarioId]);
+            }
         }
         return 1;
 
