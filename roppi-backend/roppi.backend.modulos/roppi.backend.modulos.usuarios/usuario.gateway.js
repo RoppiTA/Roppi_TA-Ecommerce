@@ -50,7 +50,7 @@ class UsuariosGateway {
       VALUES ($1, $2, $3, $4, $5, 0, $6, $6)
       RETURNING *
     `, [nombre, correo, contrasena, numeroDocumento, tipoDocumento, usuarioCreacion]);
-    
+
     const newUser = result.rows[0];
 
     await db.query(`
@@ -181,7 +181,7 @@ class UsuariosGateway {
       DELETE FROM "RoppiTA".usuarios_roles 
       WHERE id_usuario = $1 AND rol = $2
     `, [idUsuario, rol]);
-    
+
     return this.findById(idUsuario);
   }
 }
