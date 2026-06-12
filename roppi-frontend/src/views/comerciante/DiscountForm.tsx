@@ -38,6 +38,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
       setCantidad('0');
       setSelectedProductIds([]);
     }
+    setErrors({});
   }, [initialData]);
 
   const removeProduct = (id: number) => {
@@ -52,6 +53,32 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
     setShowSearch(false);
   };
 
+  // Validar datos del formulario
+  const validarFormulario = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!nombre.trim()) {
+      newErrors.nombre = 'El nombre es requerido';
+    }
+
+    const porcentajeNum = Number(porcentaje);
+    if (!porcentaje || porcentajeNum <= 0 || porcentajeNum > 100) {
+      newErrors.porcentaje = 'El porcentaje debe ser mayor a 0 y menor o igual a 100';
+    }
+
+    const cantidadNum = Number(cantidad);
+    if (!Number.isInteger(cantidadNum) || cantidadNum <= 0) {
+      newErrors.cantidad = 'La cantidad debe ser un número entero positivo';
+    }
+
+    if (selectedProductIds.length === 0) {
+      newErrors.productos = 'Se debe seleccionar al menos una categoría';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleActivar = () => {
     const newErrors: { nombre?: string; porcentaje?: string } = {};
     if (!nombre.trim()) newErrors.nombre = 'Debe completar este campo';
@@ -61,14 +88,15 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
     // [feat] cantidad ahora viene del campo de texto, no del conteo de productos — 2025-06
     onSave({
       nombre,
-      cantidad: Number(cantidad) || 0,
-      porcentajeDescuento: Number(porcentaje) || 0,
+      cantidad: Number(cantidad),
+      porcentajeDescuento: Number(porcentaje),
       idGenericoVinculados: selectedProductIds,
     });
     setNombre('');
     setPorcentaje('');
     setCantidad('0');
     setSelectedProductIds([]);
+    setErrors({});
   };
 
   const availableProducts = products.filter(
@@ -154,6 +182,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                 onKeyDown={blockNonInteger}
                 className="w-full px-3 py-2.5 bg-brand-light/40 border border-primary2/25 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40"
               />
+              {errors.cantidad && <p className="text-xs text-brand-error mt-1">{errors.cantidad}</p>}
             </div>
 
             <div>
@@ -220,6 +249,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                   )}
                 </div>
               )}
+              {errors.productos && <p className="text-xs text-brand-error mt-1">{errors.productos}</p>}
             </div>
           </div>
 
