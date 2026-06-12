@@ -1,4 +1,5 @@
 const express = require('express');
+const authMiddleware = require('./middleware/auth');
 
 class ProductosAPI {
   constructor() {
@@ -32,8 +33,7 @@ class ProductosAPI {
     this.router.get('/personalizaciones', async (req, res) => this.hacerPeticion(req, res, 'GET', '/personalizaciones'));
     this.router.get('/personalizaciones/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/personalizaciones/${req.params.id}`));
 
-    //Rutas protegidas
-    //this.router.use(authMiddleware);
+    this.router.use(authMiddleware);
 
     // Genericos
     this.router.post('/genericos', async (req, res) => this.hacerPeticion(req, res, 'POST', '/genericos', req.body));
