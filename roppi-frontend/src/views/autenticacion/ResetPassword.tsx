@@ -1,16 +1,23 @@
 // src/views/autenticacion/ResetPassword.tsx
 import { useState } from 'react';
 import { Lock, AlertCircle, CheckCircle } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams  } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+
+const decodeTokenTemp = (token: string) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub;
+  } catch {
+    return null;
+  }
+};
 
 export default function ResetPassword() {
   const { resetPassword } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
-  // En un sistema real, aquí extraerías el token. Por simulación, extraemos el email.
-  const email = searchParams.get('email') || ''; 
+  const token = searchParams.get('token') || '';
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -43,10 +50,11 @@ export default function ResetPassword() {
     setIsLoading(true);
 
     try {
-      await resetPassword(email, password);
+      const id = decodeTokenTemp(token);
+      await resetPassword(Number(id), password);
       setSuccess(true);
-    } catch (error) {
-      setErrors(['Error al restablecer la contraseña. El enlace podría ser inválido.']);
+    } catch (error: any) {
+      setErrors([error.message || 'Error al restablecer la contraseña. El enlace podría ser inválido o haber expirado.']);
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +78,7 @@ export default function ResetPassword() {
     );
   }
 
-  if (!email) {
+  if (!token) {
     return (
       <div className="w-full max-w-md font-primary">
         <div className="bg-white rounded-lg shadow-lg p-8 text-center border-brand-error border">
@@ -88,7 +96,7 @@ export default function ResetPassword() {
       <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-100">
         <h1 className="text-center text-2xl font-bold mb-4 text-primary-hover">Nueva Contraseña</h1>
         <p className="text-center mb-8 text-text-muted text-small">
-          Ingresa tu nueva contraseña para la cuenta <strong>{email}</strong>
+          Ingresa tu nueva contraseña
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">

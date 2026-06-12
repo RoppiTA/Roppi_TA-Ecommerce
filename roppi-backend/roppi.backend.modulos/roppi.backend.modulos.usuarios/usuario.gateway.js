@@ -26,7 +26,7 @@ class UsuariosGateway {
   async findByCorreo(correo) {
     const result = await db.query(`
       SELECT u.*, 
-             (SELECT COALESCE(array_agg(rol), '{}') FROM "RoppiTA".usuarios_roles WHERE id_usuario = u.id) as roles
+             (SELECT COALESCE(json_agg(rol), '[]'::json) FROM "RoppiTA".usuarios_roles WHERE id_usuario = u.id) as roles
       FROM "RoppiTA".usuarios u
       WHERE u.correo = $1
     `, [correo]);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Mail, Lock, User, FileText, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface RegisterFormProps {
   onBack: () => void;
@@ -11,6 +12,7 @@ type DocumentType = 'DNI' | 'CE' | 'RUC';
 
 export default function RegisterForm({ onBack, onRegistrationComplete }: RegisterFormProps) {
   const { register } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -64,7 +66,7 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
     setIsLoading(true);
 
     //esto es la parte que deberia ir a la otra capa, la de apis
-    try {
+    /*{try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
       const response = await fetch(`${API_URL}/api/usuarios/registro`, {
@@ -92,7 +94,17 @@ export default function RegisterForm({ onBack, onRegistrationComplete }: Registe
       setErrors([err.message || 'Error de conexión con el servidor']);
     } finally {
       setIsLoading(false);
+    }}*/
+    try{
+      const nuevo = await register(formData);
+      onRegistrationComplete(formData.email)
+    }catch(err){
+      console.log(err);
+      throw err;
+    }finally{
+      setIsLoading(false);
     }
+
   };
 
   const handleChange = (field: string, value: string) => {

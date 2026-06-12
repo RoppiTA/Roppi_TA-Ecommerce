@@ -7,10 +7,12 @@ import ComercianteStack from './stacks/ComercianteStack';
 // import { useAuth } from '../context/AuthContext';
 
 export const AppRouter = () => {
-  // Stub temporal — redirige directo al comerciante sin pasar por auth
-  // Restaurar cuando el login esté conectado:
-  //   const { user } = useAuth();
-  const user = { id: 1, role: 'MERCHANT', name: 'Comerciante Test' };
+  //const [user, setUser] = useState({ id: 104, role: 'MERCHANT', name: 'Juan Pérez' });
+  //const [user, setUser] = useState({ id: 104, role: 'CLIENT' , name: 'María Gómez' });
+  //const [user, setUser] = useState({ id: 104, role: 'GUEST', name: 'Invitado' });
+
+   const { user } = useAuth();
+
 
   return (
     <Routes>
@@ -25,7 +27,7 @@ export const AppRouter = () => {
       <Route
         path="/comerciante/*"
         element={
-          <ProtectedRoute isAllowed={user.role === 'MERCHANT'} redirectTo="/">
+          <ProtectedRoute isAllowed={user.role.includes('COMERCIANTE')} redirectTo="/">
             <ComercianteStack user={user} />
           </ProtectedRoute>
         }

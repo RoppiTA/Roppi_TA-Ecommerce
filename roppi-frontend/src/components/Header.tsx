@@ -13,7 +13,7 @@ export const Header = () => {
   // Obtener la inicial del nombre dinámicamente
   const displayInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'I';
   const displayName = user?.name || 'Invitado';
-  const isGuest = user?.role === 'GUEST';
+  const isGuest = user?.role?.includes('GUEST');
 
   // Cerrar el menú si el usuario hace clic fuera de él
   useEffect(() => {
@@ -69,7 +69,7 @@ export const Header = () => {
                 <p className="text-xs text-brand-muted font-medium">Conectado como</p>
                 <p className="text-sm font-bold text-brand-dark truncate">{displayName}</p>
                 <p className="text-[10px] bg-primary2/10 text-primary-hover inline-block px-2 py-0.5 rounded-full font-semibold mt-1">
-                  Rol: {user?.role}
+                  Rol: {user?.role?.join(', ')}
                 </p>
               </div>
 
