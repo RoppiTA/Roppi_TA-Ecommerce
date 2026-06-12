@@ -56,25 +56,20 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
   // Validar datos del formulario
   const validarFormulario = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-
     if (!nombre.trim()) {
       newErrors.nombre = 'El nombre es requerido';
     }
-
     const porcentajeNum = Number(porcentaje);
     if (!porcentaje || porcentajeNum <= 0 || porcentajeNum > 100) {
       newErrors.porcentaje = 'El porcentaje debe ser mayor a 0 y menor o igual a 100';
     }
-
     const cantidadNum = Number(cantidad);
     if (!Number.isInteger(cantidadNum) || cantidadNum <= 0) {
       newErrors.cantidad = 'La cantidad debe ser un número entero positivo';
     }
-
     if (selectedProductIds.length === 0) {
       newErrors.productos = 'Se debe seleccionar al menos una categoría';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
