@@ -28,7 +28,7 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
     const newAttemptCount = attemptCount + 1;
     setAttemptCount(newAttemptCount);
 
-    if (newAttemptCount >= 5) {
+    if (newAttemptCount >= 3) {
       setError('Cuenta temporalmente bloqueada por múltiples intentos fallidos');
       return;
     }
@@ -36,33 +36,12 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
     setIsLoading(true);
     setError('');
 
-    try {
-      const response = await fetch('http://localhost:3000/api/usuarios/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          correo: email,
-          contraseña: password
-        }),
-      });
+    try{
+      const loggeo = await login(email, password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.mensaje || 'Error al iniciar sesión');
-      }
-
-      // Login exitoso: Guardar token temporalmente en localStorage (para uso futuro)
-      localStorage.setItem('roppi_token', data.data.token);
-      localStorage.setItem('roppi_user', JSON.stringify(data.data.usuario));
-      
-      alert(`¡Bienvenido ${data.data.usuario.nombre}! Has iniciado sesión como ${data.data.usuario.rol === 1 ? 'ADMIN' : 'CLIENTE'}. \n\n(En el siguiente paso conectaremos esto con el enrutador de React)`);
-      
-    } catch (err: any) {
+    }catch(err: any){
       setError(err.message || 'Error de conexión con el servidor');
-    } finally {
+    } finally{
       setIsLoading(false);
     }
   }
@@ -170,9 +149,9 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
           </div>
         </form>
 
-        {attemptCount > 0 && attemptCount < 5 && error && (
+        {attemptCount > 0 && attemptCount < 3 && error && (
           <p className="text-center mt-4 text-sm text-text-muted">
-            Intento {attemptCount} de 5
+            Intento {attemptCount} de 3
           </p>
         )}
       </div>

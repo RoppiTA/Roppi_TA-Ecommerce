@@ -70,6 +70,21 @@ const mapearAPersonalizacion = (p: any): Personalizacion => ({
     activo: p.activo
 });
 
+const mapearADescuentoFrontend = (d: any): Descuento => ({
+    id: d.id,
+    nombre: d.nombre,
+    cantidad: d.cantidad,
+    porcentajeDescuento: d.porcentaje_descuento || d.porcentaje,  // Maneja ambos formatos del backend
+    idGenericoVinculados: d.productos?.map((p: any) => p.id) || d.id_generico_vinculados || []
+});
+
+const mapearADescuentoBackend = (d: CreateDescuentoDTO): any => ({
+    nombre: d.nombre,
+    cantidad: d.cantidad,
+    porcentaje: d.porcentajeDescuento,  // El BO espera 'porcentaje', no 'porcentaje_descuento'
+    idProductos: d.idGenericoVinculados  // El BO espera 'idProductos', no 'id_generico_vinculados'
+});
+
 export const ProductosAPIService = {
     /* --- DATOS MAESTROS --- */
     getColores: async (): Promise<Color[]> => {
@@ -129,7 +144,7 @@ export const ProductosAPIService = {
             colores: productoData.colores,
             personalizaciones: productoData.personalizaciones
         };
-        console.log(dtoBackend);
+        //console.log(dtoBackend);
         const response = await apiClient.post<{ exito: boolean; datos: any }>('/productos/genericos', dtoBackend);
         return mapearAProductoFrontend(response.data.datos);
     },
@@ -165,30 +180,38 @@ export const ProductosAPIService = {
 // [fix] Verbos HTTP corregidos — todos usaban GET incorrectamente (2025-06)
 export const DescuentosAPIService = {
     getDescuentos: async (): Promise<Descuento[]> => {
-        const response = await apiClient.get('/descuentos');
-        return response.data;
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/descuentos');
+        if (!response.data || !response.data.datos) return [];
+        return response.data.datos.map(mapearADescuentoFrontend);
     },
 
     getDescuentoById: async (id: number): Promise<Descuento> => {
-        // [fix] Corregido: endpoint con ID y verbo GET correcto
-        const response = await apiClient.get(`/descuentos/${id}`);
-        return response.data;
+        const response = await apiClient.get<{ exito: boolean; datos: any }>(`/productos/descuentos/${id}`);
+        if (!response.data || !response.data.datos) throw new Error(`No se encontraron datos para el descuento con ID ${id}`);
+        return mapearADescuentoFrontend(response.data.datos);
     },
 
     createDescuento: async (dto: CreateDescuentoDTO): Promise<Descuento> => {
-        // [fix] Corregido: POST con body DTO en lugar de GET sin body
-        const response = await apiClient.post('/descuentos', dto);
-        return response.data;
+        const dataBackend = mapearADescuentoBackend(dto);
+        const response = await apiClient.post<{ exito: boolean; datos: any }>('/productos/descuentos', dataBackend);
+        if (!response.data || !response.data.datos) throw new Error('Error al crear el descuento');
+        return mapearADescuentoFrontend(response.data.datos);
     },
 
     updateDescuento: async (id: number, dto: Partial<CreateDescuentoDTO>): Promise<Descuento> => {
-        // [fix] Corregido: PUT con ID y body DTO en lugar de GET
-        const response = await apiClient.put(`/descuentos/${id}`, dto);
-        return response.data;
+        const dataBackend = mapearADescuentoBackend(dto as CreateDescuentoDTO);
+        const response = await apiClient.put<{ exito: boolean; datos: any }>(`/productos/descuentos/${id}`, dataBackend);
+        if (!response.data || !response.data.datos) throw new Error('Error al actualizar el descuento');
+        return mapearADescuentoFrontend(response.data.datos);
     },
 
     deleteDescuento: async (id: number): Promise<void> => {
-        // [fix] Corregido: quitado prefijo /api/ duplicado (base URL ya incluye /api)
-        await apiClient.delete(`/descuentos/${id}`);
+        await apiClient.delete(`/productos/descuentos/${id}/desactivar`);
+    },
+
+    getDescuentosPorIdProducto: async (idProducto: number): Promise<Descuento[]> => {
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>(`/productos/descuentos/${idProducto}`);
+        if (!response.data || !response.data.datos) return [];
+        return response.data.datos.map(mapearADescuentoFrontend);
     }
 };

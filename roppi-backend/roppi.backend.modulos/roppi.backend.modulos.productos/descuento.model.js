@@ -5,6 +5,7 @@ class Descuento {
         this.nombre = nombre;
         this.cantidad = cantidad;
         this.porcentaje = porcentaje;
+        this.idProductos = null;
         // Auditoria
         this.fecha_creacion = fecha_creacion;
         this.usuario_creacion = usuario_creacion;

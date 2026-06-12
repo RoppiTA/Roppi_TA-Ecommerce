@@ -18,46 +18,46 @@ class UsuariosBO {
   }
 
   /**
-   * Validar fortaleza de contraseña
+   * Validar fortaleza de contrasena
    * Mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula, 1 número
    */
-  validarContraseña(contraseña) {
+  validarContrasena(contrasena) {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
-    return regex.test(contraseña);
+    return regex.test(contrasena);
   }
 
   /**
-   * Hash de contraseña con bcrypt
+   * Hash de contrasena con bcrypt
    */
-  async hashContraseña(contraseña) {
+  async hashContrasena(contrasena) {
     try {
-      return await bcrypt.hash(contraseña, SALT_ROUNDS);
+      return await bcrypt.hash(contrasena, SALT_ROUNDS);
     } catch (error) {
-      throw new Error('Error al encriptar contraseña: ' + error.message);
+      throw new Error('Error al encriptar contrasena: ' + error.message);
     }
   }
 
   /**
-   * Comparar contraseña plana con hash
+   * Comparar contrasena plana con hash
    */
-  async compararContraseña(contraseña, hash) {
+  async compararContrasena(contrasena, hash) {
     try {
-      return await bcrypt.compare(contraseña, hash);
+      return await bcrypt.compare(contrasena, hash);
     } catch (error) {
-      throw new Error('Error al comparar contraseña: ' + error.message);
+      throw new Error('Error al comparar contrasena: ' + error.message);
     }
   }
 
   /**
    * Generar JWT token
    */
-  generarJWT(usuarioId, nombre, rol = 'cliente') {
+  generarJWT(usuarioId, nombre, roles = ['CLIENTE']) {
     try {
       const token = jwt.sign(
         {
           sub: usuarioId,           // ID del usuario
           nombre: nombre,           // Nombre del usuario
-          rol: rol,                 // Rol del usuario
+          roles: roles,             // Roles del usuario
           iat: Math.floor(Date.now() / 1000),
         },
         JWT_SECRET,
@@ -105,7 +105,7 @@ class UsuariosBO {
   /**
    * Crear nuevo usuario
    */
-  async crearUsuario({ nombre, correo, contraseña, numeroDocumento, tipoDocumento }) {
+  async crearUsuario({ nombre, correo, contrasena, numeroDocumento, tipoDocumento }) {
     try {
       // Validaciones
       if (!nombre || nombre.trim() === '') {
@@ -116,8 +116,8 @@ class UsuariosBO {
         throw new Error('El correo electrónico no es válido');
       }
 
-      if (!this.validarContraseña(contraseña)) {
-        throw new Error('La contraseña debe tener al menos 8 caracteres, 1 mayúscula, 1 minúscula y 1 número');
+      if (!this.validarContrasena(contrasena)) {
+        throw new Error('La contrasena debe tener al menos 8 caracteres, 1 mayúscula, 1 minúscula y 1 número');
       }
 
       if (!numeroDocumento || numeroDocumento.trim() === '') {
@@ -139,16 +139,16 @@ class UsuariosBO {
         throw new Error('El número de documento ya está registrado');
       }
 
-      // Hash de contraseña
-      const contraseñaHash = await this.hashContraseña(contraseña);
+      // Hash de contrasena
+      const contrasenaHash = await this.hashContrasena(contrasena);
 
       // Crear usuario en BD
       const usuarioBD = await usuariosGateway.create({
-        nombre,
-        correo,
-        contraseña: contraseñaHash,
-        numeroDocumento,
-        tipoDocumento
+        nombre: nombre,
+        correo: correo,
+        contrasena: contrasenaHash,
+        numeroDocumento: numeroDocumento,
+        tipoDocumento: tipoDocumento
       });
 
       // Generar token de activación
@@ -190,35 +190,35 @@ class UsuariosBO {
   /**
    * Verificar credenciales (Login)
    */
-  async verificarCredenciales(correo, contraseña) {
+  async verificarCredenciales(correo, contrasena) {
     try {
-      if (!correo || !contraseña) {
-        throw new Error('Correo y contraseña son requeridos');
+      if (!correo || !contrasena) {
+        throw new Error('Correo y contrasena son requeridos');
       }
 
       // Buscar usuario por correo
       const usuarioBD = await usuariosGateway.findByCorreo(correo);
       if (!usuarioBD) {
-        throw new Error('Correo o contraseña incorrectos');
+        throw new Error('Correo o contrasena incorrectos');
       }
 
       // Verificar que esté activo
       if (usuarioBD.activo !== 1) {
         throw new Error('La cuenta no está activa. Verifica tu correo');
       }
-
-      // Comparar contraseña
-      const contraseñaValida = await this.compararContraseña(contraseña, usuarioBD.contraseña);
-      if (!contraseñaValida) {
-        throw new Error('Correo o contraseña incorrectos');
+      
+      // Comparar contrasena
+      const contrasenaValida = await this.compararContrasena(contrasena, usuarioBD.contrasena);
+      if (!contrasenaValida) {
+        throw new Error('Correo o contrasena incorrectos');
       }
 
       // Generar JWT
-      const token = this.generarJWT(usuarioBD.id, usuarioBD.nombre);
+      const token = this.generarJWT(usuarioBD.id, usuarioBD.nombre, usuarioBD.roles);
       const usuario = new Usuario(usuarioBD);
 
-      // NO devolver la contraseña
-      delete usuario.contraseña;
+      // NO devolver la contrasena
+      delete usuario.contrasena;
 
       return {
         token,
@@ -232,9 +232,9 @@ class UsuariosBO {
   }
 
   /**
-   * Solicitar recuperación de contraseña
+   * Solicitar recuperación de contrasena
    */
-  async solicitarRecuperacionContraseña(correo) {
+  async solicitarRecuperacionContrasena(correo) {
     try {
       if (!correo) {
         throw new Error('Correo requerido');
@@ -253,6 +253,7 @@ class UsuariosBO {
 
       return {
         usuarioId: usuarioBD.id,
+        nombre: usuarioBD.nombre,
         tokenRecuperacion,
         mensaje: 'Token de recuperación generado'
       };
@@ -263,16 +264,16 @@ class UsuariosBO {
   }
 
   /**
-   * Resetear contraseña
+   * Resetear contrasena
    */
-  async resetearContraseña(usuarioId, contraseñaNueva) {
+  async resetearContrasena(usuarioId, contrasenaNueva) {
     try {
-      if (!contraseñaNueva) {
-        throw new Error('La nueva contraseña es requerida');
+      if (!contrasenaNueva) {
+        throw new Error('La nueva contrasena es requerida');
       }
 
-      if (!this.validarContraseña(contraseñaNueva)) {
-        throw new Error('La contraseña debe tener al menos 8 caracteres, 1 mayúscula, 1 minúscula y 1 número');
+      if (!this.validarContrasena(contrasenaNueva)) {
+        throw new Error('La contrasena debe tener al menos 8 caracteres, 1 mayúscula, 1 minúscula y 1 número');
       }
 
       const usuarioBD = await usuariosGateway.findById(usuarioId);
@@ -280,14 +281,14 @@ class UsuariosBO {
         throw new Error('Usuario no encontrado');
       }
 
-      const contraseñaHash = await this.hashContraseña(contraseñaNueva);
+      const contrasenaHash = await this.hashContrasena(contrasenaNueva);
 
-      const usuarioActualizado = await usuariosGateway.actualizarContraseña(usuarioId, contraseñaHash);
+      const usuarioActualizado = await usuariosGateway.actualizarContrasena(usuarioId, contrasenaHash);
       const usuario = new Usuario(usuarioActualizado);
 
       return {
         usuario,
-        mensaje: 'Contraseña actualizada exitosamente'
+        mensaje: 'Contrasena actualizada exitosamente'
       };
 
     } catch (error) {
@@ -296,7 +297,71 @@ class UsuariosBO {
   }
 
   /**
-   * Obtener información de usuario (sin mostrar contraseña)
+   * Asignar nuevo rol a un usuario, por si acaso hay que asignar más de un rol
+   */
+  async asignarRol(idUsuario, rol, usuarioModificacion = 1) {
+    try {
+      if (!idUsuario || !rol) {
+        throw new Error('El ID del usuario y el rol son requeridos');
+      }
+
+      // Validar que el rol sea uno de los permitidos
+      const rolesPermitidos = ['CLIENTE', 'COMERCIANTE', 'ADMINISTRADOR'];
+      if (!rolesPermitidos.includes(rol)) {
+        throw new Error(`Rol inválido. Debe ser uno de: ${rolesPermitidos.join(', ')}`);
+      }
+
+      const usuarioBD = await usuariosGateway.asignarRol(idUsuario, rol, usuarioModificacion);
+      if (!usuarioBD) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      const usuario = new Usuario(usuarioBD);
+      delete usuario.contrasena;
+
+      return {
+        usuario,
+        mensaje: 'Rol asignado exitosamente'
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+ * Quitar rol a un usuario
+ */
+
+  async quitarRol(idUsuario, rol) {
+    try {
+      if (!idUsuario || !rol) {
+        throw new Error('El ID del usuario y el rol son requeridos');
+      }
+
+      const rolesPermitidos = ['CLIENTE', 'COMERCIANTE', 'ADMINISTRADOR'];
+      if (!rolesPermitidos.includes(rol)) {
+        throw new Error(`Rol inválido. Debe ser uno de: ${rolesPermitidos.join(', ')}`);
+      }
+
+      const usuarioBD = await usuariosGateway.quitarRol(idUsuario, rol);
+      if (!usuarioBD) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      const usuario = new Usuario(usuarioBD);
+      delete usuario.contrasena;
+
+      return {
+        usuario,
+        mensaje: 'Rol eliminado exitosamente'
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener información de usuario (sin mostrar contrasena)
    */
   async obtenerUsuario(usuarioId) {
     try {
@@ -306,7 +371,7 @@ class UsuariosBO {
       }
 
       const usuario = new Usuario(usuarioBD);
-      delete usuario.contraseña; // Nunca devolver contraseña
+      delete usuario.contrasena; // Nunca devolver contrasena
 
       return usuario;
 

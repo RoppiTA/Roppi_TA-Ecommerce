@@ -4,7 +4,7 @@ import { ProductList } from './ProductList';
 
 const ProductListPage = () => {
   const navigate = useNavigate();
-  const { productos, loading, error } = useProductosGenericos();
+  const { productos, loading, error, addProducto } = useProductosGenericos();
 
   if (loading) {
     return (
@@ -30,6 +30,7 @@ const ProductListPage = () => {
       <ProductList
         products={productos}
         onAddProduct={() => navigate('/comerciante/products/new')}
+        onAddProducto={addProducto}
       />
     </div>
   );
