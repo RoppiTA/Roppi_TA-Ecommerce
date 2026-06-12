@@ -1,15 +1,17 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthAPIService } from '../api/auth.api';
+import { isTokenExpired } from '../api/apiCliente';
 
 // Tipos base
-export type UserRole = 'MERCHANT' | 'CLIENT' | 'GUEST';
+export type UserRole = 'COMERCIANTE' | 'CLIENTE' | 'GUEST';
 export type AuthError = 'none' | 'invalid-account' | 'incorrect-credentials' | 'account-locked';
 
 // Definición de usuario
 interface User {
   id: number;
-  role: UserRole;
+  role: UserRole[];
   name: string;
 }
 
@@ -30,23 +32,55 @@ interface AuthContextType {
   logout: () => void;
   forgotPassword: (email: string) => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
-  resetPassword: (email: string, newPass: string) => Promise<boolean>;
+  resetPassword: (id: number, newPass: string) => Promise<boolean>;
 }
 
 // Crear contexto con valor inicial undefined
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const decodeToken = (token: string): User | null => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return {
+      id: payload.sub,
+      role: payload.roles ?? ['GUEST'],  // ✅ array completo
+      name: payload.nombre ?? 'Usuario',
+    };
+  } catch {
+    return null;
+  }
+};
+
+
 // Proveedor de autenticación
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User>({ id: 0, role: 'GUEST', name: 'Invitado' });
-  const [token, setToken] = useState<string | null>(null);
 
+  const [token, setToken] = useState<string | null>(() => {
+    const savedToken = localStorage.getItem('roppi_token');
+    if (!savedToken || isTokenExpired(savedToken)) {
+      localStorage.removeItem('roppi_token'); // limpia si venció
+      return null;
+    }
+    return savedToken;
+  });
+  const [user, setUser] = useState<User>(() => {
+    const savedToken = localStorage.getItem('roppi_token');
+    console.log('savedToken:', savedToken); // ¿hay token?
+    if (savedToken && !isTokenExpired(savedToken)) {
+      const decoded = decodeToken(savedToken);
+      console.log('decoded:', decoded); // ¿qué trae?
+      if (decoded) return decoded;
+    }
+    return { id: 0, role: ['GUEST'], name: 'Invitado' };
+  });
   // Simulación de BD para el API
-  const [simulatedDB, setSimulatedDB] = useState([
+  /*{const [simulatedDB, setSimulatedDB] = useState([
     { email: 'comerciante@roppi.com', pass: '123456', user: { id: 104, role: 'MERCHANT' as UserRole, name: 'Juan Pérez' } },
     { email: 'cliente@roppi.com', pass: '123456', user: { id: 105, role: 'CLIENT' as UserRole, name: 'María Gómez' } }
-  ]);
+  ]);}*/
+
+  // Agregar esto después de los useState, antes de las funciones
 
   // Simulación del endpoint de Login
   const login = async (email: string, pass: string): Promise<AuthError> => {
@@ -63,23 +97,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return 'invalid-account';
     }
 
-    // Buscar usuario
-    const foundUser = simulatedDB.find(u => u.email === email); //llamar api de buscar usuario (id, rol nombre y token)
-    if (!foundUser || foundUser.pass !== pass) {
-      handleFailedAttempt();
-      return 'incorrect-credentials';
+    try{
+      const foundUser = await AuthAPIService.validarCuenta(email, pass);
+      setToken(foundUser.data.token); // guardar el token
+      localStorage.setItem('roppi_token', foundUser.data.token);
+      setUser({
+        id: foundUser.data.usuario.id,
+        role: foundUser.data.usuario.roles,
+        name: foundUser.data.usuario.nombre
+      });
+      localStorage.removeItem('auth_attempts');
+      
+      if (foundUser.data.usuario.roles.includes('COMERCIANTE')) navigate('/comerciante');
+      else navigate('/');
+    } catch (err: any) {
+      const backendMessage = err.response?.data?.mensaje || err.response?.data?.message || 'Error de autenticación';
+      throw new Error(backendMessage);
     }
-
-    // Éxito: Guardar sesión y JWT Simulado
-    const mockJWT = `eyJhbGciOiJIUzI1NiIsIn...simulacion...${foundUser.user.id}`;
-    setToken(mockJWT); // guardar el token
-    setUser(foundUser.user);
-    localStorage.removeItem('auth_attempts'); // Reiniciar intentos
-
-    // Redirección por rol
-    if (foundUser.user.role === 'MERCHANT') navigate('/comerciante');
-    else navigate('/');
-    
     return 'none';
   };
 
@@ -97,68 +131,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setToken(null);
-    setUser({ id: 0, role: 'GUEST', name: 'Invitado' });
+    localStorage.removeItem('roppi_token');
+    setUser({ id: 0, role: ['GUEST'], name: 'Invitado' });
     navigate('/auth');
   };
 
   // Simulación del endpoint de recuperar contraseña
   const forgotPassword = async (email: string) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    /* INTEGRACIÓN API FUTURA:
-    const response = await fetch('https://tu-api.com/api/auth/forgot-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    if (!response.ok) throw new Error('Error al enviar correo');
-    return true;
-    */
-    console.log(`Simulación: Correo de recuperación enviado a ${email}`);
-    return true;
+    try{
+      const resultado = await AuthAPIService.recuperarContrasena(email);
+      return true;
+    }catch(err: any){
+      console.log(err);
+      const backendMessage = err.response?.data?.mensaje || err.response?.data?.message || 'Error de validacion';
+      throw new Error(backendMessage);
+    }
   };
 
   const register = async (data: RegisterData) => {
-
-    /* 🚀 INTEGRACIÓN API FUTURA:
-    const response = await fetch('https://tu-api.com/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error('Error en el registro');
-    // const result = await response.json();
-    */
-
-    // Simulación: Agregar el nuevo usuario a la BD local
-    const newUser = {
-      email: data.email,
-      pass: data.password,
-      user: { id: Date.now(), role: 'CLIENT' as UserRole, name: data.fullName }
-    };
-    // llamar a la api que crea el usuario
+    
+    try {
+      const nuevo = await AuthAPIService.createUsuario(data.fullName, data.email, data.password, data.documentNumber, data.documentType);
+      return true;
+    } catch (err){
+        console.error("Error al crear cuenta", err);
+        throw err;
+    }
+    
+    /*{// llamar a la api que crea el usuario
     setSimulatedDB(prev => [...prev, newUser]);
     
-    return true;
+    return true;}*/
   };
 
-  const resetPassword = async (email: string, newPass: string) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    /* 🚀 INTEGRACIÓN API FUTURA:
-    const response = await fetch('https://tu-api.com/api/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      // En un flujo real, aquí enviarías un token en lugar del email directamente
-      body: JSON.stringify({ email, newPassword: newPass }) 
-    });
-    if (!response.ok) throw new Error('Error al actualizar contraseña');
-    */
-
-    // Simulación: Cambiar la contraseña en la BD local
-    setSimulatedDB(prev => 
-      prev.map(u => u.email === email ? { ...u, pass: newPass } : u)
-    );
+  const resetPassword = async (id: number, newPass: string) => {
+    try{
+      await AuthAPIService.resetearContrasena(id, newPass);
+      return true;
+    }catch(err: any){
+      const backendMessage = err.response?.data?.mensaje || err.response?.data?.message || 'Error al restablecer la contraseña';
+      throw new Error(backendMessage);
+    }
     
     return true;
   };

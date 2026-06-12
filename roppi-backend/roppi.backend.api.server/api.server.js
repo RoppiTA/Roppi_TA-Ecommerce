@@ -13,14 +13,13 @@ class APIServer {
 
     this._configurarMiddlewares();
     this._distribuirRecursos();
-    this.app.use(cors({
-      origin: 'http://localhost:5173',
-      credentials: true
-    }));
   }
 
   _configurarMiddlewares() {
-    this.app.use(cors());
+      this.app.use(cors({
+      origin: 'http://localhost:5173',
+      credentials: true
+    }));
     this.app.use(express.json());
     // Se omitió AuthenticatorMiddleware por petición del usuario para pruebas
   }

@@ -144,7 +144,7 @@ export const ProductosAPIService = {
             colores: productoData.colores,
             personalizaciones: productoData.personalizaciones
         };
-        console.log(dtoBackend);
+        //console.log(dtoBackend);
         const response = await apiClient.post<{ exito: boolean; datos: any }>('/productos/genericos', dtoBackend);
         return mapearAProductoFrontend(response.data.datos);
     },

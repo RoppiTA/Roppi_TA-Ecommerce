@@ -57,10 +57,10 @@ class UsuariosAPI {
 
         // 3. Redirigir al frontend
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/?activado=true`);
+        res.redirect(`${frontendUrl}/auth/activated`);
       } catch (error) {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/?error_activacion=${encodeURIComponent(error.message)}`);
+        res.redirect(`${frontendUrl}/auth/activated?error=${encodeURIComponent(error.message)}`);
       }
     });
 
@@ -73,6 +73,20 @@ class UsuariosAPI {
         res.status(200).json({ exito: true, data: resultado });
       } catch (error) {
         res.status(401).json({ exito: false, mensaje: error.message });
+      }
+    });
+
+    //correito para recuperar la contra
+    this.router.post('/recuperar', async (req, res) => {
+      try {
+        const { correo } = req.body;
+        const resultado = await usuariosBO.solicitarRecuperacionContrasena(correo);
+
+        emailService.enviarCorreoRecuperacion(correo, resultado.tokenRecuperacion, resultado.nombre
+        ).catch(err => console.error("Error asíncrono enviando correo:", err));
+        res.status(201).json({ exito: true, data: resultado });
+      }catch (error){
+        res.status(401).json({ exito: false, mensaje: error.message});
       }
     });
 
