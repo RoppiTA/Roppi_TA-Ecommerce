@@ -7,6 +7,7 @@ import { ProductTable } from './ProductTable';
 import { MetricsSection } from './MetricsSection';
 import { CategoryForm } from './CategoryForm';
 import { DiscountForm } from './DiscountForm';
+import { MensajeModal } from '../../components/MensajeModal';
 
 export const DefaultComerciante = () => {
   const navigate = useNavigate();
@@ -14,12 +15,16 @@ export const DefaultComerciante = () => {
   const { descuentos, loading: loadingDescuentos, addDescuento } = useDescuentos();
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [mensajeModal, setMensajeModal] = useState<{ texto?: string; tipo: 'exito' | 'error' | 'cargando' } | null>(null);
 
   const handleSaveDiscount = async (discount: CreateDescuentoDTO) => {
+    setShowDiscountModal(false);
+    setMensajeModal({ tipo: 'cargando', texto: 'Guardando descuento...' });
     try {
       await addDescuento(discount);
+      setMensajeModal({ tipo: 'exito', texto: 'Descuento creado exitosamente' });
     } catch {
-      // error ya manejado en el hook
+      setMensajeModal({ tipo: 'error', texto: 'Error al crear el descuento' });
     }
   };
 
@@ -97,7 +102,7 @@ export const DefaultComerciante = () => {
                 VER CATÁLOGO COMPLETO →
               </button>
             </div>
-            <ProductTable products={productos} onViewProduct={handleViewProduct} />
+            <ProductTable products={productos.slice(0, 10)} onViewProduct={handleViewProduct} />
           </div>
 
           {/* Métricas */}
@@ -139,7 +144,6 @@ export const DefaultComerciante = () => {
             className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4"
             onClick={e => e.stopPropagation()}
           >
-            {/* [refactor] El X ahora lo gestiona DiscountForm via onClose — 2025-06 */}
             <DiscountForm
               products={productos}
               discounts={descuentos}
@@ -148,6 +152,14 @@ export const DefaultComerciante = () => {
             />
           </div>
         </div>
+      )}
+
+      {mensajeModal && (
+        <MensajeModal
+          tipo={mensajeModal.tipo}
+          mensaje={mensajeModal.texto}
+          onClose={() => setMensajeModal(null)}
+        />
       )}
     </div>
   );

@@ -16,12 +16,11 @@ export function ProductList({ products, onAddProduct, onAddProducto }: ProductLi
   const navigate = useNavigate();
   const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
 
-  //Mensaje de error o éxito de registro
-  const [mensajeModal, setMensajeModal] = useState<{ texto: string; tipo: 'exito' | 'error' } | null>(null);
+  const [mensajeModal, setMensajeModal] = useState<{ texto?: string; tipo: 'exito' | 'error' | 'cargando' } | null>(null);
 
-  //Mensaje de error o éxito de registro
   const handleSaveProduct = async (dto: CreateProductGenericoDTO) => {
     setIsNewProductModalOpen(false);
+    setMensajeModal({ tipo: 'cargando', texto: 'Guardando producto...' });
     try {
       await onAddProducto(dto);
       setMensajeModal({ texto: 'Producto registrado exitosamente', tipo: 'exito' });
@@ -77,14 +76,14 @@ export function ProductList({ products, onAddProduct, onAddProducto }: ProductLi
         </div>
       </div>
 
-      {/* ── Grilla de productos — máximo 3 por fila ── */}
+      {/* ── Grilla de productos — 4 por fila en desktop ── */}
       {products.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-brand-muted">
           <Package size={40} className="mb-3 text-primary2/30" />
           <p className="text-sm">No hay productos en el catálogo. Agrega uno con el botón de arriba.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
           {products.map((product) => {
             const imagenFiltrada = assets[product.imagen as keyof typeof assets];
             const badge = getBadge(product.activo);
@@ -105,38 +104,38 @@ export function ProductList({ products, onAddProduct, onAddProducto }: ProductLi
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Package size={36} className="text-primary2/30" />
+                      <Package size={28} className="text-primary2/30" />
                     </div>
                   )}
                 </div>
 
                 {/* Contenido */}
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="font-semibold text-sm text-brand-dark leading-tight">
+                <div className="p-3">
+                  <div className="flex items-start justify-between gap-1.5 mb-1">
+                    <h3 className="font-semibold text-xs text-brand-dark leading-tight line-clamp-2">
                       {product.nombre}
                     </h3>
-                    <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium ${badge.classes}`}>
+                    <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-medium ${badge.classes}`}>
                       {badge.label}
                     </span>
                   </div>
 
                   {product.descripcion && (
-                    <p className="text-xs text-brand-muted line-clamp-2 mb-3">
+                    <p className="text-[11px] text-brand-muted line-clamp-1 mb-2">
                       {product.descripcion}
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center justify-between mt-1.5">
                     {product.precio_base > 0 ? (
-                      <span className="px-2 py-0.5 bg-primary2/15 text-primary-hover font-bold rounded text-xs">
+                      <span className="px-1.5 py-0.5 bg-primary2/15 text-primary-hover font-bold rounded text-[11px]">
                         S/ {product.precio_base.toFixed(2)}
                       </span>
                     ) : (
-                      <span className="text-xs text-brand-muted">Sin precio base</span>
+                      <span className="text-[11px] text-brand-muted">Sin precio</span>
                     )}
                     {product.maximo_stock > 0 && (
-                      <span className="text-xs text-brand-muted">
+                      <span className="text-[11px] text-brand-muted">
                         Máx. {product.maximo_stock} u.
                       </span>
                     )}
