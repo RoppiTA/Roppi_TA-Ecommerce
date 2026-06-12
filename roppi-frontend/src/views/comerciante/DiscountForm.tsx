@@ -3,6 +3,10 @@ import { useState, useEffect } from 'react';
 import { CreateDescuentoDTO, Descuento } from '../../types/producto/descuento.types';
 import { ProductoGenerico } from '../../types/producto/productoGen.types';
 
+const blockNonInteger = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
+};
+
 // [feat] Props extendidas para soportar modo edición (initialData) y cierre modal (onClose) — 2025-06
 interface Props {
   products: ProductoGenerico[];
@@ -19,7 +23,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
   const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
   const [productSearch, setProductSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<{ nombre?: string; porcentaje?: string }>({});
 
   // [feat] Precarga de datos cuando se abre en modo edición — 2025-06
   useEffect(() => {
@@ -76,8 +80,11 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
   };
 
   const handleActivar = () => {
-    if (!validarFormulario()) return;
-
+    const newErrors: { nombre?: string; porcentaje?: string } = {};
+    if (!nombre.trim()) newErrors.nombre = 'Debe completar este campo';
+    if (!porcentaje.trim()) newErrors.porcentaje = 'Debe completar este campo';
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    setErrors({});
     // [feat] cantidad ahora viene del campo de texto, no del conteo de productos — 2025-06
     onSave({
       nombre,
@@ -133,14 +140,10 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                 type="text"
                 placeholder="e.g., SEASONAL_CLEARANCE"
                 value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                className={`w-full px-3 py-2.5 bg-brand-light/40 border rounded text-sm focus:outline-none focus:ring-2 ${
-                  errors.nombre
-                    ? 'border-brand-error/50 focus:ring-brand-error/40'
-                    : 'border-primary2/25 focus:ring-primary2/40'
-                }`}
+                onChange={(e) => { setNombre(e.target.value); if (errors.nombre) setErrors(prev => ({ ...prev, nombre: undefined })); }}
+                className={`w-full px-3 py-2.5 bg-brand-light/40 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40 ${errors.nombre ? 'border-brand-error' : 'border-primary2/25'}`}
               />
-              {errors.nombre && <p className="text-xs text-brand-error mt-1">{errors.nombre}</p>}
+              {errors.nombre && <p className="mt-1 text-xs text-brand-error">{errors.nombre}</p>}
             </div>
 
             <div>
@@ -152,20 +155,17 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                   type="number"
                   placeholder="20"
                   value={porcentaje}
-                  onChange={(e) => setPorcentaje(e.target.value)}
+                  onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) { setPorcentaje(v); if (errors.porcentaje) setErrors(prev => ({ ...prev, porcentaje: undefined })); } }}
                   min={0}
                   max={100}
-                  className={`w-full px-3 py-2.5 bg-brand-light/40 border rounded text-sm focus:outline-none focus:ring-2 pr-8 ${
-                    errors.porcentaje
-                      ? 'border-brand-error/50 focus:ring-brand-error/40'
-                      : 'border-primary2/25 focus:ring-primary2/40'
-                  }`}
+                  onKeyDown={blockNonInteger}
+                  className={`w-full px-3 py-2.5 bg-brand-light/40 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40 pr-8 ${errors.porcentaje ? 'border-brand-error' : 'border-primary2/25'}`}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#43474f] font-bold text-sm">
                   %
                 </span>
               </div>
-              {errors.porcentaje && <p className="text-xs text-brand-error mt-1">{errors.porcentaje}</p>}
+              {errors.porcentaje && <p className="mt-1 text-xs text-brand-error">{errors.porcentaje}</p>}
             </div>
 
             {/* [feat] Campo de cantidad mínima para eligibilidad — 2025-06 */}
@@ -177,13 +177,10 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                 type="number"
                 placeholder="1"
                 value={cantidad}
-                onChange={(e) => setCantidad(e.target.value)}
+                onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) setCantidad(v); }}
                 min={0}
-                className={`w-full px-3 py-2.5 bg-brand-light/40 border rounded text-sm focus:outline-none focus:ring-2 ${
-                  errors.cantidad
-                    ? 'border-brand-error/50 focus:ring-brand-error/40'
-                    : 'border-primary2/25 focus:ring-primary2/40'
-                }`}
+                onKeyDown={blockNonInteger}
+                className="w-full px-3 py-2.5 bg-brand-light/40 border border-primary2/25 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40"
               />
               {errors.cantidad && <p className="text-xs text-brand-error mt-1">{errors.cantidad}</p>}
             </div>
