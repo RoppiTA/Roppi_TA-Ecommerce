@@ -78,9 +78,10 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
     const newErrors: { nombre?: string; porcentaje?: string } = {};
     if (!nombre.trim()) newErrors.nombre = 'Debe completar este campo';
     if (!porcentaje.trim()) newErrors.porcentaje = 'Debe completar este campo';
+    if (nombre && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9 ]+$/.test(nombre)) newErrors.nombre = 'Error: El nombre debe contener solamente caracteres alfanuméricos';
+    if (Number(porcentaje)<=0 || Number(porcentaje)>=100) newErrors.porcentaje = 'Error: El valor del descuento debe ser mayor a 0 y menor que 100';
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     setErrors({});
-    // [feat] cantidad ahora viene del campo de texto, no del conteo de productos — 2025-06
     onSave({
       nombre,
       cantidad: Number(cantidad),
@@ -150,10 +151,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
                   type="number"
                   placeholder="20"
                   value={porcentaje}
-                  onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) >= 0) { setPorcentaje(v); if (errors.porcentaje) setErrors(prev => ({ ...prev, porcentaje: undefined })); } }}
-                  min={0}
-                  max={100}
-                  onKeyDown={blockNonInteger}
+                  onChange={(e) => { const v = e.target.value; if (v === '' || Number(v) === 0 || Number(v)) { setPorcentaje(v); if (errors.porcentaje) setErrors(prev => ({ ...prev, porcentaje: undefined })); } }}
                   className={`w-full px-3 py-2.5 bg-brand-light/40 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary2/40 pr-8 ${errors.porcentaje ? 'border-brand-error' : 'border-primary2/25'}`}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#43474f] font-bold text-sm">
@@ -274,7 +272,7 @@ export function DiscountForm({ products, discounts, onSave, onClose, initialData
             onClick={handleUpdate}
             className="px-5 py-2 bg-primary-hover text-white rounded-lg text-sm font-semibold hover:bg-primary2 transition-colors"
           >
-            Actualizar Descuento
+            Activar Promoción
           </button>
         </div>
       </div>
