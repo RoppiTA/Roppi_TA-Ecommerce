@@ -62,6 +62,15 @@ class DescuentoGateway {
         return result.rows;
     }
 
+    async obtenerIdsProductosPorIdDescuento(idDescuento) {
+        const result = await db.query(`
+            SELECT ID_GENERICO
+            FROM "RoppiTA".GENERICOSXDESCUENTOS 
+            WHERE ID_DESCUENTO = $1 AND ACTIVO = 1
+        `, [idDescuento]);
+        return result.rows;
+    }
+
     async findByDescuentoIdActivo(idDescuento) {
         const result = await db.query(`
             SELECT 
