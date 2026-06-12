@@ -206,6 +206,12 @@ export const DescuentosAPIService = {
     },
 
     deleteDescuento: async (id: number): Promise<void> => {
-        await apiClient.delete(`/productos/descuentos/${id}`);
+        await apiClient.delete(`/productos/descuentos/${id}/desactivar`);
+    },
+
+    getDescuentosPorIdProducto: async (idProducto: number): Promise<Descuento[]> => {
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>(`/productos/descuentos/producto/${idProducto}`);
+        if (!response.data || !response.data.datos) return [];
+        return response.data.datos.map(mapearADescuentoFrontend);
     }
 };

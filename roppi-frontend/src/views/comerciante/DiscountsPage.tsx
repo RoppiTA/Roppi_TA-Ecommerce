@@ -1,16 +1,17 @@
 // [feat] Vista de descuentos rediseñada con design system Tailwind — 2025-06
 // Reemplaza el uso de MUI (DiscountTable + DiscountModal) por componentes Tailwind propios
 // y reutiliza DiscountForm (extendido) como modal de creación/edición.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Filter, Pencil, Percent, Trash2 } from 'lucide-react';
 import { useProductosGenericos, useDescuentos } from '../../hooks/useProductos';
 import { Descuento } from '../../types/producto/descuento.types';
 import { DiscountForm } from './DiscountForm';
 import { MensajeModal } from '../../components/MensajeModal';
+import { DiscountFilterModal } from './DiscountFilterModal';
 
 export function DiscountsPage() {
   const { productos } = useProductosGenericos();
-  const { descuentos, loading, addDescuento, updateDescuento, deleteDescuento } = useDescuentos();
+  const { descuentos, loading, addDescuento, updateDescuento, deleteDescuento, getDescuentosPorIdProducto } = useDescuentos();
 
   // [feat] Estado del modal: null = cerrado, undefined = nuevo, Descuento = edición — 2025-06
   const [editingDiscount, setEditingDiscount] = useState<Descuento | undefined | null>(null);
@@ -22,29 +23,43 @@ export function DiscountsPage() {
 
   const handleAdd = () => setEditingDiscount(undefined);
   const handleFilter = () => {
-    // Mostrar el listado de productos genericos
-
-    // Permitir seleccionar uno (su id)
-
-    // Enviar a backend para ejecutar funcion: obtenerDescuentosPorIdProducto
-
-    alert('Funcionalidad de filtrado aún no implementada');
+    setFilterModalOpen(true);
   };
   const handleEdit = (d: Descuento) => setEditingDiscount(d);
   const handleClose = () => setEditingDiscount(null);
 
-  // Stub para probar modals
-  // Se llama así: await stubDescuentoExito(data)  → simula operación exitosa
-  // Se llama así: await stubDescuentoError(data)  → simula operación con error
-  // Se pone el texto así: setMensajeModal({ texto: 'Mi mensaje aquí', tipo: 'exito' | 'error' })
-  const stubDescuentoExito = async (_data: Omit<Descuento, 'id'>): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [selectedProductFilter, setSelectedProductFilter] = useState<number | null>(null);
+  const [descuentosMostrados, setDescuentosMostrados] = useState<Descuento[]>([]);
+
+  useEffect(() => {
+    if (!selectedProductFilter) {
+      setDescuentosMostrados(descuentos);
+    }
+  }, [descuentos, selectedProductFilter]);
+  const handleSelectProductFilter = async (
+    productId: number
+  ) => {
+    try {
+      const descuentosFiltrados =
+        await getDescuentosPorIdProducto(productId);
+
+      setSelectedProductFilter(productId);
+
+      setDescuentosMostrados(descuentosFiltrados);
+
+      setFilterModalOpen(false);
+    } catch {
+      setMensajeModal({
+        texto: 'Error al obtener descuentos del producto',
+        tipo: 'error'
+      });
+    }
   };
 
-  const stubDescuentoError = async (_data: Omit<Descuento, 'id'>): Promise<void> => {
-    await new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Error simulado al guardar el descuento')), 300)
-    );
+  const clearFilter = () => {
+    setSelectedProductFilter(null);
+    setDescuentosMostrados(descuentos);
   };
 
   //Mensaje de error o éxito de registro
@@ -65,9 +80,9 @@ export function DiscountsPage() {
   const getProductNames = (ids?: number[]) =>
     ids && ids.length > 0
       ? ids
-          .map((id) => productos.find((p) => p.id === id)?.nombre)
-          .filter(Boolean)
-          .join(', ') || '—'
+        .map((id) => productos.find((p) => p.id === id)?.nombre)
+        .filter(Boolean)
+        .join(', ') || '—'
       : '—';
 
   if (loading) {
@@ -88,11 +103,30 @@ export function DiscountsPage() {
         <p className="text-brand-muted text-sm mb-4">
           Administra las reglas de descuento y promociones aplicadas a tu catálogo de productos.
         </p>
-
         <div className="flex flex-wrap gap-3 mb-4">
           <span className="px-2 py-1.5 bg-primary2/15 text-primary-hover font-semibold rounded text-xs">
-            {`${descuentos.length} descuentos activos`}
+            {`${descuentosMostrados.length} descuentos`}
           </span>
+
+          {selectedProductFilter && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-primary-hover/10 rounded-lg">
+              <span className="text-sm text-primary-hover">
+                Filtrado por:
+                {
+                  productos.find(
+                    p => p.id === selectedProductFilter
+                  )?.nombre
+                }
+              </span>
+
+              <button
+                onClick={clearFilter}
+                className="text-brand-error text-xs font-semibold"
+              >
+                Quitar filtro
+              </button>
+            </div>
+          )}
         </div>
 
         {/* [feat] Mismo estilo de botón secundario que DefaultComerciante — 2025-06 */}
@@ -125,14 +159,14 @@ export function DiscountsPage() {
             </tr>
           </thead>
           <tbody>
-            {descuentos.length === 0 ? (
+            {descuentosMostrados.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-sm text-brand-muted">
                   No hay descuentos registrados. Agrega uno con el botón de arriba.
                 </td>
               </tr>
             ) : (
-              descuentos.map((d) => (
+              descuentosMostrados.map((d) => (
                 <tr key={d.id} className="border-b border-primary-hover/10 hover:bg-brand-light/20 transition-colors">
                   <td className="px-4 py-3 text-sm font-medium text-brand-dark">{d.nombre}</td>
                   <td className="px-4 py-3">
@@ -154,7 +188,7 @@ export function DiscountsPage() {
                         <Pencil size={15} />
                       </button>
                       <button
-                        onClick={() => deleteDescuento(d.id)}
+                        onClick={() => deleteDescuento(d.id)} // FALTA: Mensaje de confirmación antes de eliminar
                         className="p-1.5 rounded hover:bg-brand-error/10 text-brand-error transition-colors"
                         title="Eliminar"
                       >
@@ -199,8 +233,17 @@ export function DiscountsPage() {
           onClose={() => setMensajeModal(null)}
         />
       )}
+      {filterModalOpen && (
+          <DiscountFilterModal
+            products={productos}
+            onClose={() => setFilterModalOpen(false)}
+            onSelect={handleSelectProductFilter}
+          />
+      )}
     </div>
+    
   );
 }
+
 
 export default DiscountsPage;

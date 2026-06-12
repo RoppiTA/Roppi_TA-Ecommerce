@@ -176,6 +176,21 @@ export const useDescuentos = () => {
         }
     };
 
+    // 5. OBTENER DESCUENTOS POR ID DE PRODUCTO
+    const getDescuentosPorIdProducto = useCallback(async (idProducto: number) => {
+        try {
+            setLoading(true);
+            const data = await DescuentosAPIService.getDescuentosPorIdProducto(idProducto);
+            setDescuentos(data);
+            setError(null);
+        } catch (err) {
+            setError('Error al cargar la lista de descuentos.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     // Cargar datos al montar el hook
     useEffect(() => {
         fetchDescuentos();
@@ -188,6 +203,7 @@ export const useDescuentos = () => {
         addDescuento,
         updateDescuento,
         deleteDescuento,
+        getDescuentosPorIdProducto,
         refresh: fetchDescuentos
     };
 };
