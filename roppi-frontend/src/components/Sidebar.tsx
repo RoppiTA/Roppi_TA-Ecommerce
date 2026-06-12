@@ -18,14 +18,14 @@ import { NavLink } from 'react-router-dom';
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
-  role: 'MERCHANT' | 'CLIENT';
+  role: 'COMERCIANTE' | 'CLIENTE';
 }
 
 export function Sidebar({ isCollapsed, onToggle, role }: SidebarProps) {
-  if (role === 'MERCHANT') {
+  if (role === 'COMERCIANTE') {
     return merchant_sidebar(isCollapsed, onToggle);
   }
-  else if (role === 'CLIENT') {
+  else if (role === 'CLIENTE') {
     return client_sidebar(isCollapsed, onToggle);
   }
   else return default_sidebar(isCollapsed, onToggle);

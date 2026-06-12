@@ -26,6 +26,11 @@ apiClient.interceptors.request.use((config) => {
     window.location.href = '/auth';
     return Promise.reject(new Error('Token expirado'));
   }
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  
   return config;
 });
 

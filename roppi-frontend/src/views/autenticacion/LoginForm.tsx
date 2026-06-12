@@ -28,7 +28,7 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
     const newAttemptCount = attemptCount + 1;
     setAttemptCount(newAttemptCount);
 
-    if (newAttemptCount >= 5) {
+    if (newAttemptCount >= 3) {
       setError('Cuenta temporalmente bloqueada por múltiples intentos fallidos');
       return;
     }
@@ -149,9 +149,9 @@ export default function LoginForm({ onForgotPassword, onRegister }: LoginFormPro
           </div>
         </form>
 
-        {attemptCount > 0 && attemptCount < 5 && error && (
+        {attemptCount > 0 && attemptCount < 3 && error && (
           <p className="text-center mt-4 text-sm text-text-muted">
-            Intento {attemptCount} de 5
+            Intento {attemptCount} de 3
           </p>
         )}
       </div>
