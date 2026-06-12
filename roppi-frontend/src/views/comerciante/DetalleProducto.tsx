@@ -416,11 +416,11 @@ export default function DetalleProducto() {
                             <span className="text-[10px] text-brand-muted shrink-0">+S/.</span>
                             <input
                               type="number" step="0.01"
-                              value={mat.costo_extra}
+                              value={mat.costoExtra}
                               onKeyDown={blockNonDecimal}
                               onChange={e => {
                                 const updated = [...currentProduct.materiales];
-                                updated[index] = { ...updated[index], costo_extra: Number(e.target.value) };
+                                updated[index] = { ...updated[index], costoExtra: Number(e.target.value) };
                                 setEditedProduct({ ...currentProduct, materiales: updated });
                               }}
                               className="w-14 text-sm border-b border-primary2/30 focus:outline-none bg-transparent text-brand-dark"
@@ -430,13 +430,13 @@ export default function DetalleProducto() {
                             </button>
                           </>
                         ) : (
-                          <span className="text-xs text-brand-muted shrink-0">+S/. {mat.costo_extra}</span>
+                          <span className="text-xs text-brand-muted shrink-0">+S/. {mat.costoExtra}</span>
                         )}
                       </div>
                     );
                   })}
                   {isEditable && getAvailableMaterials().length > 0 && (
-                    <select value="" onChange={e => { const m = materiales.find(m => m.id === Number(e.target.value)); if (m && !currentProduct.materiales.find(em => em.id === m.id)) setEditedProduct({ ...currentProduct, materiales: [...currentProduct.materiales, { id: m.id, costo_extra: 0 }] }); }} className="w-full px-2 py-1.5 border border-primary2/30 rounded text-xs focus:outline-none bg-white text-brand-dark">
+                    <select value="" onChange={e => { const m = materiales.find(m => m.id === Number(e.target.value)); if (m && !currentProduct.materiales.find(em => em.id === m.id)) setEditedProduct({ ...currentProduct, materiales: [...currentProduct.materiales, { id: m.id, costoExtra: 0 }] }); }} className="w-full px-2 py-1.5 border border-primary2/30 rounded text-xs focus:outline-none bg-white text-brand-dark">
                       <option value="">+ Agregar material...</option>
                       {getAvailableMaterials().map(m => <option key={m.id} value={m.id}>{m.nombre}{m.descripcion ? ` — ${m.descripcion}` : ''}</option>)}
                     </select>
@@ -521,11 +521,11 @@ export default function DetalleProducto() {
                             <span className="text-[10px] text-brand-muted shrink-0">+S/.</span>
                             <input
                               type="number" step="0.01"
-                              value={per.costo_extra}
+                              value={per.costoExtra}
                               onKeyDown={blockNonDecimal}
                               onChange={e => {
                                 const updated = [...currentProduct.personalizaciones];
-                                updated[index] = { ...updated[index], costo_extra: Number(e.target.value) };
+                                updated[index] = { ...updated[index], costoExtra: Number(e.target.value) };
                                 setEditedProduct({ ...currentProduct, personalizaciones: updated });
                               }}
                               className="w-14 text-sm border-b border-primary2/30 focus:outline-none bg-transparent text-brand-dark"
@@ -535,13 +535,13 @@ export default function DetalleProducto() {
                             </button>
                           </>
                         ) : (
-                          <span className="text-xs text-brand-muted shrink-0">+S/. {per.costo_extra}</span>
+                          <span className="text-xs text-brand-muted shrink-0">+S/. {per.costoExtra}</span>
                         )}
                       </div>
                     );
                   })}
                   {isEditable && getAvailableCustomizations().length > 0 && (
-                    <select value="" onChange={e => { const p = personalizaciones.find(p => p.id === Number(e.target.value)); if (p && !currentProduct.personalizaciones.find(ec => ec.id === p.id)) setEditedProduct({ ...currentProduct, personalizaciones: [...currentProduct.personalizaciones, { id: p.id, costo_extra: 0 }] }); }} className="w-full px-2 py-1.5 border border-primary2/30 rounded text-xs focus:outline-none bg-white text-brand-dark">
+                    <select value="" onChange={e => { const p = personalizaciones.find(p => p.id === Number(e.target.value)); if (p && !currentProduct.personalizaciones.find(ec => ec.id === p.id)) setEditedProduct({ ...currentProduct, personalizaciones: [...currentProduct.personalizaciones, { id: p.id, costoExtra: 0 }] }); }} className="w-full px-2 py-1.5 border border-primary2/30 rounded text-xs focus:outline-none bg-white text-brand-dark">
                       <option value="">+ Agregar personalización...</option>
                       {getAvailableCustomizations().map(p => <option key={p.id} value={p.id}>{p.nombre}{p.descripcion ? ` — ${p.descripcion}` : ''}</option>)}
                     </select>
