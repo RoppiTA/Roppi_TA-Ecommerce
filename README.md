@@ -1,24 +1,45 @@
 # Roppi_TA-Ecommerce
+
 Plataforma de Ecommerce para una tienda virtual de ropa de Gamarra, enfocado en estampados
+
+## Frontend
 
 ## Backend
 
-OJO: Revisar el archivo **package.json** para ver como desplegar el API Server y el Product Server según los scripts en localhost.
+La arquitectura del backend usada es Services Oriented Architectura (SOA). Se cuenta con una API Gateway que redirige consultas a los respectivos servicios. Todos estos servicios comparten una misma base de datos.
 
-Recomendación: Usar npm run para ver los scripts.
+Para ejecutar este contenedor, primero debes revisar el archivo **package.json** para ver los scripts disponibles para el iniciar los servicios. Lo primero que debes hacer es  actualizar y obtener los paquetes necesarios con el siguiente comando en la terminal.
 
-### API
+```cmd
+npm install
+```
 
-Para desplegar el API correr el siguiente comando en la carpeta **roppi-backend**.
+También, serán necesarios ejecutar los scripts que levantaran los diferentes servicios del backend.
 
-`npm run start_api`
+### API Gateway
 
-### Services Servers
+Para desplegar el API Gateway correr el siguiente comando en la carpeta **roppi-backend**.
 
-#### Product Service
+```cmd
+npm run start_api
+```
+
+### Servicios del negocio
+
+Acá se encuentran los diferentes servicios, estos se han separado con la finalidad de que el sistema sea más resiliente ante erorres o conflictos.
+
+#### Products Service
 
 Para desplegar el Product Server correr el siguiente comando en la carpeta **roppi-backend**.
 
-`npm run start_products_server`
+```cmd
+npm run start_products_server
+```
 
+#### Users Service
 
+Para desplegar el Product Server correr el siguiente comando en la carpeta **roppi-backend**.
+
+```cmd
+# TBD, Not Implemented Yet
+```
