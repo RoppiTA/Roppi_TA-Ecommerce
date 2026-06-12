@@ -28,7 +28,7 @@ const mapearAGenericoXColor = (c: any): GenericoXColor => ({
 
 const mapearAGenericoXMaterial = (c: any): GenericoXMaterial => ({
     id: c.id,
-    costoExtra: c.costoExtra
+    costo_extra: c.costoExtra
 });
 
 const mapearAGenericoXTamano = (c: any): GenericoXTamano => ({
@@ -39,7 +39,7 @@ const mapearAGenericoXTamano = (c: any): GenericoXTamano => ({
 
 const mapearAGenericoXPersonalizacion = (c: any): GenericoXPersonalizacion => ({
     id: c.id,
-    costoExtra: c.costoExtra
+    costo_extra: c.costoExtra
 });
 
 const mapearAColor = (c: any): Color => ({
@@ -210,6 +210,7 @@ export const DescuentosAPIService = {
 
     getDescuentosPorIdProducto: async (idProducto: number): Promise<Descuento[]> => {
         const response = await apiClient.get<{ exito: boolean; datos: any[] }>(`/productos/descuentos/${idProducto}`);
+        console.log(`Descuentos obtenidos para producto ID ${idProducto}:`, response.data.datos);
         if (!response.data || !response.data.datos) return [];
         return response.data.datos.map(mapearADescuentoFrontend);
     }
