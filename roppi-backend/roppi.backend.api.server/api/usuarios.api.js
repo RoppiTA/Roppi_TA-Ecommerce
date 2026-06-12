@@ -9,7 +9,6 @@ class UsuariosAPI {
     this._configurarRutas();
   }
 
-  // Middleware de Autenticación integrado en la API
   _authMiddleware(req, res, next) {
     try {
       const authHeader = req.headers.authorization;
@@ -89,13 +88,13 @@ class UsuariosAPI {
     });
 
     // Asignar rol a un usuario (Protegido por Middleware)
+    // Esto es para la autenticacion de token para guardar lo de usuario creación en la bd con el token
     this.router.post('/roles', this._authMiddleware.bind(this), async (req, res) => {
       try {
         const { usuarioId, rol } = req.body;
-        
-        // 🔒 Sacamos el ID de quién hace la modificación directamente del Token (100% seguro)
+
         const usuarioModificacion = req.usuario.sub;
-        
+
         const resultado = await usuariosBO.asignarRol(usuarioId, rol, usuarioModificacion);
         res.status(200).json({ exito: true, data: resultado });
       } catch (error) {
@@ -103,23 +102,12 @@ class UsuariosAPI {
       }
     });
 
-    // Quitar rol a un usuario (Protegido por Middleware)
+    // Quitar rol a un usuario (Protegido por Middleware) 
+    // Esto es para la autenticacion de token para guardar lo de usuario creación en la bd con el token
     this.router.delete('/roles', this._authMiddleware.bind(this), async (req, res) => {
       try {
         const { usuarioId, rol } = req.body;
-        
-        const resultado = await usuariosBO.quitarRol(usuarioId, rol);
-        res.status(200).json({ exito: true, data: resultado });
-      } catch (error) {
-        res.status(400).json({ exito: false, mensaje: error.message });
-      }
-    });
 
-    // Quitar rol a un usuario (Protegido por Middleware)
-    this.router.delete('/roles', this._authMiddleware.bind(this), async (req, res) => {
-      try {
-        const { usuarioId, rol } = req.body;
-        
         const resultado = await usuariosBO.quitarRol(usuarioId, rol);
         res.status(200).json({ exito: true, data: resultado });
       } catch (error) {

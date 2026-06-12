@@ -327,6 +327,10 @@ class UsuariosBO {
     }
   }
 
+  /**
+ * Quitar rol a un usuario
+ */
+
   async quitarRol(idUsuario, rol) {
     try {
       if (!idUsuario || !rol) {
