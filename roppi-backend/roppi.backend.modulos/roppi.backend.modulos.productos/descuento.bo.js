@@ -79,6 +79,7 @@ class DescuentoBO {
         // Actualizar el descuento en sí
         try {
             const descuentoActualizado = await descuentoGateway.update(id, { nombre, cantidad, porcentaje, usuarioId });
+            descuentoActualizado.idProductos = idProductos;
             return descuentoActualizado;
         }
         catch (error) {

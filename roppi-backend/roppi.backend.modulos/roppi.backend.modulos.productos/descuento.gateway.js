@@ -151,10 +151,9 @@ class DescuentoGateway {
         // Actualizamos los productos que ya no están incluidos en el descuento (SET ACTIVO = 0)
         for (const id_prod of idProductosEliminar) {
             await db.query(`
-                UPDATE "RoppiTA".GENERICOSXDESCUENTOS
-                SET ACTIVO = 0, USUARIO_MODIFICACION = $3
+                DELETE FROM "RoppiTA".GENERICOSXDESCUENTOS
                 WHERE ID_GENERICO = $1 AND ID_DESCUENTO = $2
-            `, [id_prod, id, usuarioId]);
+            `, [id_prod, id]);
         }
 
         // Agregamos los productos que ahora tendrán descuento
