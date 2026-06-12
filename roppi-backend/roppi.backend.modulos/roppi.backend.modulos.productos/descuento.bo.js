@@ -66,9 +66,24 @@ class DescuentoBO {
         return 1;
     }
 
-    async actualizarDescuento(id, { nombre, cantidad, porcentaje, usuarioId }) {
-        const descuentoActualizado = await descuentoGateway.update(id, { nombre, cantidad, porcentaje, usuarioId });
-        return descuentoActualizado;
+    async actualizarDescuento(id, { nombre, cantidad, porcentaje, usuarioId, idProductos }) {
+        // Acá actualizamos la tabla GENERICOSxDESCUENTOS
+        // Obtener todos los id de los productos asociados actualmente al id de ese descuento
+        try {
+            await descuentoGateway.actualizarProductosConDescuento(id, idProductos, usuarioId);
+        }
+        catch (error) {
+            throw error;
+        }
+
+        // Actualizar el descuento en sí
+        try {
+            const descuentoActualizado = await descuentoGateway.update(id, { nombre, cantidad, porcentaje, usuarioId });
+            return descuentoActualizado;
+        }
+        catch (error) {
+            throw error;
+        }
     }
 
 }
