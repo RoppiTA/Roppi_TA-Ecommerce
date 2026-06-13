@@ -33,6 +33,10 @@ class ProductosAPI {
     this.router.get('/personalizaciones', async (req, res) => this.hacerPeticion(req, res, 'GET', '/personalizaciones'));
     this.router.get('/personalizaciones/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/personalizaciones/${req.params.id}`));
 
+    // Descuentos (Públicos)
+    this.router.get('/descuentos', async (req, res) => this.hacerPeticion(req, res, 'GET', '/descuentos'));
+    this.router.get('/descuentos/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/descuentos/${req.params.id}`));
+
     this.router.use(authMiddleware);
 
     // Genericos
@@ -40,13 +44,20 @@ class ProductosAPI {
     this.router.post('/genericos/:id', async (req, res) => this.hacerPeticion(req, res, 'POST', `/genericos/${req.params.id}`, req.body));
 
     this.router.delete('/genericos/:id/desactivar', async (req, res) => this.hacerPeticion(req, res, 'DELETE', `/genericos/${req.params.id}/desactivar`, req.body));
-    
-    // Descuentos
-    this.router.get('/descuentos', async (req, res) => this.hacerPeticion(req, res, 'GET', '/descuentos'));
-    this.router.get('/descuentos/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/descuentos/${req.params.id}`));
-    this.router.post('/descuentos', async (req, res) => this.hacerPeticion(req, res, 'POST', '/descuentos', req.body));
-    this.router.put('/descuentos/:id', async (req, res) => this.hacerPeticion(req, res, 'PUT', `/descuentos/${req.params.id}`, req.body));
-    this.router.delete('/descuentos/:id/desactivar', async (req, res) => this.hacerPeticion(req, res, 'DELETE', `/descuentos/${req.params.id}/desactivar`, req.body));
+
+    // Descuentos que deberia solo tocar un admin
+    this.router.post('/descuentos', async (req, res) => {
+      const datosDescuento = { ...req.body, usuarioId: req.usuario.sub, usuario_creacion: req.usuario.sub };
+      return this.hacerPeticion(req, res, 'POST', '/descuentos', datosDescuento);
+    });
+    this.router.put('/descuentos/:id', async (req, res) => {
+      const datosDescuento = { ...req.body, usuarioId: req.usuario.sub, usuario_modificacion: req.usuario.sub };
+      return this.hacerPeticion(req, res, 'PUT', `/descuentos/${req.params.id}`, datosDescuento);
+    });
+    this.router.delete('/descuentos/:id/desactivar', async (req, res) => {
+      const datosDescuento = { ...req.body, usuario_modificacion: req.usuario.sub };
+      return this.hacerPeticion(req, res, 'DELETE', `/descuentos/${req.params.id}/desactivar`, datosDescuento);
+    });
 
     // Personalizados
     // this.router.get('/personalizados', async (req, res) => this.hacerPeticion(req, res, 'GET', '/personalizados'));
