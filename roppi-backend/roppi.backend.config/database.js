@@ -1,10 +1,10 @@
 // la conexión a la base de datos está aquí
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // esto es para evitar el error de certificado SSL, pero no es recomendado para producción
 require('dotenv').config();
 
 const { Pool } = require('pg');
 
-class Database {
+class DBManager {
   constructor() {
     this.pool = new Pool({
       host: process.env.DB_HOST,
@@ -13,10 +13,9 @@ class Database {
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       ssl: {
-        rejectUnauthorized: false,
+        rejectUnauthorized: false, // esto es para pg que no verifique el certificado
         checkServerIdentity: () => undefined
     },                                    // la ecriptación la estoy bloqueando para probar la conexión
-
       // Pool settings
       max: Number(process.env.DB_MAX_CONNECTIONS) || 10,
       idleTimeoutMillis: Number(process.env.DB_IDLE_TIMEOUT) || 30000,
@@ -26,7 +25,8 @@ class Database {
         client.query('SET search_path TO "RoppiTA"');
         console.log('Conectados a PostgreQSL');
     });
-
+    console.log(process.env.password);
+    //console.log(process.cwd());
     this._registerEvents();
   }
 
@@ -85,4 +85,4 @@ class Database {
 }
 }
 
-module.exports = new Database();
+module.exports = new DBManager();

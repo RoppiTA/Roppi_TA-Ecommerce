@@ -15,7 +15,7 @@
     "@mui/material": "^9.0.1",
     "@tailwindcss/vite": "^4.3.0",
     "axios": "^1.16.1",
-    "lucide-react": "^1.17.0",
+    "lucide-react": "^0.475.0",
     "mui": "^0.0.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
