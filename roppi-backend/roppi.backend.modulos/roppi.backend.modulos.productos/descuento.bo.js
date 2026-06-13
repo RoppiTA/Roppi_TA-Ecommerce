@@ -19,9 +19,10 @@ class DescuentoBO {
         const descuentos = rows.map(row => new Descuento(row));
 
         for (let i = 0; i < descuentos.length; i++) {
-            const ids = await descuentoGateway.obtenerIdsProductosPorIdDescuento(descuentos[i].id);
-            // Convertimos el resultado a un array
-            descuentos[i].idProductos = ids.map(row => row.id_generico);
+            // Obtenemos las filas de id y nombre
+            const rows = await descuentoGateway.obtenerIdsProductosPorIdDescuento(descuentos[i].id);
+            // Convertimos el resultado a un array de objetos {id, nombre}
+            descuentos[i].productos = rows.map(row => ({ id: row.id_generico, nombre: row.nombre }));
         }
         return descuentos;
     }
