@@ -64,9 +64,14 @@ class DescuentoGateway {
 
     async obtenerIdsProductosPorIdDescuento(idDescuento) {
         const result = await db.query(`
-            SELECT ID_GENERICO
-            FROM "RoppiTA".GENERICOSXDESCUENTOS 
-            WHERE ID_DESCUENTO = $1 AND ACTIVO = 1
+            SELECT 
+                GD.ID_GENERICO, 
+                G.NOMBRE
+            FROM "RoppiTA".DESCUENTOS D
+            LEFT JOIN "RoppiTA".GENERICOSXDESCUENTOS GD ON D.ID = GD.ID_DESCUENTO AND GD.ACTIVO = 1
+            LEFT JOIN "RoppiTA".GENERICOS G ON GD.ID_GENERICO = G.ID
+            WHERE GD.ID_DESCUENTO = $1
+            GROUP BY GD.ID_GENERICO, G.NOMBRE
         `, [idDescuento]);
         return result.rows;
     }
