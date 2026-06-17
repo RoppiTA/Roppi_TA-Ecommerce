@@ -54,8 +54,9 @@ export default function DetalleProducto() {
 
   // Manejo de la acción futura para el carrito de compras
   const handleAddToCart = () => {
-    console.log("Agregar al carrito presionado: listo para la siguiente iteración");
-  };
+    navigate('/personalization', { state: { productoId: product?.id} });
+  }
+  
 
   if (loadingHook || loadingLocal) {
     return (
@@ -138,7 +139,7 @@ export default function DetalleProducto() {
                         <p className="text-lg font-bold text-primary-hover">S/ {product.precio_base.toFixed(2)}</p>
                       </div>
                       <div>
-                        <label className={labelCls}>Stock de seguridad</label>
+                        <label className={labelCls}>Capacidad de producción total</label>
                         <p className="text-sm font-medium text-brand-dark">{product.maximo_stock} unidades disponibles</p>
                       </div>
                     </div>
@@ -247,7 +248,7 @@ export default function DetalleProducto() {
                     }`}
                 >
                   <ShoppingCart size={18} />
-                  {product.activo === 1 ? 'Agregar al Carrito' : 'Producto No Disponible'}
+                  {product.activo === 1 ? 'Personalizar y Comprar' : 'Producto No Disponible'}
                 </button>
               </div>
 
