@@ -43,7 +43,7 @@ export const Header = () => {
 
   return (
     <header className="bg-brand-light/40 border-b border-primary-hover/15 px-6 py-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm flex-shrink-0">
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="flex items-center gap-4 ml-auto">
         
         {/* Botón de Notificaciones */}
         <button className="p-2 hover:bg-primary2/10 rounded-lg relative transition-colors cursor-pointer">
@@ -98,7 +98,7 @@ export const Header = () => {
               </button>
             </div>
           )}
-
+          </div>
           {/* Carrito de Compras (Solo visible para CLIENTE) */}
           {isCliente && (
             <button 
@@ -111,7 +111,6 @@ export const Header = () => {
             </button>
           )}
         </div>
-      </div>
     </header>
   );
 };
