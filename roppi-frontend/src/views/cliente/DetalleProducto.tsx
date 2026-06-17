@@ -84,7 +84,7 @@ export default function DetalleProducto() {
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto bg-gray-50/50">
-      <div className="p-6 max-w-5xl mx-auto">
+      <div className="p-6 max-w-5xl mx-auto flex flex-col h-[calc(100vh-80px)]">
 
         {/* ── Header ── */}
         <div className="mb-6">

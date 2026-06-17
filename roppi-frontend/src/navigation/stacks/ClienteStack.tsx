@@ -67,38 +67,30 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
                 </ProtectedRoute>
               } 
             />
-            <Route>
+            <Route
               path="personalization"
               element={
                 <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
                   <Customization />
                 </ProtectedRoute>
               }
-            </Route>
-            <Route>
+            />
+            <Route
               path="cart"
               element={
                 <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
                   <ProductCart />
                 </ProtectedRoute>
               }
-            </Route>
-            <Route>
-              path="cart"
-              element={
-                <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
-                  <ProductCart />
-                </ProtectedRoute>
-              }
-            </Route>
-            <Route>
+            />
+            <Route
               path="quoteRequest"
               element={
                 <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
                   <QuoteRequest />
                 </ProtectedRoute>
               }
-            </Route>
+            />
 
             //Rutas adicionales para soporte y configuración (Próximamente)
             <Route path="support" element={<div className="p-10 text-brand-muted">❓ Pantalla de Soporte (Próximamente)</div>} />
