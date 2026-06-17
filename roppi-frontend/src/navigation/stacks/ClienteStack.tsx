@@ -7,6 +7,8 @@ import DetalleProducto from '../../views/cliente/DetalleProducto';
 import DefaultCliente from '../../views/cliente/DefaultCliente';
 import ProductListPage from '../../views/cliente/ProductListPage';
 import { ProtectedRoute } from '../../components/ProtectedRoute';
+import Customization from '../../views/cliente/Customization'
+import ProductCart, { QuoteRequest } from '../../views/cliente/ProductCart';
 
 interface ClienteStackProps {
   user: {
@@ -65,6 +67,40 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
                 </ProtectedRoute>
               } 
             />
+            <Route>
+              path="personalization"
+              element={
+                <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
+                  <Customization />
+                </ProtectedRoute>
+              }
+            </Route>
+            <Route>
+              path="cart"
+              element={
+                <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
+                  <ProductCart />
+                </ProtectedRoute>
+              }
+            </Route>
+            <Route>
+              path="cart"
+              element={
+                <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
+                  <ProductCart />
+                </ProtectedRoute>
+              }
+            </Route>
+            <Route>
+              path="quoteRequest"
+              element={
+                <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
+                  <QuoteRequest />
+                </ProtectedRoute>
+              }
+            </Route>
+
+            //Rutas adicionales para soporte y configuración (Próximamente)
             <Route path="support" element={<div className="p-10 text-brand-muted">❓ Pantalla de Soporte (Próximamente)</div>} />
             <Route path="settings" element={<div className="p-10 text-brand-muted">⚙️ Pantalla de Configuración (Próximamente)</div>} />
           </Routes>
