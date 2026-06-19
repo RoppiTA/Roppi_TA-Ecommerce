@@ -252,6 +252,7 @@ export const Customization = () => {
                 <div className="flex flex-wrap gap-6">
                   {product.personalizaciones.map(per => {
                     const info = getPersonalizacion(per.id);
+                    const costo = Number(per.costoExtra) || 0;
                     return (
                       <label key={per.id} className="flex items-center gap-2 cursor-pointer text-sm font-medium text-brand-dark">
                         <input
@@ -262,6 +263,9 @@ export const Customization = () => {
                           className="w-4 h-4 accent-primary-hover"
                         />
                         {info?.nombre ?? `Personalización #${per.id}`}
+                        {costo > 0 && (
+                          <span className="text-[11px] font-semibold text-brand-muted">+S/. {costo.toFixed(2)}</span>
+                        )}
                       </label>
                     );
                   })}
@@ -364,7 +368,20 @@ export const Customization = () => {
           </div>
 
           {/* ── Cantidad + Añadir al carrito: fijo al pie del módulo ── */}
-          <div className="shrink-0 flex items-center gap-4 p-6 pt-4 border-t border-primary-hover/10">
+          <div className="shrink-0 p-6 pt-4 border-t border-primary-hover/10">
+            {(materialExtra > 0 || personalizacionExtra > 0) && (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-brand-muted mb-3">
+                <span>Precio base S/. {(product.precio_base ?? 0).toFixed(2)}</span>
+                {materialExtra > 0 && <span>+ Material S/. {materialExtra.toFixed(2)}</span>}
+                {personalizacionExtra > 0 && <span>+ Personalización S/. {personalizacionExtra.toFixed(2)}</span>}
+              </div>
+            )}
+
+            <p className="text-xs font-medium text-brand-muted mb-3">
+              Cantidad disponible a producir: <span className="font-semibold text-brand-dark">{product.maximo_stock}</span> unidades
+            </p>
+
+            <div className="flex items-center gap-4">
             <div className="flex items-center border border-primary-hover/20 rounded-lg">
               <button
                 onClick={() => setCantidad(c => Math.max(1, c - 1))}
@@ -392,6 +409,7 @@ export const Customization = () => {
               <ShoppingCart size={18} />
               Añadir al carrito — S/. {precioTotal.toFixed(2)}
             </button>
+            </div>
           </div>
           </div>
           </div>
