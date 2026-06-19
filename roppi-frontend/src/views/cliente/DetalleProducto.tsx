@@ -157,6 +157,7 @@ export default function DetalleProducto() {
                   <div className="space-y-1.5">
                     {product.materiales.map((mat) => {
                       const info = getMaterial(mat.id);
+                      const costo = mat.costoExtra ? Number(mat.costoExtra) : 0;
                       return (
                         <div key={mat.id} className="flex items-center bg-brand-light/40 border border-primary2/15 rounded px-3 py-2 gap-3 text-sm">
                           <div className="flex-1 min-w-0">
@@ -164,7 +165,7 @@ export default function DetalleProducto() {
                             {info?.descripcion && <p className="text-[11px] text-brand-muted truncate">{info.descripcion}</p>}
                           </div>
                           <span className="text-xs font-semibold text-brand-muted shrink-0">
-                            {mat.costo_extra > 0 ? `+S/. ${mat.costo_extra.toFixed(2)}` : 'Precio base'}
+                            {costo > 0 ? `+S/. ${costo.toFixed(2)}` : 'Precio base'}
                           </span>
                         </div>
                       );
@@ -218,6 +219,7 @@ export default function DetalleProducto() {
                   <div className="space-y-1.5">
                     {product.personalizaciones.map((per) => {
                       const info = getPersonalizacion(per.id);
+                      const costo = per.costoExtra ? Number(per.costoExtra) : 0;
                       return (
                         <div key={per.id} className="flex items-center bg-brand-light/40 border border-primary2/15 rounded px-3 py-2 gap-3 text-sm">
                           <div className="flex-1 min-w-0">
@@ -225,7 +227,7 @@ export default function DetalleProducto() {
                             {info?.descripcion && <p className="text-[11px] text-brand-muted truncate">{info.descripcion}</p>}
                           </div>
                           <span className="text-xs font-semibold text-brand-muted shrink-0">
-                            {per.costo_extra > 0 ? `+S/. ${per.costo_extra.toFixed(2)}` : 'Sin recargo'}
+                            {costo > 0 ? `+S/. ${costo.toFixed(2)}` : 'Sin recargo'}
                           </span>
                         </div>
                       );
