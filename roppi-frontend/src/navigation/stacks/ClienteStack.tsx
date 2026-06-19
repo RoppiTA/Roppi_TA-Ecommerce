@@ -8,7 +8,9 @@ import DefaultCliente from '../../views/cliente/DefaultCliente';
 import ProductListPage from '../../views/cliente/ProductListPage';
 import { ProtectedRoute } from '../../components/ProtectedRoute';
 import Customization from '../../views/cliente/Customization'
-import ProductCart, { QuoteRequest } from '../../views/cliente/ProductCart';
+import ProductCart from '../../views/cliente/ProductCart';
+import { CotizacionListScreen } from '../../views/cliente/CotizacionList';
+import { CotizacionDetailScreen } from '../../views/cliente/DetalleCotizacion';
 
 interface ClienteStackProps {
   user: {
@@ -63,7 +65,7 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
               path="quotes" 
               element={
                 <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
-                  <div className="p-10 text-brand-muted">📝 Pantalla de Cotizaciones (Próximamente)</div>
+                  <CotizacionListScreen />
                 </ProtectedRoute>
               } 
             />
@@ -84,10 +86,10 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
               }
             />
             <Route
-              path="quoteRequest"
+              path="quotes/view"
               element={
                 <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
-                  <QuoteRequest />
+                  <CotizacionDetailScreen />
                 </ProtectedRoute>
               }
             />
