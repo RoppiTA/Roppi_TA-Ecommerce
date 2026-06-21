@@ -5,6 +5,7 @@ const cors = require('cors');
 const ProductosAPI = require('./api/productos.api.js');
 const UsuariosAPI = require('./api/usuarios.api.js');
 const CotizacionesAPI = require('./api/cotizaciones.api.js');
+const PedidosAPI = require('./api/pedidos.api.js');
 
 class APIServer {
   constructor() {
@@ -30,12 +31,13 @@ class APIServer {
     const productosAPI = new ProductosAPI();
     const usuariosAPI = new UsuariosAPI();
     const cotizacionesAPI = new CotizacionesAPI();
-    //TODO: Acá faltan las demás APIs (pedidos, etc.)
+    const pedidosAPI = new PedidosAPI();
 
     // Distribuimos las peticiones HTTP a la clase correspondiente
     this.app.use('/api/productos', productosAPI.router);
     this.app.use('/api/usuarios', usuariosAPI.router);
     this.app.use('/api/cotizaciones', cotizacionesAPI.router);
+    this.app.use('/api/pedidos', pedidosAPI.router);
 
     // Podemos preparar la distribución de otras rutas para el futuro
     // this.app.use('/api/pedidos', pedidosAPI.router);
