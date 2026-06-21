@@ -1,21 +1,17 @@
+// roppi.backend.modulos/roppi.backend.modulos.cotizaciones/cotizacion.model.js
+
 class Cotizacion {
-    constructor({
-        id, version, id_usuario, estado, total, fecha_limite, comentarios_cliente, comentarios_comerciante,
-        fecha_creacion, usuario_creacion, fecha_modificacion, usuario_modificacion
-    }) {
-        // Datos
-        this.id = id;
-        this.version = version;
-        this.id_usuario = id_usuario;
-        this.estado = estado;
+    constructor({ numero_cotizacion, version_cotizacion, id_usuario, estado, total, fecha_limite, comentarios_cliente, comentarios_comerciante, fecha_creacion, detalles = [] }) {
+        this.numeroCotizacion = numero_cotizacion;
+        this.versionCotizacion = version_cotizacion;
+        this.idUsuario = id_usuario;
+        this.estado = estado; // 'CARRITO', 'SOLICITADA', 'OBSERVADA', 'CANCELADA', 'ACEPTADA'
         this.total = total;
-        this.fecha_limite = fecha_limite;
-        this.comentarios_cliente = comentarios_cliente;
-        this.comentarios_comerciante = comentarios_comerciante;
-        this.fecha_creacion = fecha_creacion;
-        this.usuario_creacion = usuario_creacion;
-        this.fecha_modificacion = fecha_modificacion;
-        this.usuario_modificacion = usuario_modificacion;
+        this.fechaLimite = fecha_limite;
+        this.comentariosCliente = comentarios_cliente;
+        this.comentariosComerciante = comentarios_comerciante;
+        this.fechaCreacion = fecha_creacion;
+        this.detalles = detalles; // Array de DetalleCotizacion
     }
 }
 

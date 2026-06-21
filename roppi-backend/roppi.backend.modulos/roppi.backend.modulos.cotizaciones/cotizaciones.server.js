@@ -1,5 +1,6 @@
+// roppi.backend.modulos/roppi.backend.modulos.cotizaciones/cotizaciones.server.js
 const express = require('express');
-
+const cotizacionBO = require('./cotizacion.bo');
 
 class CotizacionesServer {
     constructor() {
@@ -8,15 +9,64 @@ class CotizacionesServer {
         this.address = process.env.HOST_COTIZACION_SERVER || 'localhost';
         this.port = process.env.PORT_COTIZACION_SERVER || 3003;
 
-        // Necesario para procesar JSON en el cuerpo de las peticiones
         this.app.use(express.json());
-
         this._configurarFunciones();
     }
 
     _configurarFunciones() {
-        // Acá van todas las llamadas que recibe desde la API
+        // --- CARRITO ---
 
+        this.app.get('/carrito/:idUsuario', async (req, res) => {
+            try {
+                const idUsuario = parseInt(req.params.idUsuario);
+                const data = await cotizacionBO.obtenerCarritoActivo(idUsuario);
+                this.retornarRespuesta(res, 200, data);
+            } catch (error) {
+                this.devolverError(res, 500, error.message);
+            }
+        });
+
+        this.app.post('/carrito/items', async (req, res) => {
+            try {
+                const { idUsuario, idProducto, cantidad } = req.body;
+                const resultado = await cotizacionBO.agregarItemCarrito(idUsuario, { idProducto, cantidad });
+                this.retornarRespuesta(res, 201, resultado);
+            } catch (error) {
+                this.devolverError(res, 400, error.message);
+            }
+        });
+
+        this.app.put('/carrito/items/:idProducto', async (req, res) => {
+            try {
+                const idProducto = parseInt(req.params.idProducto);
+                const { idUsuario, cantidad } = req.body;
+                const resultado = await cotizacionBO.actualizarCantidadCarrito(idUsuario, idProducto, cantidad);
+                this.retornarRespuesta(res, 200, resultado);
+            } catch (error) {
+                this.devolverError(res, 400, error.message);
+            }
+        });
+
+        this.app.delete('/carrito/items/:idProducto', async (req, res) => {
+            try {
+                const idProducto = parseInt(req.params.idProducto);
+                const { idUsuario } = req.body;
+                await cotizacionBO.eliminarItemCarrito(idUsuario, idProducto);
+                this.retornarRespuesta(res, 200, { mensaje: "Eliminado" });
+            } catch (error) {
+                this.devolverError(res, 400, error.message);
+            }
+        });
+
+        this.app.post('/carrito/vaciar', async (req, res) => {
+            try {
+                const { idUsuario } = req.body;
+                await cotizacionBO.vaciarCarrito(idUsuario);
+                this.retornarRespuesta(res, 200, { mensaje: "Vaciado" });
+            } catch (error) {
+                this.devolverError(res, 400, error.message);
+            }
+        });
     }
 
     devolverError(response, status, mensaje) {
@@ -47,3 +97,11 @@ class CotizacionesServer {
         });
     }
 }
+
+// Permitir correr el servidor independientemente (microservicio)
+if (require.main === module) {
+    const server = new CotizacionesServer();
+    server.startServer();
+}
+
+module.exports = CotizacionesServer;
