@@ -8,8 +8,11 @@ import maxwell from './maxwell.jpg';
 import gorra_simple from "./gorra_simple.jpeg";
 import jean from "./jean.jpg";
 import mochila from "./mochila.jpeg";
-import polo_comercial from "./polo_comercial.jpg";
-import chaqueta from "./chaqueta.jpg";
+import polo_comercial from "./polo_comercial.png";
+import chaqueta from "./chaqueta.png";
+import polo from "./polo.png";
+import cap_side from "./cap_side.png";
+import totebag from "./Totebag.png";
 
 const assets = {
     "logoRoppi": logoRoppiImg,
@@ -20,7 +23,10 @@ const assets = {
     "jean": jean,
     "mochila.jpeg": mochila,
     "polo_comercial": polo_comercial,
-    "chaqueta.jpg": chaqueta
+    "chaqueta.png": chaqueta,
+    "polo.png" : polo,
+    "cap_side.png": cap_side,
+    "Totebag.png": totebag
 };
 
 
