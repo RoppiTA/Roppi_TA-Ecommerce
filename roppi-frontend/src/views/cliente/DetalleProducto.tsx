@@ -54,8 +54,9 @@ export default function DetalleProducto() {
 
   // Manejo de la acción futura para el carrito de compras
   const handleAddToCart = () => {
-    console.log("Agregar al carrito presionado: listo para la siguiente iteración");
-  };
+    navigate('/personalization', { state: { productoId: product?.id} });
+  }
+  
 
   if (loadingHook || loadingLocal) {
     return (
@@ -83,7 +84,7 @@ export default function DetalleProducto() {
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto bg-gray-50/50">
-      <div className="p-6 max-w-5xl mx-auto">
+      <div className="p-6 max-w-5xl mx-auto flex flex-col h-[calc(100vh-80px)]">
 
         {/* ── Header ── */}
         <div className="mb-6">
@@ -138,7 +139,7 @@ export default function DetalleProducto() {
                         <p className="text-lg font-bold text-primary-hover">S/ {product.precio_base.toFixed(2)}</p>
                       </div>
                       <div>
-                        <label className={labelCls}>Stock de seguridad</label>
+                        <label className={labelCls}>Capacidad de producción total</label>
                         <p className="text-sm font-medium text-brand-dark">{product.maximo_stock} unidades disponibles</p>
                       </div>
                     </div>
@@ -156,6 +157,7 @@ export default function DetalleProducto() {
                   <div className="space-y-1.5">
                     {product.materiales.map((mat) => {
                       const info = getMaterial(mat.id);
+                      const costo = mat.costoExtra ? Number(mat.costoExtra) : 0;
                       return (
                         <div key={mat.id} className="flex items-center bg-brand-light/40 border border-primary2/15 rounded px-3 py-2 gap-3 text-sm">
                           <div className="flex-1 min-w-0">
@@ -163,7 +165,7 @@ export default function DetalleProducto() {
                             {info?.descripcion && <p className="text-[11px] text-brand-muted truncate">{info.descripcion}</p>}
                           </div>
                           <span className="text-xs font-semibold text-brand-muted shrink-0">
-                            {mat.costo_extra > 0 ? `+S/. ${mat.costo_extra.toFixed(2)}` : 'Precio base'}
+                            {costo > 0 ? `+S/. ${costo.toFixed(2)}` : 'Precio base'}
                           </span>
                         </div>
                       );
@@ -217,6 +219,7 @@ export default function DetalleProducto() {
                   <div className="space-y-1.5">
                     {product.personalizaciones.map((per) => {
                       const info = getPersonalizacion(per.id);
+                      const costo = per.costoExtra ? Number(per.costoExtra) : 0;
                       return (
                         <div key={per.id} className="flex items-center bg-brand-light/40 border border-primary2/15 rounded px-3 py-2 gap-3 text-sm">
                           <div className="flex-1 min-w-0">
@@ -224,7 +227,7 @@ export default function DetalleProducto() {
                             {info?.descripcion && <p className="text-[11px] text-brand-muted truncate">{info.descripcion}</p>}
                           </div>
                           <span className="text-xs font-semibold text-brand-muted shrink-0">
-                            {per.costo_extra > 0 ? `+S/. ${per.costo_extra.toFixed(2)}` : 'Sin recargo'}
+                            {costo > 0 ? `+S/. ${costo.toFixed(2)}` : 'Sin recargo'}
                           </span>
                         </div>
                       );
@@ -247,7 +250,7 @@ export default function DetalleProducto() {
                     }`}
                 >
                   <ShoppingCart size={18} />
-                  {product.activo === 1 ? 'Agregar al Carrito' : 'Producto No Disponible'}
+                  {product.activo === 1 ? 'Personalizar y Comprar' : 'Producto No Disponible'}
                 </button>
               </div>
 

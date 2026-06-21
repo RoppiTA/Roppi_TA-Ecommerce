@@ -1,7 +1,7 @@
 // src/components/Header.tsx
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, LogOut, LogIn, User } from 'lucide-react';
+import { Bell, LogOut, LogIn, User, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext'; // Ajusta la ruta a tu AuthContext
 
 export const Header = () => {
@@ -14,6 +14,9 @@ export const Header = () => {
   const displayInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'I';
   const displayName = user?.name || 'Invitado';
   const isGuest = user?.role?.includes('GUEST');
+
+  // erificar si el rol incluye 'CLIENTE' para colocar opcion de carrito de compras
+  const isCliente = user?.role?.includes('CLIENTE');
 
   // Cerrar el menú si el usuario hace clic fuera de él
   useEffect(() => {
@@ -40,7 +43,7 @@ export const Header = () => {
 
   return (
     <header className="bg-brand-light/40 border-b border-primary-hover/15 px-6 py-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm flex-shrink-0">
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="flex items-center gap-4 ml-auto">
         
         {/* Botón de Notificaciones */}
         <button className="p-2 hover:bg-primary2/10 rounded-lg relative transition-colors cursor-pointer">
@@ -95,9 +98,19 @@ export const Header = () => {
               </button>
             </div>
           )}
+          </div>
+          {/* Carrito de Compras (Solo visible para CLIENTE) */}
+          {isCliente && (
+            <button 
+              onClick={() => navigate('/cart')}
+              className="p-2 hover:bg-primary2/10 rounded-lg relative transition-colors cursor-pointer"
+              title="Ver mi carrito"
+            >
+              <ShoppingCart size={20} className="text-brand-dark" />
+              {/* Opcional: Si manejas una variable global o de contexto para ítems del carrito, puedes poner un contador aquí */}
+            </button>
+          )}
         </div>
-
-      </div>
     </header>
   );
 };
