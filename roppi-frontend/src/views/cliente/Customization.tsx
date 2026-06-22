@@ -14,6 +14,7 @@ import {
 import { ProductoGenerico } from '../../types/producto/productoGen.types';
 import assets from '../../assets/assets.js';
 import { useProductosGenericos } from '../../hooks/useProductos';
+import { PersonalizadorCanvas } from '../../components/PersonalizadorCanvas.js';
 
 const sectionTitleCls = 'text-sm font-semibold text-brand-dark mb-3';
 
@@ -22,6 +23,12 @@ type DesignMode = 'upload' | 'preset';
 export const Customization = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [colorSeleccionado, setColorSeleccionado] = useState<string>('#ffffff');
+  const [imagenEstampado, setImagenEstampado] = useState<string | null>(null);
+  const [estampadoRotacion, setEstampadoRotacion] = useState<number>(0);
+  const [estampadoEscala, setEstampadoEscala] = useState<number>(1);
+  const [showSlider, setShowSlider] = useState<boolean>(false);
 
   // Extraemos el ID desde el estado de la navegación
   const state = location.state as { productoId?: number } | null;
@@ -53,6 +60,9 @@ export const Customization = () => {
         setLoadingLocal(true);
         const data = await getProductoById(Number(id_nav));
         setProduct(data);
+        if (data && data.colores.length > 0) {
+          setColorSeleccionado(getColorHex(data.colores[0].id));
+        }
       } catch (error) {
         console.error('No se pudo cargar el producto', error);
       } finally {
@@ -98,7 +108,15 @@ export const Customization = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     setUploadedFile(file);
-    if (file) setDesignMode('upload');
+    
+    if (file) {
+      setDesignMode('upload');
+      // Genera una URL temporal local para que use-image de Konva la pueda cargar
+      const objectUrl = URL.createObjectURL(file);
+      setImagenEstampado(objectUrl);
+    } else {
+      setImagenEstampado(null);
+    }
   };
 
   const handleUploadClick = () => {
@@ -187,23 +205,65 @@ export const Customization = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-10 lg:flex-1 lg:min-h-0">
 
           {/* ── Columna de imagen: módulo fijo con sus controles ── */}
-          <div className="shrink-0">
-            <div className="relative bg-white rounded-3xl border border-primary-hover/15 aspect-square flex items-center justify-center overflow-hidden">
-              <img
-                src={assets[product.imagen as keyof typeof assets] || assets['maxwell']}
-                alt={product.nombre}
-                className="w-3/4 h-3/4 object-contain"
+          <div className="shrink-0 flex flex-col items-center justify-center">
+            <div className="relative bg-white rounded-3xl border border-primary-hover/15 w-[320px] h-[426px] flex items-center justify-center overflow-hidden shadow-sm">
+              
+              {/* RENDERIZAMOS EL CANVAS AQUÍ PASANDO LOS ESTADOS */}
+              <PersonalizadorCanvas
+                prendaUrl={assets[product.imagen as keyof typeof assets] || assets['maxwell']}
+                color={colorSeleccionado}
+                estampadoUrl={imagenEstampado}
+                rotacion={estampadoRotacion} // <- Nueva prop
+                escala={estampadoEscala}     // <- Nueva prop
               />
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white rounded-full shadow-md border border-primary-hover/10 px-2 py-1.5">
+
+              {/* Controles flotantes actualizados con Popover de Zoom */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white rounded-full shadow-md border border-primary-hover/10 px-3 py-1.5 z-20">
+                
+                {/* Botón Vista 3D */}
                 <button className="w-8 h-8 rounded-full bg-primary-hover text-white flex items-center justify-center" title="Vista 3D">
                   <Scan size={16} />
                 </button>
-                <button className="w-8 h-8 rounded-full text-brand-dark hover:bg-brand-light flex items-center justify-center transition-colors" title="Rotar">
+                
+                {/* Botón Rotar */}
+                <button 
+                  onClick={() => setEstampadoRotacion(r => (r + 90) % 360)}
+                  className="w-8 h-8 rounded-full text-brand-dark hover:bg-brand-light flex items-center justify-center transition-colors" 
+                  title="Rotar"
+                >
                   <RotateCw size={16} />
                 </button>
-                <button className="w-8 h-8 rounded-full text-brand-dark hover:bg-brand-light flex items-center justify-center transition-colors" title="Zoom">
-                  <ZoomIn size={16} />
-                </button>
+                
+                {/* Contenedor del Botón Lupa + Slider Desplegable */}
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowSlider(!showSlider)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                      showSlider ? 'bg-primary2/20 text-primary-hover font-bold' : 'text-brand-dark hover:bg-brand-light'
+                    }`} 
+                    title="Zoom"
+                  >
+                    <ZoomIn size={16} />
+                  </button>
+
+                  {/* Slider Flotante (Se muestra arriba del botón) */}
+                  {showSlider && (
+                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white border border-primary-hover/15 rounded-xl shadow-xl px-4 py-3 flex items-center gap-2 z-30 min-w-[180px] animate-in fade-in slide-in-from-bottom-2 duration-150">
+                      <Minus size={14} className="text-brand-muted shrink-0" />
+                      <input
+                        type="range"
+                        min="0.3"  
+                        max="2.5"  
+                        step="0.05"
+                        value={estampadoEscala}
+                        onChange={(e) => setEstampadoEscala(parseFloat(e.target.value))}
+                        className="w-28 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary2"
+                      />
+                      <Plus size={14} className="text-brand-muted shrink-0" />
+                    </div>
+                  )}
+                </div>
+
               </div>
             </div>
           </div>
@@ -300,13 +360,17 @@ export const Customization = () => {
                   className="hidden"
                   onChange={handleFileChange}
                 />
+                {/* Botón de Diseño Predeterminado modificado */}
                 <button
-                  onClick={() => setDesignMode('preset')}
+                  onClick={() => {
+                    setDesignMode('preset');
+                    setImagenEstampado(null); // <--- CLAVE: Borra la imagen del cliente del Canvas
+                  }}
                   className={`flex flex-col items-center justify-center gap-2 py-6 rounded-lg border transition-colors ${
                     designMode === 'preset'
                       ? 'border-primary2 bg-primary2/10 text-primary-hover'
                       : 'border-primary-hover/20 text-brand-dark hover:bg-brand-light/40'
-                  }`}
+                    }`}
                 >
                   <Palette size={22} />
                   <span className="text-sm font-medium">Diseño predeterminado</span>
@@ -314,26 +378,31 @@ export const Customization = () => {
               </div>
             </div>
 
-            {/* 4. Colores */}
-            {product.colores.length > 0 && (
-              <div className="mb-8">
-                <p className={sectionTitleCls}>4. Colores</p>
-                <div className="flex flex-wrap gap-3">
-                  {product.colores.map(col => {
-                    const active = selectedColor === col.id;
-                    return (
-                      <button
-                        key={col.id}
-                        onClick={() => setSelectedColor(col.id)}
-                        title={getColor(col.id)?.nombre}
-                        className={`w-9 h-9 rounded-full border-2 transition-all ${active ? 'border-primary-hover scale-110' : 'border-black/10'}`}
-                        style={{ backgroundColor: getColorHex(col.id) }}
-                      />
-                    );
-                  })}
-                </div>
+            {/* Colores interactivos */}
+            <div className="mb-8">
+              <p className={sectionTitleCls}>Variantes de Color</p>
+              <div className="flex flex-wrap gap-2">
+                {product.colores.map(col => {
+                  const info = getColor(col.id);
+                  const hex = getColorHex(col.id);
+                  const esSeleccionado = colorSeleccionado === hex;
+                  
+                  return (
+                    <button
+                      key={col.id}
+                      type="button"
+                      onClick={() => setColorSeleccionado(hex)}
+                      className={`flex items-center gap-2 bg-brand-light/40 border rounded-full px-3 py-1 transition-all cursor-pointer
+                        ${esSeleccionado ? 'border-primary2 ring-2 ring-primary2/20 font-bold' : 'border-primary2/15'}`}
+                    >
+                      <div className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0" style={{ backgroundColor: hex }} />
+                      <span className="text-xs text-brand-dark">{info?.nombre ?? `#${col.id}`}</span>
+                    </button>
+                  );
+                })}
+                {product.colores.length === 0 && <p className="text-xs text-brand-muted italic">Color único</p>}
               </div>
-            )}
+            </div>
 
             {/* 5. Talla */}
             {product.tamanos.length > 0 && (
