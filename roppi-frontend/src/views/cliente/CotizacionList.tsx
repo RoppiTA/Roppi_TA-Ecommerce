@@ -22,7 +22,10 @@ export function CotizacionListScreen() {
   };
 
   const handleViewCotizacion = (id: number, version: number) => {
-    navigate(`/quotes/view?id=${id}&version=${version}`);
+    // Pasamos los datos mediante el estado interno del router de forma segura e invisible
+    navigate('/quotes/view', { 
+      state: { id, version } 
+    });
   };
 
   return (

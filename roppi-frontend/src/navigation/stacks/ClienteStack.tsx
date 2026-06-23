@@ -1,6 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
-import { Bell } from 'lucide-react';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
 import DetalleProducto from '../../views/cliente/DetalleProducto';
@@ -11,6 +10,8 @@ import Customization from '../../views/cliente/Customization'
 import ProductCart from '../../views/cliente/ProductCart';
 import { CotizacionListScreen } from '../../views/cliente/CotizacionList';
 import { CotizacionDetailScreen } from '../../views/cliente/DetalleCotizacion';
+import { SolicitudCotizacionScreen } from '../../views/cliente/SolicitudCotizacion';
+
 
 interface ClienteStackProps {
   user: {
@@ -92,6 +93,14 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
                   <CotizacionDetailScreen />
                 </ProtectedRoute>
               }
+            />
+            <Route 
+              path="quotes/new" 
+              element={
+                <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
+                  <SolicitudCotizacionScreen />
+                </ProtectedRoute>
+              } 
             />
 
             //Rutas adicionales para soporte y configuración (Próximamente)

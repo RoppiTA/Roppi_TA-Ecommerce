@@ -1,28 +1,32 @@
 import { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom"; // Manejo de rutas nativo
+import { useLocation, useNavigate } from "react-router-dom"; // Manejo de rutas nativo
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, MessageSquare } from "lucide-react";
 import { useCotizaciones } from "../../hooks/useCotizaciones";
 import { StatusBadge } from "../../components/StatusBadge";
 import { MensajeModal } from "../../components/MensajeModal";
 
 export function CotizacionDetailScreen() {
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
-  const { getCotizacionDetalle, calcularSubtotal, calcularDiasRestantes } = useCotizaciones();
+  const { getCotizacionDetalle, calcularSubtotal,calcularDiasRestantes } = useCotizaciones();
 
-  // Parsear los valores de la URL a números para respetar la PK compuesta del Backend
-  const cotizacionId = Number(searchParams.get("id"));
-  const version = Number(searchParams.get("version"));
+  // Rescatamos las PKs compuestas guardadas en el estado interno del router
+  const state = location.state as { id?: number; version?: number } | null;
+  const cotizacionId = state?.id || 0;
+  const version = state?.version || 0;
 
   const cotizacion = getCotizacionDetalle(cotizacionId, version);
   const [modalConfig, setModalConfig] = useState<{ tipo: 'exito' | 'error' | 'cargando' | 'confirmar', accion?: 'aceptar' | 'cancelar', mensaje: string } | null>(null);
   
   if (!cotizacion) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <p className="text-muted-foreground font-medium mb-4">No se encontró la cotización especificada o los parámetros son inválidos.</p>
-          <button onClick={() => navigate('/quotes')} className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold">
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f7f8]">
+        <div className="text-center bg-white p-8 rounded-3xl border border-gray-200 shadow-sm max-w-sm mx-4">
+          <p className="text-[#8c6d53] font-semibold mb-4">Acceso no válido al detalle de cotización.</p>
+          <button 
+            onClick={() => navigate('/quotes')} 
+            className="px-5 py-2.5 bg-[#005f6a] text-white rounded-xl text-sm font-bold shadow-sm hover:opacity-90 transition-opacity"
+          >
             Volver a la lista
           </button>
         </div>

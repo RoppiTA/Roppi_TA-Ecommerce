@@ -205,8 +205,9 @@ function client_sidebar(isCollapsed: boolean, onToggle: () => void) {
 
   const topItems = [
     { id: 'productos', label: 'Productos', icon: Shirt, path: '/products' },
-    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
     { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
+    { id: 'orders', label: 'Pedidos', icon: ShoppingCart, path: '/orders' },
+    
   ];
 
   const bottomItems = [
