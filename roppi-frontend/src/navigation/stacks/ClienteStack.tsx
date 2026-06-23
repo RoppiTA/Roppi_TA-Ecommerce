@@ -8,8 +8,8 @@ import ProductListPage from '../../views/cliente/ProductListPage';
 import { ProtectedRoute } from '../../components/ProtectedRoute';
 import Customization from '../../views/cliente/Customization'
 import ProductCart from '../../views/cliente/ProductCart';
-import { CotizacionListScreen } from '../../views/cliente/CotizacionList';
-import { CotizacionDetailScreen } from '../../views/cliente/DetalleCotizacion';
+import { CotizacionListScreen } from '../../views/cliente/cotizacion/CotizacionList';
+import { CotizacionDetailScreen } from '../../views/cliente/cotizacion/DetalleCotizacion';
 import { SolicitudCotizacionScreen } from '../../views/cliente/SolicitudCotizacion';
 
 
