@@ -8,11 +8,11 @@ import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 
 export const AppRouter = () => {
-  const [user, setUser] = useState({ id: 104, role: 'MERCHANT', name: 'Juan Pérez' });
+  //const [user, setUser] = useState({ id: 104, role: 'MERCHANT', name: 'Juan Pérez' });
   //const [user, setUser] = useState({ id: 104, role: 'CLIENT' , name: 'María Gómez' });
   //const [user, setUser] = useState({ id: 104, role: 'GUEST', name: 'Invitado' });
 
-  //const { user, token } = useAuth();
+  const { user, token } = useAuth();
 
 
   return (

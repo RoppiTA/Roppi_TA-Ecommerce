@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Cotizacion, CotizacionResumen, EstadoCotizacion } from "../types/cotizacion/cotizacion.types";
+import { CotizacionesAPIService } from '../api/cotizaciones.api';
 
 // Mock Data (Fechas actualizadas para coincidir con pruebas recientes)
 const MOCK_COTIZACIONES: Cotizacion[] = [
@@ -106,8 +107,32 @@ const MOCK_COTIZACIONES: Cotizacion[] = [
   }
 ];
 
-export function useCotizaciones() {
+export function useCotizaciones(userId: number, userType: "CLIENTE" | "COMERCIANTE") {
   const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>(MOCK_COTIZACIONES);
+  //const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  //Función para cargar todos los datos necesarios
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const cot = await CotizacionesAPIService.getCotizaciones(userId, userType);
+      setCotizaciones(cot);
+    } catch (err) {
+      setError('Error al conectar con la base de datos');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  
+  // Se ejecuta una vez al montar el componente para cargar los datos iniciales
+  //useEffect(() => {
+  //  fetchData();
+  //}, [fetchData]);
+  
 
   // Helper para calcular subtotal
   const calcularSubtotal = (productos: Cotizacion['productos']) => {
@@ -126,7 +151,7 @@ export function useCotizaciones() {
         fechaSolicitud: cot.fechaSolicitud,
         fechaVencimiento: cot.fechaVencimiento,
         estado: cot.estado,
-        total: subtotal*1.18,
+        total: total,
         version: cot.version,
         cantidadProductos: cot.productos.length
       };
