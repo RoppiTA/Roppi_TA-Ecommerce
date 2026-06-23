@@ -50,7 +50,7 @@ export function ComercianteCotizacionDetailScreen() {
       <div className="bg-[#005f6a] text-white sticky top-0 z-20 px-4 py-4 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/comerciante/quotes')} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><ArrowLeft className="w-4 h-4" /></button>
-          <div><h1 className="font-bold text-base">COT-N° {cotizacion.id} · Comerciante</h1><p className="text-[11px] text-white/70">Asignado a: {cotizacion.cliente}</p></div>
+          <div><h1 className="font-bold text-base">COT-N° {cotizacion.id} · Comerciante</h1><p className="text-[11px] text-white/70">Asignado a: {cotizacion.comerciante}</p></div>
         </div>
         <div className="flex items-center gap-3">
           <StatusBadge estado={cotizacion.estado} size="md" />
