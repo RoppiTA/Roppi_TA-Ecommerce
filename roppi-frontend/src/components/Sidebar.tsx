@@ -41,8 +41,8 @@ function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
   ];
 
   const topItems = [
-    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/comerciante/orders' },
     { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/comerciante/quotes' },
+    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/comerciante/orders' },
     { id: 'reports', label: 'Reportes', icon: BarChart3, path: '/comerciante/reports' },
   ];
 
@@ -205,8 +205,9 @@ function client_sidebar(isCollapsed: boolean, onToggle: () => void) {
 
   const topItems = [
     { id: 'productos', label: 'Productos', icon: Shirt, path: '/products' },
-    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
     { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
+    { id: 'orders', label: 'Pedidos', icon: ShoppingCart, path: '/orders' },
+    
   ];
 
   const bottomItems = [

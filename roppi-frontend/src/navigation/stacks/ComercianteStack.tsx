@@ -7,6 +7,8 @@ import DefaultComerciante from '../../views/comerciante/DefaultComerciante';
 import ProductListPage from '../../views/comerciante/ProductListPage';
 import DiscountsPage from '../../views/comerciante/DiscountsPage';
 import { Header } from '../../components/Header';
+import { ComercianteCotizacionListScreen } from '../../views/comerciante/cotizacion/CotizacionList';
+import { ComercianteCotizacionDetailScreen } from '../../views/comerciante/cotizacion/DetalleCotizacion';
 
 //Prop para tener los datos del usuario logueado, como su id y rol, para mostrar información personalizada en el sidebar y otras partes de la interfaz del comerciante
 interface ComercianteStackProps {
@@ -45,7 +47,8 @@ export const ComercianteStack = ({ user }: ComercianteStackProps) => {
             <Route path="products/edit" element={<DetalleProducto />} />
             <Route path="orders" element={<div className="p-10 text-brand-muted">📦 Pantalla de Pedidos (Próximamente)</div>} />
             <Route path="reports" element={<div className="p-10 text-brand-muted">📈 Pantalla de Reportes (Próximamente)</div>} />
-            <Route path="quotes" element={<div className="p-10 text-brand-muted">📝 Pantalla de Cotizaciones (Próximamente)</div>} />
+            <Route path="quotes"element={<ComercianteCotizacionListScreen />} />
+            <Route path="quotes/view" element={<ComercianteCotizacionDetailScreen />} />
             <Route path="support" element={<div className="p-10 text-brand-muted">❓ Pantalla de Soporte (Próximamente)</div>} />
             <Route path="settings" element={<div className="p-10 text-brand-muted">⚙️ Pantalla de Configuración (Próximamente)</div>} />
             <Route path="*" element={<DefaultComerciante />} />

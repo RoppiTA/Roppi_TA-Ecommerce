@@ -28,7 +28,12 @@ services:
     environment:
       - PORT_API_SERVER=3000
       - HOST_API_SERVER=0.0.0.0
-
+      # Conectamos con el microservicio interno
+      - HOST_PRODUCT_SERVER=productos-interno
+      - PORT_PRODUCT_SERVER=3002
+      # Conectamos con el microservicio de cotizaciones
+      - HOST_COTIZACION_SERVER=cotizaciones-service
+      - PORT_COTIZACION_SERVER=3003
 
   usuarios-service:
     build:
@@ -42,3 +47,17 @@ services:
     environment:
       - PORT_API_SERVER=3000
       - HOST_API_SERVER=0.0.0.0
+
+  cotizaciones-service:
+    build:
+      context: ./roppi-backend
+      dockerfile: Dockerfile
+    command: node roppi.backend.modulos/roppi.backend.modulos.cotizaciones/cotizaciones.server.js
+    container_name: roppi-cotizaciones-service
+    ports:
+      - "3003:3003"
+    env_file:
+      - ./roppi-backend/.env
+    environment:
+      - PORT_COTIZACION_SERVER=3003
+      - HOST_COTIZACION_SERVER=0.0.0.0
