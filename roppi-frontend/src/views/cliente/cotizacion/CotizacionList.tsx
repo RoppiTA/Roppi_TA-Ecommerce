@@ -5,9 +5,9 @@ import { useCotizaciones } from "../../../hooks/useCotizaciones";
 import { StatusBadge } from "../../../components/StatusBadge";
 import { EstadoCotizacion } from "../../../types/cotizacion/cotizacion.types";
 
-export function CotizacionListScreen() {
+export function CotizacionListScreen(userId: number, userType: "CLIENTE" | "COMERCIANTE") {
   const navigate = useNavigate();
-  const { getCotizacionesResumen } = useCotizaciones();
+  const { getCotizacionesResumen } = useCotizaciones(userId, userType); 
   const resumenes = getCotizacionesResumen();
   
   const [filtro, setFiltro] = useState<EstadoCotizacion | "Todos">("Todos");

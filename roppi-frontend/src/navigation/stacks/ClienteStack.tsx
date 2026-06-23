@@ -66,7 +66,7 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
               path="quotes" 
               element={
                 <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
-                  <CotizacionListScreen />
+                  <CotizacionListScreen userId={user.id} userType={user.role} />
                 </ProtectedRoute>
               } 
             />
@@ -90,7 +90,7 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
               path="quotes/view"
               element={
                 <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
-                  <CotizacionDetailScreen />
+                  <CotizacionDetailScreen userId={user.id} userType={user.role} />
                 </ProtectedRoute>
               }
             />

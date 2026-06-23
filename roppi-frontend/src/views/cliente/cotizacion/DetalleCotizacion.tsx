@@ -5,10 +5,10 @@ import { useCotizaciones } from "../../../hooks/useCotizaciones";
 import { StatusBadge } from "../../../components/StatusBadge";
 import { MensajeModal } from "../../../components/MensajeModal";
 
-export function CotizacionDetailScreen() {
+export function CotizacionDetailScreen(userId: number, userType: "CLIENTE" | "COMERCIANTE") {
   const location = useLocation();
   const navigate = useNavigate();
-  const { getCotizacionDetalle, calcularSubtotal,calcularDiasRestantes } = useCotizaciones();
+  const { getCotizacionDetalle, calcularSubtotal,calcularDiasRestantes } = useCotizaciones(userId, userType);
 
   // Rescatamos las PKs compuestas guardadas en el estado interno del router
   const state = location.state as { id?: number; version?: number } | null;
