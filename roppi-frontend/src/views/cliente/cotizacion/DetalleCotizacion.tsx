@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; // Manejo de rutas nativo
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, MessageSquare } from "lucide-react";
-import { useCotizaciones } from "../../hooks/useCotizaciones";
-import { StatusBadge } from "../../components/StatusBadge";
-import { MensajeModal } from "../../components/MensajeModal";
+import { useCotizaciones } from "../../../hooks/useCotizaciones";
+import { StatusBadge } from "../../../components/StatusBadge";
+import { MensajeModal } from "../../../components/MensajeModal";
 
 export function CotizacionDetailScreen() {
   const location = useLocation();

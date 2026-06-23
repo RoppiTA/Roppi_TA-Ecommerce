@@ -18,14 +18,12 @@ export interface LineaProducto {
 export interface Cotizacion {
   id: number;
   comerciante: string;
+  cliente: string;
   fechaSolicitud: string;
   fechaVencimiento: string;
   version: number;
   estado: EstadoCotizacion;
   productos: LineaProducto[];
-  //ES IMPORTANTE AJUSTAR ESTO, se debe adaptar a lo
-  //que se va utilizar en el backend, pero se deja asi por ahora 
-  //para poder avanzar con el desarrollo del frontend
   observacionesCliente?: string;
   comentariosComerciante?: string;
   motivoCancelacion?: string;
@@ -35,6 +33,7 @@ export interface Cotizacion {
 export interface CotizacionResumen {
   id: number;
   comerciante: string;
+  cliente: string;
   fechaSolicitud: string;
   fechaVencimiento: string;
   estado: EstadoCotizacion;

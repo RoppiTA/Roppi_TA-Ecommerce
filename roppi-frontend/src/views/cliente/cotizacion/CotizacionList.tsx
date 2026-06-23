@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, User, Hash, ChevronRight, FileText, ShoppingBag } from "lucide-react";
-import { useCotizaciones } from "../../hooks/useCotizaciones";
-import { StatusBadge } from "../../components/StatusBadge";
-import { EstadoCotizacion } from "../../types/cotizacion/cotizacion.types";
+import { useCotizaciones } from "../../../hooks/useCotizaciones";
+import { StatusBadge } from "../../../components/StatusBadge";
+import { EstadoCotizacion } from "../../../types/cotizacion/cotizacion.types";
 
 export function CotizacionListScreen() {
   const navigate = useNavigate();
@@ -30,16 +30,12 @@ export function CotizacionListScreen() {
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "'Nunito', sans-serif" }}>
-      <div className="bg-primary text-primary-foreground">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
-              <FileText className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold leading-tight">Mis Cotizaciones</h1>
-              <p className="text-sm text-black/70">Gestiona y revisa el estado de tus pedidos</p>
-            </div>
+      <div className="bg-[#005f6a] text-white py-6 shadow-xs">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center"><FileText /></div>
+          <div>
+            <h1 className="text-xl font-bold">Panel de Cotizaciones recibidas</h1>
+            <p className="text-xs text-white/70">Gestiona las cotizaciones solicitadas y observadas</p>
           </div>
         </div>
       </div>

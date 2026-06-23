@@ -41,8 +41,8 @@ function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
   ];
 
   const topItems = [
-    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/comerciante/orders' },
     { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/comerciante/quotes' },
+    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/comerciante/orders' },
     { id: 'reports', label: 'Reportes', icon: BarChart3, path: '/comerciante/reports' },
   ];
 
