@@ -174,11 +174,11 @@ export function CategoryForm({ onClose, onSave }: CategoryFormProps) {
       maximo_stock: Number(capacidad),
       imagen: imageName,
       colores: Array.from(selectedColorIds).map(id => ({ id })),
-      materiales: materialesForm.map(m => ({ id: m.id, costo_extra: Number(m.costoExtra) })),
+      materiales: materialesForm.map(m => ({ id: m.id, costoExtra: Number(m.costoExtra) })),
       tamanos: tallasForm.map(t => ({ id: t.id, ancho: Number(t.ancho), alto: Number(t.alto) })),
       personalizaciones: personalizacionesForm
         .filter(p => p.habilitado)
-        .map(p => ({ id: p.id, costo_extra: Number(p.costoExtra) })),
+        .map(p => ({ id: p.id, costoExtra: Number(p.costoExtra) })),
     });
   };
 
