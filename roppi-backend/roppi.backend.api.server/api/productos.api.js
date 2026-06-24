@@ -10,6 +10,12 @@ class ProductosAPI {
   }
 
   _configurarRutas() {
+    // Genericos
+    this.router.get('/genericos', async (req, res) => {
+      const queryString = new URLSearchParams(req.query).toString();
+      return this.hacerPeticion(req, res, 'GET', queryString ? `/genericos?${queryString}` : '/genericos');
+    });
+    this.router.get('/genericos/:id', async (req, res) => this.hacerPeticion(req, res, 'GET', `/genericos/${req.params.id}`));
 
     //Rutas públicas
 
