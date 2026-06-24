@@ -18,7 +18,7 @@ interface ClienteStackProps {
 
 export const ClienteStack = ({ user }: ClienteStackProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const isAuthenticated = user.role === 'CLIENT';
+  const isAuthenticated = user.role.includes('CLIENTE');
 
   // Si está autenticado y tiene nombre, usamos su nombre. Si no, mostramos "Invitado".
   const displayName = isAuthenticated && user.name ? user.name : 'Invitado';
@@ -33,7 +33,7 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
       <Sidebar
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
-        role="CLIENT"
+        role="CLIENTE"
       />
 
       <main className="flex-1 flex flex-col overflow-hidden">

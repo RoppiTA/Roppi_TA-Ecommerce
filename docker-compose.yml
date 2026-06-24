@@ -28,7 +28,9 @@ services:
     environment:
       - PORT_API_SERVER=3000
       - HOST_API_SERVER=0.0.0.0
-
+      # Conectamos con el microservicio interno
+      - HOST_PRODUCT_SERVER=productos-interno
+      - PORT_PRODUCT_SERVER=3002
 
   usuarios-service:
     build:

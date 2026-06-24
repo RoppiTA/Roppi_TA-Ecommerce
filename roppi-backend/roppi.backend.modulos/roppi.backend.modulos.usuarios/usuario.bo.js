@@ -144,11 +144,11 @@ class UsuariosBO {
 
       // Crear usuario en BD
       const usuarioBD = await usuariosGateway.create({
-        nombre,
-        correo,
+        nombre: nombre,
+        correo: correo,
         contrasena: contrasenaHash,
-        numeroDocumento,
-        tipoDocumento
+        numeroDocumento: numeroDocumento,
+        tipoDocumento: tipoDocumento
       });
 
       // Generar token de activación
@@ -206,7 +206,7 @@ class UsuariosBO {
       if (usuarioBD.activo !== 1) {
         throw new Error('La cuenta no está activa. Verifica tu correo');
       }
-
+      
       // Comparar contrasena
       const contrasenaValida = await this.compararContrasena(contrasena, usuarioBD.contrasena);
       if (!contrasenaValida) {
@@ -253,6 +253,7 @@ class UsuariosBO {
 
       return {
         usuarioId: usuarioBD.id,
+        nombre: usuarioBD.nombre,
         tokenRecuperacion,
         mensaje: 'Token de recuperación generado'
       };

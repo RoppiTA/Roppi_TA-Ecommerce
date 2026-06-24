@@ -1,27 +1,13 @@
 const express = require('express');
 const usuariosBO = require('../../roppi.backend.modulos/roppi.backend.modulos.usuarios/usuario.bo.js');
 const emailService = require('../../roppi.backend.modulos/roppi.backend.modulos.usuarios/email.service.js');
+const authMiddleware = require('./middleware/auth');
 
 class UsuariosAPI {
   constructor() {
     this.router = express.Router();
 
     this._configurarRutas();
-  }
-
-  _authMiddleware(req, res, next) {
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ exito: false, mensaje: 'Token de acceso no proporcionado o formato inválido' });
-      }
-      const token = authHeader.split(' ')[1];
-      const decoded = usuariosBO.verificarJWT(token);
-      req.usuario = decoded;
-      next();
-    } catch (error) {
-      return res.status(401).json({ exito: false, mensaje: 'Token inválido o expirado' });
-    }
   }
 
   _configurarRutas() {
@@ -57,10 +43,10 @@ class UsuariosAPI {
 
         // 3. Redirigir al frontend
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/?activado=true`);
+        res.redirect(`${frontendUrl}/auth/activated`);
       } catch (error) {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/?error_activacion=${encodeURIComponent(error.message)}`);
+        res.redirect(`${frontendUrl}/auth/activated?error=${encodeURIComponent(error.message)}`);
       }
     });
 
@@ -73,6 +59,20 @@ class UsuariosAPI {
         res.status(200).json({ exito: true, data: resultado });
       } catch (error) {
         res.status(401).json({ exito: false, mensaje: error.message });
+      }
+    });
+
+    //correito para recuperar la contra
+    this.router.post('/recuperar', async (req, res) => {
+      try {
+        const { correo } = req.body;
+        const resultado = await usuariosBO.solicitarRecuperacionContrasena(correo);
+
+        emailService.enviarCorreoRecuperacion(correo, resultado.tokenRecuperacion, resultado.nombre
+        ).catch(err => console.error("Error asíncrono enviando correo:", err));
+        res.status(201).json({ exito: true, data: resultado });
+      }catch (error){
+        res.status(401).json({ exito: false, mensaje: error.message});
       }
     });
 
@@ -89,7 +89,7 @@ class UsuariosAPI {
 
     // Asignar rol a un usuario (Protegido por Middleware)
     // Esto es para la autenticacion de token para guardar lo de usuario creación en la bd con el token
-    this.router.post('/roles', this._authMiddleware.bind(this), async (req, res) => {
+    this.router.post('/roles', authMiddleware, async (req, res) => {
       try {
         const { usuarioId, rol } = req.body;
 
@@ -104,7 +104,7 @@ class UsuariosAPI {
 
     // Quitar rol a un usuario (Protegido por Middleware) 
     // Esto es para la autenticacion de token para guardar lo de usuario creación en la bd con el token
-    this.router.delete('/roles', this._authMiddleware.bind(this), async (req, res) => {
+    this.router.delete('/roles', authMiddleware, async (req, res) => {
       try {
         const { usuarioId, rol } = req.body;
 
