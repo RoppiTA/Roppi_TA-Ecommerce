@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react";
-import { Cotizacion, CotizacionResumen } from "../types/cotizacion/cotizacion.types";
+import { Cotizacion, CotizacionResumen, EstadoCotizacion } from "../types/cotizacion/cotizacion.types";
 
 // Mock Data (Fechas actualizadas para coincidir con pruebas recientes)
 const MOCK_COTIZACIONES: Cotizacion[] = [
   {
     id: 101, // ID numérico autogenerado
     comerciante: "Carlos Mendoza",
+    cliente: "Empresa Textil S.A.",
     fechaSolicitud: "2026-06-15",
     fechaVencimiento: "2026-06-25",
     version: 3,
@@ -37,6 +38,7 @@ const MOCK_COTIZACIONES: Cotizacion[] = [
   {
     id: 102,
     comerciante: "Ana Torres",
+    cliente: "Corporación Textil S.A.",
     fechaSolicitud: "2026-06-10",
     fechaVencimiento: "2026-06-20",
     version: 1,
@@ -56,7 +58,8 @@ const MOCK_COTIZACIONES: Cotizacion[] = [
   },
   {
     id: 103,
-    comerciante: "Estudio Creativo SAC",
+    comerciante: "Carlos Mendoza",
+    cliente: "Corporación Textil S.A.",
     fechaSolicitud: "2026-06-01",
     fechaVencimiento: "2026-06-05",
     version: 2,
@@ -73,18 +76,45 @@ const MOCK_COTIZACIONES: Cotizacion[] = [
       },
     ],
     motivoCancelacion: "El cliente solicitó un descuento adicional del 15% que no era viable por los costos de los materiales actuales.",
+  },
+  {
+    id: 104,
+    comerciante: "Carlos Mendoza",
+    cliente: "Corporación Textil S.A.",
+    fechaSolicitud: "2026-06-22",
+    fechaVencimiento: "2026-06-29",
+    version: 1,
+    estado: "Solicitado",
+    productos: [
+      { 
+        idCotizacion: 104, 
+        versionCotizacion: 1, 
+        numeroLinea: 1, 
+        nombre: "Polo Corporativo Algodón", 
+        atributos: { talla: "L", material: "Pima 50/50", personalizacion: "Bordado Pecho", color: "Azul" }, 
+        precioUnitario: 10.0, 
+        cantidad: 100 },
+      { idCotizacion: 104, 
+        versionCotizacion: 1, 
+        numeroLinea: 2, 
+        nombre: "Gorra Publicitaria", 
+        atributos: { talla: "Estándar", material: "Dril", personalizacion: "Estampado", color: "Blanco" }, 
+        precioUnitario: 11.0, 
+        cantidad: 150 }
+    ],
+    observacionesCliente: "Por favor cotizar con el hilo de la mejor calidad posible."
   }
 ];
 
 export function useCotizaciones() {
-  const [cotizaciones] = useState<Cotizacion[]>(MOCK_COTIZACIONES);
+  const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>(MOCK_COTIZACIONES);
 
   // Helper para calcular subtotal
   const calcularSubtotal = (productos: Cotizacion['productos']) => {
     return productos.reduce((sum, p) => sum + p.precioUnitario * p.cantidad, 0);
   };
 
-  // 1. Obtener listado ligero
+  // 1. Obtener listado ligero de cotizaciones para listado simple
   const getCotizacionesResumen = (): CotizacionResumen[] => {
     return cotizaciones.map(cot => {
       const subtotal = calcularSubtotal(cot.productos);
@@ -92,22 +122,47 @@ export function useCotizaciones() {
       return {
         id: cot.id,
         comerciante: cot.comerciante,
+        cliente: cot.cliente,
         fechaSolicitud: cot.fechaSolicitud,
         fechaVencimiento: cot.fechaVencimiento,
         estado: cot.estado,
-        total,
+        total: subtotal*1.18,
         version: cot.version,
         cantidadProductos: cot.productos.length
       };
     });
   };
 
-  // 2. Obtener detalle completo
+  // 2. Obtener detalle completo de un cotización específica por ID y versión
   const getCotizacionDetalle = (id: number, version: number): Cotizacion | undefined => {
     return cotizaciones.find(cot => cot.id === id && cot.version === version);
   };
 
-  // 3. Helper de Días Restantes
+  // 3. Resolver cotización (aceptar, observar, cancelar)
+  const resolverCotizacion = (
+    id: number, 
+    versionActual: number, 
+    nuevoEstado: EstadoCotizacion, 
+    productosEditados: Cotizacion['productos'], 
+    comentarios: string
+  ) => {
+    const original = cotizaciones.find(c => c.id === id && c.version === versionActual);
+    if (!original) return false;
+
+    const nuevaCotizacion: Cotizacion = {
+      ...original,
+      version: versionActual + 1,
+      estado: nuevoEstado,
+      comentariosComerciante: comentarios,
+      precioAnterior: calcularSubtotal(original.productos) * 1.18,
+      productos: productosEditados.map(p => ({ ...p, versionCotizacion: versionActual + 1 }))
+    };
+
+    setCotizaciones(prev => [nuevaCotizacion, ...prev]);
+    return nuevaCotizacion.version;
+  };
+
+  // 4. Helper de Días Restantes
   const calcularDiasRestantes = (fechaVencimiento: string): number => {
     const hoy = new Date();
     const vencimiento = new Date(fechaVencimiento);
@@ -119,6 +174,7 @@ export function useCotizaciones() {
     getCotizacionesResumen,
     getCotizacionDetalle,
     calcularSubtotal,
-    calcularDiasRestantes
+    calcularDiasRestantes,
+    resolverCotizacion
   };
 }
