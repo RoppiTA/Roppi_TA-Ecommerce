@@ -97,7 +97,7 @@ export function ComercianteCotizacionDetailScreen() {
           <p className="text-sm text-brand-muted mt-0.5">Asignado a: {cotizacion.comerciante}</p>
         </div>
 
-        {/* Right: banner modo edición */}
+        {/* Right: banner modo edición: Solo sale cuando el comerciante edita "Solicitado" */}
         {modoEdicion && (
           <div className="w-full lg:shrink-0 lg:self-stretch lg:w-[630px] rounded-xl border border-orange-100 border-l-4 border-l-orange-500 bg-[#FFF7ED] px-5 py-3 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-1">
@@ -111,10 +111,10 @@ export function ComercianteCotizacionDetailScreen() {
         )}
       </div>
 
-      {/* Two-column body */}
+      {/* Two-column body  - Patrón de diseño usualmente utilziaod en retail*/}
       <div className="px-4 lg:px-6 py-4 flex flex-col lg:flex-row gap-5 lg:gap-6 lg:flex-1 lg:overflow-hidden">
 
-        {/* ── LEFT COLUMN (70%) ── */}
+        {/*  Columna izquierda (70%) */}
         <div className="flex-1 min-w-0 overflow-hidden space-y-5 pr-1">
 
           {/* Items table */}
@@ -210,7 +210,7 @@ export function ComercianteCotizacionDetailScreen() {
 
           </div>
 
-          {/* Chat-style comments */}
+          {/* comentarios como si fuera chat // lo comentó el JP */}
           <div className={`${cardCls} p-5`}>
             <p className={`${labelCls} mb-4`}>Comentarios</p>
 
@@ -252,7 +252,7 @@ export function ComercianteCotizacionDetailScreen() {
 
         </div>
 
-        {/* ── RIGHT COLUMN (30%) ── */}
+        {/* columna de (30%) */}
         <div className="w-full lg:w-[30%] lg:min-w-[260px] lg:max-w-[340px] lg:overflow-hidden space-y-4 pb-4">
 
           {/* Detalle de cotización (estado + metadata unificados) */}
