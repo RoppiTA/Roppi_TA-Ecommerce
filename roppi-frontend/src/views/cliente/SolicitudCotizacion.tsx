@@ -100,8 +100,8 @@ export function SolicitudCotizacionScreen() {
           <div className={`${cardCls} overflow-hidden`}>
             <div className="overflow-x-auto overflow-y-auto max-h-[320px]">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-[#B8DFE2]">
-                  <tr className="bg-[#B8DFE2] border-b border-[#C8E6E8]">
+                <thead className="sticky top-0 z-10 border-primary-hover/15">
+                  <tr className="bg-brand-light border-b border-[#C8E6E8]">
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-5 py-3 min-w-[180px]">Producto</th>
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3 min-w-[120px]">Personalización</th>
                     <th className="text-center text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3">Cantidad</th>
@@ -118,17 +118,17 @@ export function SolicitudCotizacionScreen() {
                         <p className="font-bold text-brand-dark">{p.nombre}</p>
                         <div className="flex flex-wrap gap-1 mt-1.5">
                           {p.atributos.talla && (
-                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
+                            <span className="bg-brand-light/40 text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               T: {p.atributos.talla}
                             </span>
                           )}
                           {p.atributos.material && (
-                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
+                            <span className="bg-brand-light/40 text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               {p.atributos.material}
                             </span>
                           )}
                           {p.atributos.color && (
-                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
+                            <span className="bg-brand-light/40 text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               {p.atributos.color}
                             </span>
                           )}
