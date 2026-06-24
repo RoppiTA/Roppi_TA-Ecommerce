@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, XCircle, CheckCircle, Clock } from "lucide-react";
+import { ArrowLeft, Send, XCircle, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { useCotizaciones } from "../../../hooks/useCotizaciones";
 import { useAuth } from "../../../context/AuthContext";
 import { StatusBadge } from "../../../components/StatusBadge";
@@ -16,6 +16,8 @@ export function ComercianteCotizacionDetailScreen() {
   const esComerciante = user?.role?.includes('COMERCIANTE') ?? true;
 
   useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    if (!mq.matches) return;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
@@ -46,12 +48,12 @@ export function ComercianteCotizacionDetailScreen() {
 
   const productos = modoEdicion ? productosEditados : cotizacion.productos;
 
-  const subtotal = calcularSubtotal(productos);
+  const subtotal = calcularSubtotal(productos)*0.92;
   const igv = subtotal * 0.18;
-  const total = subtotal + igv;
+  const total = calcularSubtotal(productos);
 
   const subtotalInicial = calcularSubtotal(cotizacion.productos);
-  const totalInicial = subtotalInicial * 1.18;
+  const totalInicial = subtotalInicial;
 
   const handlePrecioChange = (index: number, valor: string) => {
     const copia = [...productosEditados];
@@ -76,34 +78,50 @@ export function ComercianteCotizacionDetailScreen() {
   const cardCls = "bg-white rounded-[20px] border border-gray-100 shadow-xs";
 
   return (
-    <div className="h-screen bg-[#f4f7f8] flex flex-col overflow-hidden" style={{ fontFamily: "'Nunito', sans-serif" }}>
+    <div className="min-h-screen lg:h-full bg-[#f4f7f8] flex flex-col overflow-x-hidden lg:overflow-hidden" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
-      {/* Header — left-aligned */}
-      <div className="px-6 pt-6 pb-2 shrink-0">
-        <button
-          onClick={() => navigate('/comerciante/quotes')}
-          className="flex items-center gap-1.5 text-primary2 hover:text-primary-hover text-sm font-medium transition-colors mb-2"
-        >
-          <ArrowLeft size={16} />
-          Volver a cotizaciones
-        </button>
-        <h1 className="text-xl font-semibold text-brand-dark">
-          Cot-N° {cotizacion.id} - Comerciante
-        </h1>
-        <p className="text-sm text-brand-muted mt-0.5">Asignado a: {cotizacion.comerciante}</p>
+      {/* Header */}
+      <div className="px-4 lg:px-6 pt-6 pb-2 shrink-0 flex flex-col lg:flex-row items-start gap-3 lg:gap-6">
+        {/* Left: navegación + título */}
+        <div className="flex-1 min-w-0">
+          <button
+            onClick={() => navigate('/comerciante/quotes')}
+            className="flex items-center gap-1.5 text-primary2 hover:text-primary-hover text-sm font-medium transition-colors mb-2"
+          >
+            <ArrowLeft size={16} />
+            Volver a cotizaciones
+          </button>
+          <h1 className="text-xl font-semibold text-brand-dark">
+            Cot-N° {cotizacion.id} - V{cotizacion.version}
+          </h1>
+          <p className="text-sm text-brand-muted mt-0.5">Asignado a: {cotizacion.comerciante}</p>
+        </div>
+
+        {/* Right: banner modo edición */}
+        {modoEdicion && (
+          <div className="w-full lg:shrink-0 lg:self-stretch lg:w-[630px] rounded-xl border border-orange-100 border-l-4 border-l-orange-500 bg-[#FFF7ED] px-5 py-3 flex flex-col justify-center">
+            <div className="flex items-center gap-2 mb-1">
+              <AlertTriangle size={15} className="text-orange-500 shrink-0" />
+              <span className="text-sm font-bold text-orange-800 whitespace-nowrap">Modo Edición Activado</span>
+            </div>
+            <p className="text-xs text-orange-700 leading-relaxed">
+              Estás modificando precios y respuesta. Usa "Enviar cotización" para aplicar los cambios, regresa para descartarlos o presiona "Cancelar cotización" si deseas anular la venta.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Two-column body */}
-      <div className="px-4 lg:px-6 py-4 flex flex-col lg:flex-row gap-5 lg:gap-6 flex-1 overflow-hidden">
+      <div className="px-4 lg:px-6 py-4 flex flex-col lg:flex-row gap-5 lg:gap-6 lg:flex-1 lg:overflow-hidden">
 
         {/* ── LEFT COLUMN (70%) ── */}
         <div className="flex-1 min-w-0 overflow-hidden space-y-5 pr-1">
 
           {/* Items table */}
           <div className={`${cardCls} overflow-hidden`}>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-auto max-h-[280px]">
               <table className="w-full text-sm">
-                <thead>
+                <thead className="sticky top-0 z-10 bg-gray-50">
                   <tr className="bg-gray-50 border-b border-gray-100">
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-5 py-3 min-w-[180px]">Producto</th>
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3 min-w-[120px]">Personalización</th>
@@ -235,12 +253,12 @@ export function ComercianteCotizacionDetailScreen() {
         </div>
 
         {/* ── RIGHT COLUMN (30%) ── */}
-        <div className="w-full lg:w-[30%] lg:min-w-[260px] lg:max-w-[340px] overflow-hidden space-y-4 pb-4">
+        <div className="w-full lg:w-[30%] lg:min-w-[260px] lg:max-w-[340px] lg:overflow-hidden space-y-4 pb-4">
 
           {/* Detalle de cotización (estado + metadata unificados) */}
           <div className={`${cardCls} p-4`}>
             <div className="flex items-start justify-between mb-3">
-              <p className="text-sm font-bold text-brand-dark">Detalle de cotización</p>
+              <p className={labelCls}>Detalle de cotización</p>
               <StatusBadge estado={cotizacion.estado} size="sm" />
             </div>
             <div className="space-y-3">
@@ -257,10 +275,6 @@ export function ComercianteCotizacionDetailScreen() {
                   <p className={labelCls}>Vencimiento</p>
                   <p className={valueCls}>{cotizacion.fechaVencimiento}</p>
                 </div>
-              </div>
-              <div>
-                <p className={labelCls}>Instancia</p>
-                <p className={valueCls}>Versión v{cotizacion.version}</p>
               </div>
             </div>
           </div>

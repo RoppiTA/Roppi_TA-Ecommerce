@@ -1,4 +1,4 @@
-export type EstadoCotizacion = "Solicitado" | "Observado" | "Aceptado" | "Cancelado";
+export type EstadoCotizacion = "Solicitado" | "Observado" | "Aceptado" | "Cancelado" | "Vencido";
 
 export interface LineaProducto {
   numeroLinea: number;
