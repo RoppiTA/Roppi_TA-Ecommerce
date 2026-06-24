@@ -15,7 +15,7 @@ export function ComercianteCotizacionListScreen() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { getCotizacionesResumen } = useCotizaciones();
-  const [filtroEstado, setFiltroEstado] = useState<EstadoCotizacion | null>(null);
+  const [seleccion, setSeleccion] = useState<Set<EstadoCotizacion>>(new Set());
 
   const grupo = searchParams.get('status') ?? 'all';
   const estadosGrupo = ESTADOS_POR_GRUPO[grupo] ?? ESTADOS_POR_GRUPO.all;
@@ -23,11 +23,22 @@ export function ComercianteCotizacionListScreen() {
   const resumenes = getCotizacionesResumen();
   const enGrupo = resumenes.filter(q => estadosGrupo.includes(q.estado));
 
-  // Si el filtro secundario ya no pertenece al grupo actual, se ignora
-  const filtroActivo = filtroEstado && estadosGrupo.includes(filtroEstado) ? filtroEstado : null;
-  const filtradas = filtroActivo ? enGrupo.filter(q => q.estado === filtroActivo) : enGrupo;
+  // Solo considera seleccionados los que pertenecen al grupo actual
+  const seleccionActiva = new Set([...seleccion].filter(e => estadosGrupo.includes(e)));
+  const filtradas = seleccionActiva.size > 0
+    ? enGrupo.filter(q => seleccionActiva.has(q.estado))
+    : enGrupo;
 
   const conteo = (estado: EstadoCotizacion) => enGrupo.filter(q => q.estado === estado).length;
+
+  const toggleEstado = (estado: EstadoCotizacion) => {
+    setSeleccion(prev => {
+      const next = new Set(prev);
+      if (next.has(estado)) next.delete(estado);
+      else next.add(estado);
+      return next;
+    });
+  };
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto p-8">
@@ -51,11 +62,11 @@ export function ComercianteCotizacionListScreen() {
           <div className="flex flex-wrap gap-2">
             {estadosGrupo.map((estado) => {
               const n = conteo(estado);
-              const activo = filtroActivo === estado;
+              const activo = seleccionActiva.has(estado);
               return (
                 <button
                   key={estado}
-                  onClick={() => setFiltroEstado(activo ? null : estado)}
+                  onClick={() => toggleEstado(estado)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                     activo
                       ? 'bg-primary-hover text-white'
