@@ -23,20 +23,7 @@ class ProductoServer {
 
     _configurarFunciones() {
         // Genericos
-        this.app.get('/genericos', async (req, res) => {
-            const filtros = {
-                colores: req.query.colores ? req.query.colores.split(',').map(Number) : null,
-                materiales: req.query.materiales ? req.query.materiales.split(',').map(Number) : null,
-                tamanos: req.query.tamanos ? req.query.tamanos.split(',').map(Number) : null,
-                personalizaciones: req.query.personalizaciones ? req.query.personalizaciones.split(',').map(Number) : null,
-                precioMin: req.query.precioMin ? Number(req.query.precioMin) : null,
-                precioMax: req.query.precioMax ? Number(req.query.precioMax) : null,
-                nombre: req.query.nombre || null,
-                pagina: req.query.pagina ? Number(req.query.pagina) : 1,
-                limite: req.query.limite ? Number(req.query.limite) : 20,
-            };
-            return this.procesarConsultaGenericos(req, res, 'listarTodos', filtros);
-        });
+        this.app.get('/genericos', async (req, res) => this.procesarConsultaGenericos(req, res, 'listarTodos'));
         this.app.get('/genericos/:id', async (req, res) => this.procesarConsultaGenericos(req, res, 'obtenerPorId'));
         this.app.post('/genericos', async (req, res) => this.procesarConsultaGenericos(req, res, 'crear'));
         this.app.post('/genericos/:id', async (req, res) => this.procesarConsultaGenericos(req, res, 'actualizar'));
@@ -71,14 +58,14 @@ class ProductoServer {
         // this.app.get('/personalizados/:id', async (req, res) => this.procesarConsultaPersonalizados(req, res, 'obtenerPorId'));
     }
 
-    async procesarConsultaGenericos(req, res, accion, filtros = null) {
+    async procesarConsultaGenericos(req, res, accion) {
         try {
             let resultado = null;
             let statusCode = 200;
 
             switch (accion) {
                 case 'listarTodos':
-                    resultado = await genericosBO.listarTodos(filtros);
+                    resultado = await genericosBO.listarTodos();
                     break;
                 case 'obtenerPorId':
                     resultado = await genericosBO.obtenerPorId(req.params.id);
