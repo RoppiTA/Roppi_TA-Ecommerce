@@ -70,12 +70,12 @@ export function SolicitudCotizacionScreen() {
     }, 2000);
   };
 
-  const cardCls = "bg-white rounded-[20px] border border-gray-100 shadow-xs";
+  const cardCls = "bg-white rounded-[20px] border border-[#C8E6E8] shadow-[0_2px_16px_rgba(61,30,8,0.06)]";
   const labelCls = "text-[10px] font-bold uppercase tracking-wide text-brand-muted block";
   const valueCls = "text-sm font-semibold text-brand-dark mt-0.5";
 
   return (
-    <div className="min-h-screen lg:h-full bg-[#f4f7f8] flex flex-col overflow-x-hidden lg:overflow-hidden" style={{ fontFamily: "'Nunito', sans-serif" }}>
+    <div className="min-h-screen lg:h-full bg-white flex flex-col overflow-x-hidden lg:overflow-hidden" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
       {/* Header inline — navegación sin fondo oscuro */}
       <div className="px-4 lg:px-6 pt-6 pb-2 shrink-0">
@@ -100,8 +100,8 @@ export function SolicitudCotizacionScreen() {
           <div className={`${cardCls} overflow-hidden`}>
             <div className="overflow-x-auto overflow-y-auto max-h-[320px]">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-gray-50">
-                  <tr className="bg-gray-50 border-b border-gray-100">
+                <thead className="sticky top-0 z-10 bg-[#B8DFE2]">
+                  <tr className="bg-[#B8DFE2] border-b border-[#C8E6E8]">
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-5 py-3 min-w-[180px]">Producto</th>
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3 min-w-[120px]">Personalización</th>
                     <th className="text-center text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3">Cantidad</th>
@@ -109,26 +109,26 @@ export function SolicitudCotizacionScreen() {
                     <th className="text-right text-[10px] font-bold uppercase tracking-wide text-brand-muted px-5 py-3 whitespace-nowrap">Subtotal</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[#C8E6E8]">
                   {productosSolicitados.map((p) => (
-                    <tr key={p.id} className="hover:bg-gray-50/40 transition-colors">
+                    <tr key={p.id} className="hover:bg-[#E2F4F5] transition-colors">
 
                       {/* Producto + atributos */}
                       <td className="px-5 py-4">
                         <p className="font-bold text-brand-dark">{p.nombre}</p>
                         <div className="flex flex-wrap gap-1 mt-1.5">
                           {p.atributos.talla && (
-                            <span className="bg-brand-light/60 text-brand-dark text-[10px] font-medium rounded px-1.5 py-0.5">
+                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               T: {p.atributos.talla}
                             </span>
                           )}
                           {p.atributos.material && (
-                            <span className="bg-brand-light/60 text-brand-dark text-[10px] font-medium rounded px-1.5 py-0.5">
+                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               {p.atributos.material}
                             </span>
                           )}
                           {p.atributos.color && (
-                            <span className="bg-brand-light/60 text-brand-dark text-[10px] font-medium rounded px-1.5 py-0.5">
+                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               {p.atributos.color}
                             </span>
                           )}
@@ -137,18 +137,18 @@ export function SolicitudCotizacionScreen() {
 
                       {/* Personalización */}
                       <td className="px-3 py-4">
-                        <span className="text-xs text-gray-500">{p.atributos.personalizacion || "—"}</span>
+                        <span className="text-xs text-brand-muted">{p.atributos.personalizacion || "—"}</span>
                       </td>
 
                       {/* Cantidad */}
                       <td className="px-3 py-4 text-center">
                         <span className="font-bold text-brand-dark">{p.cantidad}</span>
-                        <span className="block text-[10px] text-brand-muted">Und.</span>
+                        <span className="block text-[10px] text-brand-muted/70">Und.</span>
                       </td>
 
                       {/* Precio unitario */}
                       <td className="px-3 py-4 text-right">
-                        <span className="text-sm text-gray-500">S/ {p.precioUnitario.toFixed(2)}</span>
+                        <span className="text-sm text-brand-muted">S/ {p.precioUnitario.toFixed(2)}</span>
                       </td>
 
                       {/* Subtotal línea */}
@@ -170,7 +170,7 @@ export function SolicitudCotizacionScreen() {
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
               placeholder="Escribe detalles sobre embalaje, variaciones especiales, horarios de entrega o cualquier condición requerida..."
-              className="w-full text-xs p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-primary2 focus:ring-1 focus:ring-primary2/30 bg-gray-50 resize-none transition-all placeholder-gray-400"
+              className="w-full text-xs p-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:border-brand-muted/50 focus:ring-1 focus:ring-brand-muted/20 bg-[#FDFAF7] resize-none transition-all placeholder-brand-muted/40"
             />
           </div>
 
@@ -207,17 +207,17 @@ export function SolicitudCotizacionScreen() {
           <div className={`${cardCls} p-4`}>
             <p className={`${labelCls} mb-3`}>Resumen de Costos</p>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-brand-muted">
                 <span>Subtotal aproximado</span>
                 <span className="font-semibold">S/ {subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-brand-muted">
                 <span>IGV estimado (18%)</span>
                 <span className="font-semibold">S/ {igv.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-gray-100 font-bold text-brand-dark">
+              <div className="flex justify-between pt-2 border-t border-[#C8E6E8] font-bold text-brand-dark">
                 <span>Total Proyectado</span>
-                <span className="text-lg text-primary-hover">S/ {totalCompleto.toFixed(2)}</span>
+                <span className="text-lg text-brand-dark">S/ {totalCompleto.toFixed(2)}</span>
               </div>
               <p className="text-[10px] text-brand-muted pt-1">Los precios son estimados. El comerciante confirmará el precio final.</p>
             </div>
@@ -243,7 +243,7 @@ export function SolicitudCotizacionScreen() {
                   mensaje: '¿Estás seguro de que deseas cancelar la solicitud? Se vaciarán los detalles ingresados y volverás al carrito.',
                   onConfirmAction: () => { setModalConfig(null); navigate('/cart'); }
                 })}
-                className="w-full py-2.5 bg-white hover:bg-red-50 text-red-600 font-bold text-xs rounded-xl border border-red-200 flex items-center justify-center gap-2 transition-colors"
+                className="w-full py-2.5 bg-transparent hover:bg-[#FFF5EE] text-brand-error font-bold text-xs rounded-xl border border-brand-error/40 hover:border-brand-error/70 flex items-center justify-center gap-2 transition-colors"
               >
                 <XCircle className="w-3.5 h-3.5" /> Cancelar solicitud
               </button>
