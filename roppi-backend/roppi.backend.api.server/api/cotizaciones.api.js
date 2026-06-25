@@ -44,6 +44,54 @@ class CotizacionesAPI {
             const idUsuario = req.usuario.sub;
             return this.hacerPeticion(req, res, 'POST', `/carrito/vaciar`, { idUsuario });
         });
+
+        // --- COTIZACIONES ---
+
+        // POV del cliente
+        // Listar las cotizaciones abiertas de un cliente, tanto activas como inactivas según
+        // el parámetro 'active'.   
+        // Ejemplo: localhost:3000/api/cotizaciones/solicitudes/cliente/:id?page=2&len=10&active=1
+        this.router.get('/solicitudes/cliente/:id', async (req, res) => {
+            const id = req.params.id;
+            const page = req.query.page;
+            const items_per_page = req.query.len;
+            const active = req.query.active;
+            if (active == null) {
+                return this.hacerPeticion(req, res, 'GET', `/solicitudes/cliente/${id}?page=${page}&len=${items_per_page}`);
+            }
+            return this.hacerPeticion(req, res, 'GET', `/solicitudes/cliente/${id}?page=${page}&len=${items_per_page}&active=${active}`);
+        });
+
+        // POV del vendedor
+        // Listar todas las cotizaciones abiertas o inactivas según el parámtero 'active'
+        // Ejemplo: localhost:3000/api/cotizaciones/solicitudes/comerciante?page=2&len=10&active=1
+        this.router.get('/solicitudes/comerciante', async (req, res) => {
+            const page = req.query.page;
+            const items_per_page = req.query.len;
+            const active = req.query.active;
+            if (active == null) {
+                return this.hacerPeticion(req, res, 'GET', `/solicitudes/comerciante?page=${page}&len=${items_per_page}`);
+            }
+            return this.hacerPeticion(req, res, 'GET', `/solicitudes/comerciante?page=${page}&len=${items_per_page}&active=${active}`);
+        });
+
+        this.router.get('solicitudes/:numero/:version', async (req, res) => {
+            const numero = req.params.numero;
+            const version = req.params.version;
+            return this.hacerPeticion(req, res, 'GET', `/solicitudes/${numero}/${version}`);
+        })
+
+        this.router.get('/solicitudes/:numero', async (req, res) => {
+            const numero = req.params.numero;
+            return this.hacerPeticion(req, res, 'GET', `/solicitudes/${numero}`);
+        })
+
+        // Actualizar estado de la cotización
+        this.router.put('/solicitudes/update/estado', async (req, res) => {
+            const { numeroCotizacion, numeroVersion, estado } = req.body;
+            return this.hacerPeticion(req, res, 'PUT', `/solicitudes/update/estado`, { numeroCotizacion, numeroVersion, estado });
+        });
+
     }
 
     async hacerPeticion(req, res, metodo, path, body = null) {
