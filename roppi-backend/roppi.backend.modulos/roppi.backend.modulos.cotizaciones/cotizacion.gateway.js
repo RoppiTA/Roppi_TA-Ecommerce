@@ -100,13 +100,13 @@ class CotizacionGateway {
     const limit = indice_max - indice_min;
     const result = await db.query(`
       WITH UltimasVersiones AS (
-        SELECT DISTINCT ON (c.NUMERO_COTIZACION) c.NUMERO_COTIZACION, c.VERSION_COTIZACION, c.ESTADO, c.TOTAL, c.FECHA_LIMITE, u.NOMBRE, u.ID, c.FECHA_MODIFICACION
+        SELECT DISTINCT ON (c.NUMERO_COTIZACION) c.NUMERO_COTIZACION, c.VERSION_COTIZACION, c.ESTADO, c.TOTAL, c.FECHA_LIMITE, c.ID_COMERCIANTE, u.NOMBRE, u.ID, c.FECHA_MODIFICACION
         FROM "RoppiTA".COTIZACIONES c
         JOIN "RoppiTA".USUARIOS u ON c.ID_USUARIO = u.ID
         WHERE c.ESTADO IN ('SOLICITADA', 'OBSERVADA')
         ORDER BY c.NUMERO_COTIZACION, c.VERSION_COTIZACION DESC
       )
-      SELECT NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, TOTAL, FECHA_LIMITE, NOMBRE, ID
+      SELECT NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, TOTAL, FECHA_LIMITE, ID_COMERCIANTE, NOMBRE, ID
       FROM UltimasVersiones
       ORDER BY FECHA_MODIFICACION DESC
       LIMIT $1 OFFSET $2
@@ -118,13 +118,13 @@ class CotizacionGateway {
     const limit = indice_max - indice_min;
     const result = await db.query(`
       WITH UltimasVersiones AS (
-        SELECT DISTINCT ON (c.NUMERO_COTIZACION) c.NUMERO_COTIZACION, c.VERSION_COTIZACION, c.ESTADO, c.TOTAL, c.FECHA_LIMITE, u.NOMBRE, u.ID, c.FECHA_MODIFICACION
+        SELECT DISTINCT ON (c.NUMERO_COTIZACION) c.NUMERO_COTIZACION, c.VERSION_COTIZACION, c.ESTADO, c.TOTAL, c.FECHA_LIMITE, c.ID_COMERCIANTE, u.NOMBRE, u.ID, c.FECHA_MODIFICACION
         FROM "RoppiTA".COTIZACIONES c
         JOIN "RoppiTA".USUARIOS u ON c.ID_USUARIO = u.ID
         WHERE c.ESTADO IN ('ACEPTADA', 'CANCELADA', 'VENCIDA')
         ORDER BY c.NUMERO_COTIZACION, c.VERSION_COTIZACION DESC
       )
-      SELECT NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, TOTAL, FECHA_LIMITE, NOMBRE, ID
+      SELECT NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, TOTAL, FECHA_LIMITE, ID_COMERCIANTE, NOMBRE, ID
       FROM UltimasVersiones
       ORDER BY FECHA_MODIFICACION DESC
       LIMIT $1 OFFSET $2
@@ -136,13 +136,13 @@ class CotizacionGateway {
     const limit = indice_max - indice_min;
     const result = await db.query(`
       WITH UltimasVersiones AS (
-        SELECT DISTINCT ON (c.NUMERO_COTIZACION) c.NUMERO_COTIZACION, c.VERSION_COTIZACION, c.ESTADO, c.TOTAL, c.FECHA_LIMITE, u.NOMBRE, u.ID, c.FECHA_MODIFICACION
+        SELECT DISTINCT ON (c.NUMERO_COTIZACION) c.NUMERO_COTIZACION, c.VERSION_COTIZACION, c.ESTADO, c.TOTAL, c.FECHA_LIMITE, c.ID_COMERCIANTE, u.NOMBRE, u.ID, c.FECHA_MODIFICACION
         FROM "RoppiTA".COTIZACIONES c
         JOIN "RoppiTA".USUARIOS u ON c.ID_USUARIO = u.ID
         WHERE c.ESTADO != 'CARRITO'
         ORDER BY c.NUMERO_COTIZACION, c.VERSION_COTIZACION DESC
       )
-      SELECT NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, TOTAL, FECHA_LIMITE, NOMBRE, ID
+      SELECT NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, TOTAL, FECHA_LIMITE, ID_COMERCIANTE, NOMBRE, ID
       FROM UltimasVersiones
       ORDER BY FECHA_MODIFICACION DESC
       LIMIT $1 OFFSET $2
@@ -160,13 +160,25 @@ class CotizacionGateway {
     return result.rows[0];
   }
 
-  async listarVersionesDeCotizacion(numeroCotizacion) {
+  async asignarComerciante(numeroCotizacion, numeroVersion, idComerciante) {
     const result = await db.query(`
-      SELECT NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, TOTAL, FECHA_LIMITE, FECHA_MODIFICACION
+      UPDATE "RoppiTA".COTIZACIONES
+      SET ID_COMERCIANTE = $1, FECHA_MODIFICACION = CURRENT_TIMESTAMP
+      WHERE NUMERO_COTIZACION = $2 AND VERSION_COTIZACION = $3
+      RETURNING NUMERO_COTIZACION, VERSION_COTIZACION, ID_COMERCIANTE
+    `, [idComerciante, numeroCotizacion, numeroVersion]);
+    return result.rows[0];
+  }
+
+  async listarVersionesDeCotizacion(numeroCotizacion, indice_min, indice_max) {
+    const limit = indice_max - indice_min;
+    const result = await db.query(`
+      SELECT NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, TOTAL, FECHA_LIMITE, ID_COMERCIANTE, FECHA_MODIFICACION
       FROM "RoppiTA".COTIZACIONES
       WHERE NUMERO_COTIZACION = $1
       ORDER BY VERSION_COTIZACION DESC
-    `, [numeroCotizacion]);
+      LIMIT $2 OFFSET $3
+    `, [numeroCotizacion, limit, indice_min]);
     return result.rows;
   }
 
@@ -182,6 +194,7 @@ class CotizacionGateway {
         c.FECHA_CREACION,
         c.FECHA_LIMITE,
         c.TOTAL,
+        c.ID_COMERCIANTE,
         u.NOMBRE AS cliente_nombre
       FROM "RoppiTA".COTIZACIONES c
       JOIN "RoppiTA".USUARIOS u ON c.ID_USUARIO = u.ID
@@ -193,7 +206,7 @@ class CotizacionGateway {
     const cabecera = result.rows[0];
 
     // 2. Obtenemos los detalles usando la nueva función modularizada V2
-    const detalles = await detalleGateway.getDetallesByCotizacionV2(numeroCotizacion, numeroVersion);
+    const detalles = await detalleGateway.getDetallesByCotizacion(numeroCotizacion, numeroVersion);
 
     // 3. Combinamos la data
     cabecera.detalles = detalles;
