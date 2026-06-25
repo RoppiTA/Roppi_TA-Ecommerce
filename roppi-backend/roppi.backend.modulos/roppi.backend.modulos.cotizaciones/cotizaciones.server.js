@@ -11,6 +11,7 @@ class CotizacionesServer {
 
         this.app.use(express.json());
         this._configurarFunciones();
+        this._configurarFuncionesCotizacion();
     }
 
     _configurarFunciones() {
@@ -67,6 +68,90 @@ class CotizacionesServer {
                 this.devolverError(res, 400, error.message);
             }
         });
+    }
+
+    _configurarFuncionesCotizacion() {
+        this.app.get('/solicitudes/cliente/:id', async (req, res) => {
+            try {
+                const idCliente = parseInt(req.params.id);
+                const page = parseInt(req.query.page) || 1;
+                const items_per_page = Math.min(parseInt(req.query.len), 10) || 10;
+                let data = null;
+                const active = parseInt(req.query.active) || null;
+                if (active === 1) {
+                    data = await cotizacionBO.listarCotizacionesActivasPorCliente(idCliente, page, items_per_page);
+                }
+                else if (active === 0) {
+                    data = await cotizacionBO.listarCotizacionesCerradasPorCliente(idCliente, page, items_per_page);
+                }
+                else {
+                    data = await cotizacionBO.listarTodasLasCotizacionesPorCliente(idCliente, page, items_per_page);
+                }
+                this.retornarRespuesta(res, 200, data);
+            }
+            catch (error) {
+                this.devolverError(res, 500, error.message);
+            }
+
+        })
+
+        this.app.get('/solicitudes/comerciante', async (req, res) => {
+            try {
+                const page = parseInt(req.query.page) || 1;
+                const items_per_page = Math.min(parseInt(req.query.len), 10) || 10;
+                let data = null;
+                const active = parseInt(req.query.active) || null;
+                if (active == 1) {
+                    data = await cotizacionBO.listarCotizacionesAbiertas(page, items_per_page);
+                }
+                else if (active == 0) {
+                    data = await cotizacionBO.listarCotizacionesCerradas(page, items_per_page);
+                }
+                else {
+                    data = await cotizacionBO.listarTodasLasCotizaciones(page, items_per_page);
+                }
+                this.retornarRespuesta(res, 200, data)
+            }
+            catch (error) {
+                this.devolverError(res, 500, error.message);
+            }
+        })
+
+        this.app.get('/solicitudes/:numero', async (req, res) => {
+            try {
+                const numero = parseInt(req.params.numero);
+                const resultado = await cotizacionBO.listarVersionesDeCotizacion(numero);
+                this.retornarRespuesta(res, 200, resultado);
+            }
+            catch (error) {
+                this.devolverError(res, 500, error.message);
+            }
+        })
+
+        this.app.get('/solicitudes/:numero/:version', async (req, res) => {
+            try {
+                const numero = parseInt(req.params.numero);
+                const version = parseInt(req.params.version);
+                const resultado = await cotizacionBO.obtenerDetallesCotizacion(numero, version);
+                this.retornarRespuesta(res, 200, resultado);
+            }
+            catch (error) {
+                this.devolverError(res, 500, error.message);
+            }
+        })
+
+        this.app.put('/solicitudes/update/estado', async (req, res) => {
+            try {
+                const { numeroCotizacion, numeroVersion, estado } = req.body;
+                const resultado = await cotizacionBO.updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado);
+                this.retornarRespuesta(res, 200, resultado);
+            }
+            catch (error) {
+                this.devolverError(res, 500, error.message);
+            }
+        })
+
+
     }
 
     devolverError(response, status, mensaje) {
