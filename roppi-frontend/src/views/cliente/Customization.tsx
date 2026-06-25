@@ -102,6 +102,8 @@ export const Customization = () => {
     setSelectedPersonalizacion(product.personalizaciones[0]?.id ?? null);
     setSelectedColor(product.colores[0]?.id ?? null);
     setSelectedTamano(product.tamanos[0]?.id ?? null);
+
+    console.log(product);
   }, [product]);
 
   const materialExtra = useMemo(() => {
@@ -134,7 +136,10 @@ export const Customization = () => {
 
   const handleUploadClick = () => {
     setDesignMode('upload');
-    fileInputRef.current?.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''; // Resetea para que el mismo archivo pueda re-seleccionarse
+      fileInputRef.current.click();
+    }
   };
 
   const handleCantidadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -266,56 +271,9 @@ export const Customization = () => {
                 estampadoUrl={imagenEstampado}
                 rotacion={estampadoRotacion} // <- Nueva prop
                 escala={estampadoEscala}     // <- Nueva prop
+                draggable={false}
+                initialPos={{ x: product.posicionX, y: product.posicionY }}
               />
-
-              {/* Controles flotantes actualizados con Popover de Zoom */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white rounded-full shadow-md border border-primary-hover/10 px-3 py-1.5 z-20">
-                
-                {/* Botón Vista 3D */}
-                <button className="w-8 h-8 rounded-full bg-primary-hover text-white flex items-center justify-center" title="Vista 3D">
-                  <Scan size={16} />
-                </button>
-                
-                {/* Botón Rotar */}
-                <button 
-                  onClick={() => setEstampadoRotacion(r => (r + 90) % 360)}
-                  className="w-8 h-8 rounded-full text-brand-dark hover:bg-brand-light flex items-center justify-center transition-colors" 
-                  title="Rotar"
-                >
-                  <RotateCw size={16} />
-                </button>
-                
-                {/* Contenedor del Botón Lupa + Slider Desplegable */}
-                <div className="relative">
-                  <button 
-                    onClick={() => setShowSlider(!showSlider)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                      showSlider ? 'bg-primary2/20 text-primary-hover font-bold' : 'text-brand-dark hover:bg-brand-light'
-                    }`} 
-                    title="Zoom"
-                  >
-                    <ZoomIn size={16} />
-                  </button>
-
-                  {/* Slider Flotante (Se muestra arriba del botón) */}
-                  {showSlider && (
-                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-white border border-primary-hover/15 rounded-xl shadow-xl px-4 py-3 flex items-center gap-2 z-30 min-w-[180px] animate-in fade-in slide-in-from-bottom-2 duration-150">
-                      <Minus size={14} className="text-brand-muted shrink-0" />
-                      <input
-                        type="range"
-                        min="0.3"  
-                        max="2.5"  
-                        step="0.05"
-                        value={estampadoEscala}
-                        onChange={(e) => setEstampadoEscala(parseFloat(e.target.value))}
-                        className="w-28 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary2"
-                      />
-                      <Plus size={14} className="text-brand-muted shrink-0" />
-                    </div>
-                  )}
-                </div>
-
-              </div>
             </div>
           </div>
 
@@ -370,7 +328,13 @@ export const Customization = () => {
                           type="radio"
                           name="personalizacion"
                           checked={selectedPersonalizacion === per.id}
-                          onChange={() => setSelectedPersonalizacion(per.id)}
+                          onChange={() => {
+                            setSelectedPersonalizacion(per.id);
+                            const nombre = getPersonalizacion(per.id)?.nombre ?? '';
+                            if (nombre.toLowerCase() === 'ninguna') {
+                              setImagenEstampado(null);
+                            }
+                          }}
                           className="w-4 h-4 accent-primary-hover"
                         />
                         {info?.nombre ?? `Personalización #${per.id}`}
@@ -385,49 +349,57 @@ export const Customization = () => {
             )}
 
             {/* 3. Diseño de personalización */}
-            <div className="mb-8">
-              <p className={sectionTitleCls}>3. Diseño de personalización</p>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={handleUploadClick}
-                  className={`flex flex-col items-center justify-center gap-2 py-6 rounded-lg border transition-colors ${
-                    designMode === 'upload'
-                      ? 'border-primary2 bg-primary2/10 text-primary-hover'
-                      : 'border-primary-hover/20 text-brand-dark hover:bg-brand-light/40'
-                  }`}
-                >
-                  <Upload size={22} />
-                  <span className="text-sm font-medium">Subir imagen</span>
-                  {uploadedFile && (
-                    <span className="text-[11px] font-medium text-brand-muted truncate max-w-[90%]">
-                      {uploadedFile.name}
-                    </span>
-                  )}
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                {/* Botón de Diseño Predeterminado modificado */}
-                <button
-                  onClick={() => {
-                    setDesignMode('preset');
-                    setImagenEstampado(null); // <--- CLAVE: Borra la imagen del cliente del Canvas
-                  }}
-                  className={`flex flex-col items-center justify-center gap-2 py-6 rounded-lg border transition-colors ${
-                    designMode === 'preset'
-                      ? 'border-primary2 bg-primary2/10 text-primary-hover'
-                      : 'border-primary-hover/20 text-brand-dark hover:bg-brand-light/40'
+            {(() => {
+              const personalizacionNombre = getPersonalizacion(selectedPersonalizacion!)?.nombre ?? '';
+              const esNinguna = personalizacionNombre.toLowerCase() === 'ninguna';
+              if (esNinguna) return null;
+              return (
+              <div className="mb-8">
+                <p className={sectionTitleCls}>3. Diseño de personalización</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleUploadClick}
+                    className={`flex flex-col items-center justify-center gap-2 py-6 rounded-lg border transition-colors ${
+                      designMode === 'upload'
+                        ? 'border-primary2 bg-primary2/10 text-primary-hover'
+                        : 'border-primary-hover/20 text-brand-dark hover:bg-brand-light/40'
                     }`}
-                >
-                  <Palette size={22} />
-                  <span className="text-sm font-medium">Diseño predeterminado</span>
-                </button>
+                  >
+                    <Upload size={22} />
+                    <span className="text-sm font-medium">Subir imagen</span>
+                    {uploadedFile && (
+                      <span className="text-[11px] font-medium text-brand-muted truncate max-w-[90%]">
+                        {uploadedFile.name}
+                      </span>
+                    )}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                  {/* Botón de Diseño Predeterminado modificado */}
+                  <button
+                    onClick={() => {
+                      setDesignMode('preset');
+                      setImagenEstampado(assets['maxwell']); // <--- CLAVE: Borra la imagen del cliente del Canvas
+                    }}
+                    className={`flex flex-col items-center justify-center gap-2 py-6 rounded-lg border transition-colors ${
+                      designMode === 'preset'
+                        ? 'border-primary2 bg-primary2/10 text-primary-hover'
+                        : 'border-primary-hover/20 text-brand-dark hover:bg-brand-light/40'
+                      }`}
+                  >
+                    <Palette size={22} />
+                    <span className="text-sm font-medium">Diseño predeterminado</span>
+                  </button>
+                </div>
               </div>
-            </div>
+              );
+            })()}
+            
 
             {/* Colores interactivos */}
             <div className="mb-8">

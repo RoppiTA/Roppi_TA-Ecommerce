@@ -51,7 +51,7 @@ class GenericosBO {
       //Insertar el genérico
       console.log(nombre);
       const genericoRow = await genericosGateway.createWithClient(client,
-        { nombre, descripcion, precioBase, maximoStock, urlImagen, posicionX, posicionY, usuarioId });
+        { nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId, posicionX, posicionY });
       const idGenerico = genericoRow.id;
 
       // Insertar todas las relacinones de manera paralela
@@ -85,8 +85,8 @@ class GenericosBO {
   // MODIFICAR
   //lo que estamos haciendo para actualizar las listas vinculadas es comparar la lista anterior con la nueva 
   // y solo eliminar/insertar lo que cambió.
-  async actualizar(id, { nombre, descripcion, precioBase, maximoStock, urlImagen, posicionX, posicionY,
-    tamanos, materiales, colores, personalizaciones, usuarioId
+  async actualizar(id, { nombre, descripcion, precioBase, maximoStock, urlImagen,
+    tamanos, materiales, colores, personalizaciones, usuarioId, posicionX, posicionY
   }) {
 
     // Obtener el producto actual con sus atributos
@@ -150,7 +150,7 @@ class GenericosBO {
 
       await genericosGateway.updateWithClient(client, id, {
         nombre: nombre, descripcion: descripcion, precioBase: precioBase, maximoStock: maximoStock,
-        urlImagen: urlImagen, posicionX: posicionX, posicionY: posicionY, usuarioId: usuarioId
+        urlImagen: urlImagen, usuarioId: usuarioId, posicionX: posicionX, posicionY: posicionY
       });
 
       await Promise.all([
