@@ -18,15 +18,15 @@ export const AppRouter = () => {
   return (
     <Routes>
       <Route path="/auth/*" element={<AuthStack />} />
-      <Route path="/comerciante/*" element={<ComercianteStack user={user} />} />
-      {/*<Route
+      {/*<Route path="/comerciante/*" element={<ComercianteStack user={user} />} />*/}
+      <Route
         path="/comerciante/*"
         element={
-          <ProtectedRoute isAllowed={user.role.includes('COMERCIANTE')} redirectTo="/">
+          <ProtectedRoute isAllowed={user.role.includes('COMERCIANTE')} redirectTo="/auth">
             <ComercianteStack user={user} />
           </ProtectedRoute>
         }
-      />*/}
+      />
       <Route path="/*" element={<ClienteStack user={user} />} />
     </Routes>
   );

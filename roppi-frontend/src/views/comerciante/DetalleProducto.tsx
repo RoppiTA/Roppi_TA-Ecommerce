@@ -5,6 +5,9 @@ import { ProductoGenerico, CreateProductGenericoDTO } from '../../types/producto
 import assets from '../../assets/assets.js';
 import { useProductosGenericos } from '../../hooks/useProductos';
 import { MensajeModal } from '../../components/MensajeModal';
+import { MapPin } from 'lucide-react';
+import { PersonalizadorCanvas } from '../../components/PersonalizadorCanvas';
+const DUMMY_STAMP = 'https://placehold.co/100x100/e2e8f0/94a3b8?text=★';
 
 const blockNonDecimal = (e: React.KeyboardEvent<HTMLInputElement>) => {
   if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
@@ -56,6 +59,9 @@ export default function DetalleProducto() {
     onConfirmar?: () => void | Promise<void>;
   } | null>(null);
 
+  const [showPosModal, setShowPosModal]   = useState(false);
+  const [pendingPos, setPendingPos]       = useState<{ x: number; y: number } | null>(null);
+
   const getMaterial        = (id: number) => materiales.find(m => m.id === id);
   const getColor           = (id: number) => colores.find(c => c.id === id);
   const getTamano          = (id: number) => tamano.find(s => s.id === id);
@@ -71,7 +77,7 @@ export default function DetalleProducto() {
 
   useEffect(() => {
     if (view === 'create') {
-      setEditedProduct({ id: 0, nombre: '', activo: 1, precio_base: 0, maximo_stock: 0, descripcion: '', imagen: 'maxwell', materiales: [], colores: [], tamanos: [], personalizaciones: [] });
+      setEditedProduct({ id: 0, nombre: '', activo: 1, precio_base: 0, maximo_stock: 0, descripcion: '', imagen: 'maxwell', materiales: [], colores: [], tamanos: [], personalizaciones: [], posicionX: 0, posicionY: 0 });
       setProduct(null);
       setImagePreview(null);
       return;
@@ -117,6 +123,8 @@ export default function DetalleProducto() {
         activo: editedProduct.activo,
         maximo_stock: editedProduct.maximo_stock,
         imagen: editedProduct.imagen,
+        posicionX: editedProduct.posicionX,
+        posicionY: editedProduct.posicionY,
         colores: editedProduct.colores,
         materiales: editedProduct.materiales,
         tamanos: editedProduct.tamanos,
@@ -300,6 +308,24 @@ export default function DetalleProducto() {
                   Archivo: <span className="font-mono font-semibold">{currentProduct.imagen || '(ninguno)'}</span>
                 </p>
               )}
+
+              {isEditable && (imagePreview || currentProduct.imagen) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingPos(
+                    currentProduct.posicionX != null
+                      ? { x: currentProduct.posicionX, y: currentProduct.posicionY }
+                      : null
+                  );
+                  setShowPosModal(true);
+                }}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 border border-primary2/40 text-primary-hover rounded-lg text-xs font-medium hover:bg-brand-light/50 transition-colors"
+              >
+                <MapPin size={13} />
+                {currentProduct.posicionX != null ? 'Reposicionar diseño' : 'Definir zona de diseño'}
+              </button>
+            )}
 
               {/* Estado */}
               <div className="flex items-center justify-between px-1">
@@ -566,6 +592,70 @@ export default function DetalleProducto() {
           }}
           onConfirm={mensajeModal.onConfirmar}
         />
+      )}
+
+      {showPosModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setShowPosModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl p-5 flex flex-col items-center gap-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between w-full">
+              <h3 className="text-sm font-bold text-brand-dark">Posicionar zona de diseño</h3>
+              <button
+                type="button"
+                onClick={() => setShowPosModal(false)}
+                className="text-brand-muted hover:text-brand-dark transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="text-[11px] text-brand-muted text-center">
+              Arrastra la imagen al lugar donde los clientes podrán colocar su diseño.
+            </p>
+
+            <PersonalizadorCanvas
+              prendaUrl={imagePreview ?? (assets[currentProduct.imagen as keyof typeof assets] || assets['maxwell'])}
+              color="#ffffff"
+              estampadoUrl={DUMMY_STAMP}
+              rotacion={0}
+              escala={1}
+              initialPos={pendingPos ?? undefined}
+              draggable={true}
+              onPosChange={setPendingPos}
+            />
+
+            <div className="flex gap-2 w-full">
+              <button
+                type="button"
+                onClick={() => setShowPosModal(false)}
+                className="flex-1 py-2 border border-brand-muted text-brand-muted rounded-lg text-xs font-medium hover:bg-brand-light transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (pendingPos && editedProduct) {
+                    setEditedProduct({
+                      ...editedProduct,
+                      posicionX: Math.round(pendingPos.x),
+                      posicionY: Math.round(pendingPos.y),
+                    });
+                  }
+                  setShowPosModal(false);
+                }}
+                className="flex-1 py-2 bg-primary-hover text-white rounded-lg text-xs font-semibold hover:bg-primary2 transition-colors"
+              >
+                Confirmar posición
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

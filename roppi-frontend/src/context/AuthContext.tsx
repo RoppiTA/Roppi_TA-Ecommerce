@@ -126,11 +126,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
-    setToken(null);
-    localStorage.removeItem('roppi_token');
-    setUser({ id: 0, role: ['GUEST'], name: 'Invitado' });
-    navigate('/auth');
+  const logout = async () => {
+    try{
+      const resultado = await AuthAPIService.logout();
+      setToken(null);
+      localStorage.removeItem('roppi_token');
+      setUser({ id: 0, role: ['GUEST'], name: 'Invitado' });
+      navigate('/auth');
+    }catch(err: any){
+      console.log(err);
+      throw new Error(err);
+    }
+
   };
 
   // Simulación del endpoint de recuperar contraseña

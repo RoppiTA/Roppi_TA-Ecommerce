@@ -33,7 +33,7 @@ class GenericosGateway {
     return result.rows[0];
   }
 
-  async createWithClient(client, { nombre, descripcion, precioBase, maximoStock, urlImagen, posicionX, posicionY, usuarioId }) {
+  async createWithClient(client, { nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId, posicionX, posicionY }) {
     console.log(nombre);
     const result = await client.query(`
     INSERT INTO "RoppiTA".GENERICOS
@@ -44,7 +44,7 @@ class GenericosGateway {
     return result.rows[0];
   }
 
-  async updateWithClient(client, id, { nombre, descripcion, precioBase, maximoStock, urlImagen, posicionX, posicionY, usuarioId }) {
+  async updateWithClient(client, id, { nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId, posicionX, posicionY }) {
     const result = await client.query(`
     UPDATE "RoppiTA".GENERICOS
     SET NOMBRE = $1,
