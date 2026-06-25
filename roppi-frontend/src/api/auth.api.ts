@@ -50,6 +50,14 @@ export const AuthAPIService = {
             throw new Error('Error al restablecer la contraseña');
         }
         return response.data;
+    },
+
+    logout: async () => {
+        const response = await apiClient.post<{ exito: boolean; data: any}>('/usuarios/logout');
+        if (!response.data) {
+            throw new Error('Error al cerrar sesión');
+        }
+        return response.data;
     }
 
 }
