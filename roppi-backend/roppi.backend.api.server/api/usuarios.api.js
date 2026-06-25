@@ -62,6 +62,18 @@ class UsuariosAPI {
       }
     });
 
+    // Logout (Invalidar token en memoria)
+    this.router.post('/logout', authMiddleware, async (req, res) => {
+      try {
+        const authHeader = req.headers.authorization;
+        const token = authHeader.split(' ')[1];
+        authMiddleware.revocarToken(token);
+        res.status(200).json({ exito: true, mensaje: 'Sesión cerrada exitosamente. El token ha sido invalidado.' });
+      } catch (error) {
+        res.status(500).json({ exito: false, mensaje: 'Error al procesar el cierre de sesión' });
+      }
+    });
+
     //correito para recuperar la contra
     this.router.post('/recuperar', async (req, res) => {
       try {

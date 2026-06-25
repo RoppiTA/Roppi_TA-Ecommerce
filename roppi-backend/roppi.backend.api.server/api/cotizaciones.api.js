@@ -22,22 +22,22 @@ class CotizacionesAPI {
 
         this.router.post('/carrito/items', async (req, res) => {
             const idUsuario = req.usuario.sub;
-            const { idPersonalizado, cantidad } = req.body;
-            return this.hacerPeticion(req, res, 'POST', `/carrito/items`, { idUsuario, idProducto: idPersonalizado, cantidad });
+            const { idGenerico, cantidad, idTamano, idColor, idMaterial, idPersonalizacion, urlDiseno } = req.body;
+            return this.hacerPeticion(req, res, 'POST', `/carrito/items`, { idUsuario, idGenerico, cantidad, idTamano, idColor, idMaterial, idPersonalizacion, urlDiseno });
         });
 
-        this.router.put('/carrito/items/:idProducto', async (req, res) => {
+        this.router.put('/carrito/items/:idGenerico', async (req, res) => {
             const idUsuario = req.usuario.sub;
-            const idProducto = req.params.idProducto;
+            const idGenerico = req.params.idGenerico;
             const { cantidad } = req.body;
-            return this.hacerPeticion(req, res, 'PUT', `/carrito/items/${idProducto}`, { idUsuario, cantidad });
+            return this.hacerPeticion(req, res, 'PUT', `/carrito/items/${idGenerico}`, { idUsuario, cantidad });
         });
 
-        this.router.delete('/carrito/items/:idProducto', async (req, res) => {
+        this.router.delete('/carrito/items/:idGenerico', async (req, res) => {
             const idUsuario = req.usuario.sub;
-            const idProducto = req.params.idProducto;
+            const idGenerico = req.params.idGenerico;
             // fetch con DELETE y body
-            return this.hacerPeticion(req, res, 'DELETE', `/carrito/items/${idProducto}`, { idUsuario });
+            return this.hacerPeticion(req, res, 'DELETE', `/carrito/items/${idGenerico}`, { idUsuario });
         });
 
         this.router.delete('/carrito', async (req, res) => {
@@ -75,7 +75,7 @@ class CotizacionesAPI {
             return this.hacerPeticion(req, res, 'GET', `/solicitudes/comerciante?page=${page}&len=${items_per_page}&active=${active}`);
         });
 
-        this.router.get('solicitudes/:numero/:version', async (req, res) => {
+        this.router.get('/solicitudes/:numero/:version', async (req, res) => {
             const numero = req.params.numero;
             const version = req.params.version;
             return this.hacerPeticion(req, res, 'GET', `/solicitudes/${numero}/${version}`);
@@ -83,6 +83,11 @@ class CotizacionesAPI {
 
         this.router.get('/solicitudes/:numero', async (req, res) => {
             const numero = req.params.numero;
+            const page = req.query.page;
+            const items_per_page = req.query.len;
+            if (page && items_per_page) {
+                return this.hacerPeticion(req, res, 'GET', `/solicitudes/${numero}?page=${page}&len=${items_per_page}`);
+            }
             return this.hacerPeticion(req, res, 'GET', `/solicitudes/${numero}`);
         })
 
@@ -90,6 +95,12 @@ class CotizacionesAPI {
         this.router.put('/solicitudes/update/estado', async (req, res) => {
             const { numeroCotizacion, numeroVersion, estado } = req.body;
             return this.hacerPeticion(req, res, 'PUT', `/solicitudes/update/estado`, { numeroCotizacion, numeroVersion, estado });
+        });
+
+        // Asignar comerciante a la cotización
+        this.router.put('/solicitudes/update/comerciante', async (req, res) => {
+            const { numeroCotizacion, numeroVersion, idComerciante } = req.body;
+            return this.hacerPeticion(req, res, 'PUT', `/solicitudes/update/comerciante`, { numeroCotizacion, numeroVersion, idComerciante });
         });
 
     }
