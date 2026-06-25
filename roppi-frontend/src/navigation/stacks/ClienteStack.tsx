@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
+import { CarritoProvider } from '../../context/CarritoContext';
 import { Sidebar } from '../../components/Sidebar';
 import { Header } from '../../components/Header';
 import DetalleProducto from '../../views/cliente/DetalleProducto';
@@ -12,7 +13,6 @@ import CompraSegura from '../../views/cliente/CompraSegura';
 import { CotizacionListScreen } from '../../views/cliente/cotizacion/CotizacionList';
 import { CotizacionDetailScreen } from '../../views/cliente/cotizacion/DetalleCotizacion';
 import { SolicitudCotizacionScreen } from '../../views/cliente/SolicitudCotizacion';
-import { CarritoProvider } from '../../context/CarritoContext';
 
 
 interface ClienteStackProps {
@@ -36,8 +36,6 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
     : 'I';
 
   return (
-    // CarritoProvider envuelve todo el stack del cliente para que el carrito
-    // sea accesible desde Header, Customization, ProductCart y SolicitudCotizacion
     <CarritoProvider>
     <div className="flex h-screen overflow-hidden">
       <Sidebar

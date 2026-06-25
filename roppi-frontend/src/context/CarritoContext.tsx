@@ -35,7 +35,19 @@ const CarritoContext = createContext<CarritoContextType | null>(null);
 
 export const useCarrito = (): CarritoContextType => {
   const ctx = useContext(CarritoContext);
-  if (!ctx) throw new Error('useCarrito debe usarse dentro de <CarritoProvider>');
+  if (!ctx) {
+    // Estos valores son para el comerciante, que no usa carrito.
+    // El carrito siempre se carga al ser un header general.
+    return {
+      items: [],
+      totalItems: 0,
+      addItem: () => {},
+      updateCantidad: () => {},
+      removeItem: () => {},
+      clearCart: () => {},
+      triggerAddAnimation: () => {},
+    };
+  }
   return ctx;
 };
 
