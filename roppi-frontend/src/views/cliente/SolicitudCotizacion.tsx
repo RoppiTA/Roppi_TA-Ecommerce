@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle, XCircle, FileText, ClipboardList, Send } from "lucide-react";
-import { MensajeModal } from "../../components/MensajeModal"; // Ajusta la ruta según tu estructura
+import { ArrowLeft, XCircle, Send } from "lucide-react";
+import { MensajeModal } from "../../components/MensajeModal";
+import { StatusBadge } from "../../components/StatusBadge";
 
-// Interfaz para emular los productos que vienen del carrito de compras
 interface CartItem {
   id: number;
   nombre: string;
@@ -20,19 +20,15 @@ interface CartItem {
 export function SolicitudCotizacionScreen() {
   const navigate = useNavigate();
   const [observaciones, setObservaciones] = useState("");
-  
-  // Fechas automáticas (Hoy y Vencimiento en 7 días)
   const [fechaHoy, setFechaHoy] = useState("");
   const [fechaVence, setFechaVence] = useState("");
 
-  // Estado para el manejo dinámico de las alertas y confirmaciones
   const [modalConfig, setModalConfig] = useState<{
     tipo: 'exito' | 'error' | 'cargando' | 'confirmar';
     mensaje: string;
     onConfirmAction?: () => void;
   } | null>(null);
 
-  // Mock de productos provenientes del carrito (puedes reemplazarlo por tu hook useCart o location.state)
   const [productosSolicitados] = useState<CartItem[]>([
     {
       id: 101,
@@ -54,176 +50,214 @@ export function SolicitudCotizacionScreen() {
     const hoy = new Date();
     const vence = new Date();
     vence.setDate(hoy.getDate() + 7);
-
-    const formatOptions: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
-    setFechaHoy(hoy.toLocaleDateString('es-PE', formatOptions));
-    setFechaVence(vence.toLocaleDateString('es-PE', formatOptions));
+    const fmt: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    setFechaHoy(hoy.toLocaleDateString('es-PE', fmt));
+    setFechaVence(vence.toLocaleDateString('es-PE', fmt));
   }, []);
 
-  // Cálculos financieros
   const subtotal = productosSolicitados.reduce((acc, item) => acc + (item.precioUnitario * item.cantidad), 0);
   const igv = subtotal * 0.18;
   const totalCompleto = subtotal + igv;
 
-  // Manejador del flujo de envío
   const ejecutarEnvioSolicitud = () => {
-    // 1. Cerrar modal de confirmación y pasar a cargando
-    setModalConfig({
-      tipo: 'cargando',
-      mensaje: 'Procesando y enviando tu solicitud de cotización...'
-    });
-
-    // 2. Simular respuesta exitosa del servidor tras 2 segundos
+    setModalConfig({ tipo: 'cargando', mensaje: 'Procesando y enviando tu solicitud de cotización...' });
     setTimeout(() => {
       setModalConfig({
         tipo: 'exito',
         mensaje: '¡Solicitud creada correctamente! El comerciante ha sido notificado y responderá pronto.',
-        onConfirmAction: () => {
-          setModalConfig(null);
-          navigate('/quotes'); // Redirección final a la lista de cotizaciones
-        }
+        onConfirmAction: () => { setModalConfig(null); navigate('/quotes'); }
       });
     }, 2000);
   };
 
+  const cardCls = "bg-white rounded-[20px] border border-[#C8E6E8] shadow-[0_2px_16px_rgba(61,30,8,0.06)]";
+  const labelCls = "text-[10px] font-bold uppercase tracking-wide text-brand-muted block";
+  const valueCls = "text-sm font-semibold text-brand-dark mt-0.5";
+
   return (
-    <div className="min-h-screen bg-[#f4f7f8] pb-12" style={{ fontFamily: "'Nunito', sans-serif" }}>
-      
-      {/* Header Superior Corporativo */}
-      <div className="bg-[#005f6a] text-white sticky top-0 z-20 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
-          <button 
-            onClick={() => navigate('/cart')} 
-            className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors flex-shrink-0"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </button>
-          <div>
-            <h1 className="font-bold text-lg sm:text-xl tracking-tight leading-tight">
-              Nueva Solicitud de Cotización
-            </h1>
-            <p className="text-xs text-white/70 font-medium mt-0.5">Confirma los detalles de tu orden personalizada</p>
-          </div>
-        </div>
+    <div className="min-h-screen lg:h-full bg-white flex flex-col overflow-x-hidden lg:overflow-hidden" style={{ fontFamily: "'Nunito', sans-serif" }}>
+
+      {/* Header inline — navegación sin fondo oscuro */}
+      <div className="px-4 lg:px-6 pt-6 pb-2 shrink-0">
+        <button
+          onClick={() => navigate('/cart')}
+          className="flex items-center gap-1.5 text-primary2 hover:text-primary-hover text-sm font-medium transition-colors mb-2"
+        >
+          <ArrowLeft size={16} />
+          Volver al carrito
+        </button>
+        <h1 className="text-xl font-semibold text-brand-dark">Nueva Solicitud de Cotización</h1>
+        <p className="text-sm text-brand-muted mt-0.5">Confirma los detalles antes de enviar</p>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5">
-        
-        {/* Tarjeta de Tiempos y Fechas */}
-        <div className="bg-white rounded-[24px] border border-[#eef2f3] p-6 shadow-sm">
-          <h2 className="text-xs font-bold text-[#8c6d53] uppercase tracking-wider mb-4 flex items-center gap-1.5">
-            <ClipboardList className="w-4 h-4" /> Resumen de la Solicitud
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-0.5">
-              <span className="text-xs font-bold text-[#8c6d53] uppercase tracking-wide block">Fecha de Registro</span>
-              <span className="font-bold text-gray-900 text-sm sm:text-base">{fechaHoy}</span>
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-xs font-bold text-[#8c6d53] uppercase tracking-wide block">Fecha Estimada de Vencimiento</span>
-              <span className="font-bold text-gray-900 text-sm sm:text-base">{fechaVence} <span className="text-xs text-gray-400 font-normal">(7 días hábiles)</span></span>
+      {/* Body — dos columnas */}
+      <div className="px-4 lg:px-6 py-4 flex flex-col lg:flex-row gap-5 lg:gap-6 lg:flex-1 lg:overflow-hidden">
+
+        {/* Columna izquierda */}
+        <div className="flex-1 min-w-0 overflow-hidden space-y-5 pr-1">
+
+          {/* Tabla de productos */}
+          <div className={`${cardCls} overflow-hidden`}>
+            <div className="overflow-x-auto overflow-y-auto max-h-[320px]">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 z-10 bg-[#B8DFE2]">
+                  <tr className="bg-[#B8DFE2] border-b border-[#C8E6E8]">
+                    <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-5 py-3 min-w-[180px]">Producto</th>
+                    <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3 min-w-[120px]">Personalización</th>
+                    <th className="text-center text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3">Cantidad</th>
+                    <th className="text-right text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3 whitespace-nowrap">Precio Unit.</th>
+                    <th className="text-right text-[10px] font-bold uppercase tracking-wide text-brand-muted px-5 py-3 whitespace-nowrap">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#C8E6E8]">
+                  {productosSolicitados.map((p) => (
+                    <tr key={p.id} className="hover:bg-[#E2F4F5] transition-colors">
+
+                      {/* Producto + atributos */}
+                      <td className="px-5 py-4">
+                        <p className="font-bold text-brand-dark">{p.nombre}</p>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {p.atributos.talla && (
+                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
+                              T: {p.atributos.talla}
+                            </span>
+                          )}
+                          {p.atributos.material && (
+                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
+                              {p.atributos.material}
+                            </span>
+                          )}
+                          {p.atributos.color && (
+                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
+                              {p.atributos.color}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Personalización */}
+                      <td className="px-3 py-4">
+                        <span className="text-xs text-brand-muted">{p.atributos.personalizacion || "—"}</span>
+                      </td>
+
+                      {/* Cantidad */}
+                      <td className="px-3 py-4 text-center">
+                        <span className="font-bold text-brand-dark">{p.cantidad}</span>
+                        <span className="block text-[10px] text-brand-muted/70">Und.</span>
+                      </td>
+
+                      {/* Precio unitario */}
+                      <td className="px-3 py-4 text-right">
+                        <span className="text-sm text-brand-muted">S/ {p.precioUnitario.toFixed(2)}</span>
+                      </td>
+
+                      {/* Subtotal línea */}
+                      <td className="px-5 py-4 text-right">
+                        <span className="font-bold text-brand-dark">S/ {(p.precioUnitario * p.cantidad).toFixed(2)}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
+
+          {/* Observaciones */}
+          <div className={`${cardCls} p-5`}>
+            <p className={`${labelCls} mb-3`}>Observaciones para el comerciante</p>
+            <textarea
+              rows={4}
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              placeholder="Escribe detalles sobre embalaje, variaciones especiales, horarios de entrega o cualquier condición requerida..."
+              className="w-full text-xs p-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:border-brand-muted/50 focus:ring-1 focus:ring-brand-muted/20 bg-[#FDFAF7] resize-none transition-all placeholder-brand-muted/40"
+            />
+          </div>
+
         </div>
 
-        {/* Listado de Productos Solicitados */}
-        <div className="bg-white rounded-[24px] border border-[#eef2f3] overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-xs font-bold text-[#8c6d53] uppercase tracking-wider">
-              Productos seleccionados en el carrito
-            </h2>
-          </div>
-          
-          <div className="divide-y divide-gray-100">
-            {productosSolicitados.map((producto, index) => (
-              <div key={producto.id} className="p-6 hover:bg-gray-50/30 transition-colors">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex gap-4 items-start min-w-0">
-                    <div className="w-7 h-7 rounded-full bg-[#e6f2f3] text-[#005f6a] text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                      {index + 1}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-gray-900 text-base leading-tight">{producto.nombre}</p>
-                      <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-                        Talla {producto.atributos.talla} · {producto.atributos.material} · {producto.atributos.personalizacion} · Color {producto.atributos.color}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-bold text-gray-900 text-base">S/ {(producto.precioUnitario * producto.cantidad).toFixed(2)}</p>
-                    <p className="text-xs text-gray-400 mt-1">{producto.cantidad} und × S/ {producto.precioUnitario.toFixed(2)}</p>
-                  </div>
+        {/* Columna derecha */}
+        <div className="w-full lg:w-[30%] lg:min-w-[260px] lg:max-w-[340px] lg:overflow-hidden space-y-4 pb-4">
+
+          {/* Detalle de solicitud */}
+          <div className={`${cardCls} p-4`}>
+            <div className="flex items-start justify-between mb-3">
+              <p className={labelCls}>Detalle de solicitud</p>
+              <StatusBadge estado="Solicitado" size="sm" />
+            </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className={labelCls}>Fecha de registro</p>
+                  <p className={valueCls}>{fechaHoy}</p>
+                </div>
+                <div>
+                  <p className={labelCls}>Vencimiento estimado</p>
+                  <p className={valueCls}>{fechaVence}</p>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Bloque Financiero Estilo Figma */}
-          <div className="px-6 py-5 bg-[#f8fafb] border-t border-gray-100 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500 font-medium">Subtotal aproximado</span>
-              <span className="font-semibold text-gray-800">S/ {subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500 font-medium">IGV estimado (18%)</span>
-              <span className="font-semibold text-gray-800">S/ {igv.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between pt-3 border-t border-gray-200/70 items-center">
-              <span className="font-bold text-gray-900 text-base">Total Proyectado</span>
-              <span className="font-bold text-xl text-[#005f6a]">S/ {totalCompleto.toFixed(2)}</span>
+              <div>
+                <p className={labelCls}>Productos en la solicitud</p>
+                <p className={valueCls}>{productosSolicitados.length} ítem(s)</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Cuadro de Observaciones del Cliente */}
-        <div className="bg-white rounded-[24px] border border-[#eef2f3] p-6 shadow-sm space-y-3">
-          <label htmlFor="observaciones" className="text-xs font-bold text-[#8c6d53] uppercase tracking-wider block">
-            ✍️ Observaciones o especificaciones adicionales para el comerciante
-          </label>
-          <textarea
-            id="observaciones"
-            rows={4}
-            value={observaciones}
-            onChange={(e) => setObservaciones(e.target.value)}
-            placeholder="Escribe aquí detalles sobre embalaje, variaciones especiales, horarios de entrega ideales o cualquier condición requerida..."
-            className="w-full rounded-2xl border border-gray-200 p-4 text-sm text-gray-800 focus:outline-none focus:border-[#005f6a] focus:ring-1 focus:ring-[#005f6a] transition-all bg-[#fafbfc] placeholder-gray-400 resize-none"
-          />
-        </div>
+          {/* Resumen de costos */}
+          <div className={`${cardCls} p-4`}>
+            <p className={`${labelCls} mb-3`}>Resumen de Costos</p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between text-brand-muted">
+                <span>Subtotal aproximado</span>
+                <span className="font-semibold">S/ {subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-brand-muted">
+                <span>IGV estimado (18%)</span>
+                <span className="font-semibold">S/ {igv.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t border-[#C8E6E8] font-bold text-brand-dark">
+                <span>Total Proyectado</span>
+                <span className="text-lg text-brand-dark">S/ {totalCompleto.toFixed(2)}</span>
+              </div>
+              <p className="text-[10px] text-brand-muted pt-1">Los precios son estimados. El comerciante confirmará el precio final.</p>
+            </div>
+          </div>
 
-        {/* Botonera Principal de Acciones */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <button
-            onClick={() => setModalConfig({
-              tipo: 'confirmar',
-              mensaje: '¿Estás seguro de que deseas cancelar la solicitud? Se vaciarán los detalles ingresados y volverás al carrito.',
-              onConfirmAction: () => { setModalConfig(null); navigate('/cart'); }
-            })}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl border border-gray-300 text-gray-600 font-bold text-sm bg-white hover:bg-gray-50 transition-colors order-2 sm:order-1"
-          >
-            <XCircle className="w-4 h-4" /> Cancelar solicitud
-          </button>
-          
-          <button
-            onClick={() => setModalConfig({
-              tipo: 'confirmar',
-              mensaje: '¿Estás seguro de que deseas enviar esta solicitud de cotización al comerciante asignado?',
-              onConfirmAction: ejecutarEnvioSolicitud
-            })}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl bg-[#005f6a] text-white font-bold text-sm shadow-sm hover:bg-[#004d56] transition-colors order-1 sm:order-2"
-          >
-            <Send className="w-4 h-4" /> Enviar solicitud
-          </button>
-        </div>
+          {/* Acciones */}
+          <div className={`${cardCls} p-4`}>
+            <p className={`${labelCls} mb-3`}>Acciones</p>
+            <div className="space-y-2">
+              <button
+                onClick={() => setModalConfig({
+                  tipo: 'confirmar',
+                  mensaje: '¿Estás seguro de que deseas enviar esta solicitud de cotización al comerciante asignado?',
+                  onConfirmAction: ejecutarEnvioSolicitud
+                })}
+                className="w-full py-2.5 bg-primary2 hover:bg-primary-hover text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
+              >
+                <Send className="w-3.5 h-3.5" /> Enviar solicitud
+              </button>
+              <button
+                onClick={() => setModalConfig({
+                  tipo: 'confirmar',
+                  mensaje: '¿Estás seguro de que deseas cancelar la solicitud? Se vaciarán los detalles ingresados y volverás al carrito.',
+                  onConfirmAction: () => { setModalConfig(null); navigate('/cart'); }
+                })}
+                className="w-full py-2.5 bg-transparent hover:bg-[#FFF5EE] text-brand-error font-bold text-xs rounded-xl border border-brand-error/40 hover:border-brand-error/70 flex items-center justify-center gap-2 transition-colors"
+              >
+                <XCircle className="w-3.5 h-3.5" /> Cancelar solicitud
+              </button>
+            </div>
+          </div>
 
+        </div>
       </div>
 
-      {/* Modal Reutilizable de Roppi */}
       {modalConfig && (
         <MensajeModal
           tipo={modalConfig.tipo}
           mensaje={modalConfig.mensaje}
           onClose={() => {
-            // Si el modal es de éxito, al cerrar forzamos la redirección
             if (modalConfig.tipo === 'exito' && modalConfig.onConfirmAction) {
               modalConfig.onConfirmAction();
             } else {

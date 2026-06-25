@@ -1,4 +1,4 @@
-import { ClockIcon, AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { ClockIcon, AlertCircle, CheckCircle, XCircle, Timer } from "lucide-react";
 import { EstadoCotizacion } from "../types/cotizacion/cotizacion.types";
 
 export const STATUS_CONFIG: Record<
@@ -32,6 +32,13 @@ export const STATUS_CONFIG: Record<
     text: "text-red-600",
     border: "border-red-200",
     Icon: XCircle,
+  },
+  Vencido: {
+    label: "Vencido",
+    bg: "bg-gray-100",
+    text: "text-gray-500",
+    border: "border-gray-200",
+    Icon: Timer,
   },
 };
 

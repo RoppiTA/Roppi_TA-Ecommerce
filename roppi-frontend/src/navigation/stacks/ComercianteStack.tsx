@@ -38,7 +38,7 @@ export const ComercianteStack = ({ user }: ComercianteStackProps) => {
         <Header />
 
         {/* Área de contenido de cada vista */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <Routes>
             <Route path="descuentos" element={<DiscountsPage />} />
             <Route path="products" element={<ProductListPage />} />

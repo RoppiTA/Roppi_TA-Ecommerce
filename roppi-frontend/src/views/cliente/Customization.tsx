@@ -124,6 +124,21 @@ export const Customization = () => {
     fileInputRef.current?.click();
   };
 
+  const handleCantidadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '');
+    if (raw === '') {
+      setCantidad(0);
+      return;
+    }
+    const max = product?.maximo_stock ?? Number.MAX_SAFE_INTEGER;
+    setCantidad(Math.min(Number(raw), max));
+  };
+
+  const handleCantidadBlur = () => {
+    const max = product?.maximo_stock ?? Number.MAX_SAFE_INTEGER;
+    setCantidad(c => Math.min(Math.max(c, 1), max));
+  };
+
   const handleAddToCart = () => {
     navigate('/cart', {
       state: {
@@ -454,14 +469,24 @@ export const Customization = () => {
             <div className="flex items-center border border-primary-hover/20 rounded-lg">
               <button
                 onClick={() => setCantidad(c => Math.max(1, c - 1))}
-                className="w-9 h-9 flex items-center justify-center text-brand-dark hover:bg-brand-light/60 transition-colors"
+                disabled={cantidad <= 1}
+                className="w-9 h-9 flex items-center justify-center text-brand-dark hover:bg-brand-light/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Minus size={16} />
               </button>
-              <span className="w-10 text-center text-sm font-semibold text-brand-dark">{cantidad}</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={cantidad === 0 ? '' : cantidad}
+                onChange={handleCantidadChange}
+                onBlur={handleCantidadBlur}
+                className="w-12 text-center text-sm font-semibold text-brand-dark bg-transparent outline-none"
+              />
               <button
-                onClick={() => setCantidad(c => c + 1)}
-                className="w-9 h-9 flex items-center justify-center text-brand-dark hover:bg-brand-light/60 transition-colors"
+                onClick={() => setCantidad(c => Math.min(product.maximo_stock, c + 1))}
+                disabled={cantidad >= product.maximo_stock}
+                className="w-9 h-9 flex items-center justify-center text-brand-dark hover:bg-brand-light/60 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <Plus size={16} />
               </button>

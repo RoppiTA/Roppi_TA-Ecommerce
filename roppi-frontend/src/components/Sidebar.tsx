@@ -13,7 +13,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -32,7 +32,9 @@ export function Sidebar({ isCollapsed, onToggle, role }: SidebarProps) {
 }
 
 function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
+  const location = useLocation();
   const [catalogExpanded, setCatalogExpanded] = useState(true);
+  const [quotesExpanded, setQuotesExpanded] = useState(true);
 
   const catalogChildren = [
     { id: 'vista-general', label: 'Vista general', path: '/comerciante' },
@@ -40,8 +42,17 @@ function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
     { id: 'descuentos', label: 'Descuentos', path: '/comerciante/descuentos' },
   ];
 
+  const quotesBasePath = '/comerciante/quotes';
+  const quoteChildren = [
+    { id: 'quotes-open', label: 'Abiertas', status: 'open' },
+    { id: 'quotes-closed', label: 'Cerradas', status: 'closed' },
+    { id: 'quotes-all', label: 'Todas', status: 'all' },
+  ];
+  const isQuoteChildActive = (status: string) =>
+    location.pathname === quotesBasePath &&
+    new URLSearchParams(location.search).get('status') === status;
+
   const topItems = [
-    { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/comerciante/quotes' },
     { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/comerciante/orders' },
     { id: 'reports', label: 'Reportes', icon: BarChart3, path: '/comerciante/reports' },
   ];
@@ -137,33 +148,105 @@ function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
             </p>
           )}
 
-          {/* Ítems principales */}
-          {topItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.id}
-                to={item.path}
-                className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
-                title={isCollapsed ? item.label : undefined}
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-error rounded-r-full" />
-                    )}
-                    <Icon
-                      size={20}
-                      className={`shrink-0 ${isActive ? 'text-white' : 'text-primary2'}`}
-                    />
-                    {!isCollapsed && (
-                      <span className="text-sm font-medium">{item.label}</span>
-                    )}
-                  </>
-                )}
-              </NavLink>
-            );
-          })}
+          {/* Ordenes */}
+          {topItems
+            .filter((item) => item.id === 'orders')
+            .map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.id}
+                  to={item.path}
+                  className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-error rounded-r-full" />
+                      )}
+                      <Icon
+                        size={20}
+                        className={`shrink-0 ${isActive ? 'text-white' : 'text-primary2'}`}
+                      />
+                      {!isCollapsed && (
+                        <span className="text-sm font-medium">{item.label}</span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
+
+          {/* Cotizaciones (grupo expandible) */}
+          <div>
+            <button
+              onClick={() => !isCollapsed && setQuotesExpanded(!quotesExpanded)}
+              className={`${itemBase} ${itemInactive}`}
+              title={isCollapsed ? 'Cotizaciones' : undefined}
+            >
+              <FileText size={20} className="text-primary2 shrink-0" />
+              {!isCollapsed && (
+                <>
+                  <span className="text-sm flex-1 text-left font-medium">Cotizaciones</span>
+                  {quotesExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </>
+              )}
+            </button>
+
+            {!isCollapsed && quotesExpanded && (
+              <div className="ml-7 mt-0.5 space-y-0.5 border-l-2 border-primary-hover/20 pl-3">
+                {quoteChildren.map((child) => {
+                  const active = isQuoteChildActive(child.status);
+                  return (
+                    <NavLink
+                      key={child.id}
+                      to={`${quotesBasePath}?status=${child.status}`}
+                      className={`relative flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-150 font-medium ${active
+                        ? 'bg-primary2 text-white'
+                        : 'text-brand-dark hover:bg-primary-hover/10'
+                        }`}
+                    >
+                      {active && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-brand-error rounded-r-full" />
+                      )}
+                      <span className="pl-1">{child.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Reportes */}
+          {topItems
+            .filter((item) => item.id === 'reports')
+            .map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.id}
+                  to={item.path}
+                  className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-error rounded-r-full" />
+                      )}
+                      <Icon
+                        size={20}
+                        className={`shrink-0 ${isActive ? 'text-white' : 'text-primary2'}`}
+                      />
+                      {!isCollapsed && (
+                        <span className="text-sm font-medium">{item.label}</span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
         </div>
       </nav>
 
@@ -201,14 +284,24 @@ function merchant_sidebar(isCollapsed: boolean, onToggle: () => void) {
 }
 
 function client_sidebar(isCollapsed: boolean, onToggle: () => void) {
+  const location = useLocation();
   const [catalogExpanded, setCatalogExpanded] = useState(true);
+  const [quotesExpanded, setQuotesExpanded] = useState(true);
 
   const topItems = [
     { id: 'productos', label: 'Productos', icon: Shirt, path: '/products' },
-    { id: 'quotes', label: 'Cotizaciones', icon: FileText, path: '/quotes' },
-    { id: 'orders', label: 'Pedidos', icon: ShoppingCart, path: '/orders' },
-    
+    { id: 'orders', label: 'Ordenes', icon: ShoppingCart, path: '/orders' },
   ];
+
+  const quotesBasePath = '/quotes';
+  const quoteChildren = [
+    { id: 'quotes-open', label: 'Abiertas', status: 'open' },
+    { id: 'quotes-closed', label: 'Cerradas', status: 'closed' },
+    { id: 'quotes-all', label: 'Todas', status: 'all' },
+  ];
+  const isQuoteChildActive = (status: string) =>
+    location.pathname === quotesBasePath &&
+    new URLSearchParams(location.search).get('status') === status;
 
   const bottomItems = [
     { id: 'support', label: 'Soporte', icon: HelpCircle, path: '/support' },
@@ -278,6 +371,46 @@ function client_sidebar(isCollapsed: boolean, onToggle: () => void) {
               </NavLink>
             );
           })}
+
+          {/* Cotizaciones (grupo expandible) */}
+          <div>
+            <button
+              onClick={() => !isCollapsed && setQuotesExpanded(!quotesExpanded)}
+              className={`${itemBase} ${itemInactive}`}
+              title={isCollapsed ? 'Cotizaciones' : undefined}
+            >
+              <FileText size={20} className="text-primary2 shrink-0" />
+              {!isCollapsed && (
+                <>
+                  <span className="text-sm flex-1 text-left font-medium">Cotizaciones</span>
+                  {quotesExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </>
+              )}
+            </button>
+
+            {!isCollapsed && quotesExpanded && (
+              <div className="ml-7 mt-0.5 space-y-0.5 border-l-2 border-primary-hover/20 pl-3">
+                {quoteChildren.map((child) => {
+                  const active = isQuoteChildActive(child.status);
+                  return (
+                    <NavLink
+                      key={child.id}
+                      to={`${quotesBasePath}?status=${child.status}`}
+                      className={`relative flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-150 font-medium ${active
+                        ? 'bg-primary2 text-white'
+                        : 'text-brand-dark hover:bg-primary-hover/10'
+                        }`}
+                    >
+                      {active && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-brand-error rounded-r-full" />
+                      )}
+                      <span className="pl-1">{child.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 

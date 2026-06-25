@@ -155,8 +155,15 @@ export const useDescuentos = () => {
     const updateDescuento = async (id: number, data: CreateDescuentoDTO) => {
         try {
             const actualizado = await DescuentosAPIService.updateDescuento(id, data);
-            setDescuentos((prev) => 
-                prev.map((d) => (d.id === id ? actualizado : d))
+            setDescuentos((prev) =>
+                prev.map((d) =>
+                    d.id === id
+                        ? {
+                            ...actualizado,
+                            idGenericoVinculados: data.idGenericoVinculados
+                        }
+                        : d
+                )
             );
             return actualizado;
         } catch (err) {
