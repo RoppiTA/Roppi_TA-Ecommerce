@@ -10,11 +10,13 @@ import {
   Minus,
   Plus,
   ShoppingCart,
+  Check,
 } from 'lucide-react';
 import { ProductoGenerico } from '../../types/producto/productoGen.types';
 import assets from '../../assets/assets.js';
 import { useProductosGenericos } from '../../hooks/useProductos';
 import { PersonalizadorCanvas } from '../../components/PersonalizadorCanvas.js';
+import { useCarrito } from '../../context/CarritoContext';
 
 const sectionTitleCls = 'text-sm font-semibold text-brand-dark mb-3';
 
@@ -23,6 +25,14 @@ type DesignMode = 'upload' | 'preset';
 export const Customization = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Contexto del carrito: addItem agrega la línea, triggerAddAnimation hace la animación
+  const { addItem, triggerAddAnimation } = useCarrito();
+
+  // Para el "¡Añadido!"
+  const [added, setAdded] = useState(false);
+  // Ref del botón "Añadir al carrito" — necesario para calcular la posición de origen de la animación
+  const addButtonRef = useRef<HTMLButtonElement>(null);
 
   const [colorSeleccionado, setColorSeleccionado] = useState<string>('#ffffff');
   const [imagenEstampado, setImagenEstampado] = useState<string | null>(null);
@@ -80,7 +90,10 @@ export const Customization = () => {
   const [selectedColor, setSelectedColor] = useState<number | null>(null);
   const [selectedTamano, setSelectedTamano] = useState<number | null>(null);
   const [cantidad, setCantidad] = useState(1);
+  const [cantidadEdicion, setCantidadEdicion] = useState<string | null>(null);
+  const [cantidadError, setCantidadError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   // Inicializa las selecciones por defecto apenas llega el producto
   useEffect(() => {
@@ -126,36 +139,59 @@ export const Customization = () => {
 
   const handleCantidadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, '');
+    setCantidadEdicion(raw);
     if (raw === '') {
-      setCantidad(0);
+      setCantidadError(false);
       return;
     }
     const max = product?.maximo_stock ?? Number.MAX_SAFE_INTEGER;
-    setCantidad(Math.min(Number(raw), max));
+    setCantidadError(Number(raw) > max);
   };
 
   const handleCantidadBlur = () => {
+    if (cantidadEdicion === null) return;
     const max = product?.maximo_stock ?? Number.MAX_SAFE_INTEGER;
-    setCantidad(c => Math.min(Math.max(c, 1), max));
+    const val = parseInt(cantidadEdicion, 10);
+    setCantidad(isNaN(val) || val < 1 ? 1 : Math.min(val, max));
+    setCantidadEdicion(null);
+    setCantidadError(false);
   };
 
   const handleAddToCart = () => {
-    navigate('/cart', {
-      state: {
-        item: {
-          productoId: product?.id,
-          nombre: product?.nombre,
-          materialId: selectedMaterial,
-          personalizacionId: selectedPersonalizacion,
-          colorId: selectedColor,
-          tamanoId: selectedTamano,
-          designMode,
-          uploadedFileName: uploadedFile?.name,
-          cantidad,
-          precioUnitario,
-        },
+    if (!product) return;
+
+    // Entidad: LineaCarrito — construye la línea con todos los atributos seleccionados
+    addItem({
+      productoId: product.id,
+      nombre: product.nombre,
+      imagenKey: product.imagen,
+      atributos: {
+        talla: getTamanoInfo(selectedTamano ?? 0)?.nombre ?? '',
+        material: getMaterial(selectedMaterial ?? 0)?.nombre ?? '',
+        personalizacion:
+          selectedPersonalizacion == null
+            ? ''
+            : (getPersonalizacion(selectedPersonalizacion)?.nombre ??
+              `Personalización #${selectedPersonalizacion}`),
+        color: getColor(selectedColor ?? 0)?.nombre ?? '',
+        colorHex: colorSeleccionado,
       },
+      precioUnitario,
+      cantidad,
+      maximoStock: product.maximo_stock,
     });
+
+    // Disparar animación del dot desde el botón hacia el ícono del carrito en el Header
+    if (addButtonRef.current) {
+      triggerAddAnimation(addButtonRef.current);
+    }
+
+    // Mostrar toast de confirmación brevemente
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+
+    // TODO API: addItem (dentro de CarritoContext) llama a CarritoAPIService.guardarCarrito
+    // No se navega — el usuario puede seguir personalizando o ir al carrito manualmente
   };
 
   if (loadingHook || loadingLocal) {
@@ -466,7 +502,7 @@ export const Customization = () => {
             </p>
 
             <div className="flex items-center gap-4">
-            <div className="flex items-center border border-primary-hover/20 rounded-lg">
+            <div className={`flex items-center border rounded-lg ${cantidadError ? 'border-red-400' : 'border-primary-hover/20'}`}>
               <button
                 onClick={() => setCantidad(c => Math.max(1, c - 1))}
                 disabled={cantidad <= 1}
@@ -478,7 +514,7 @@ export const Customization = () => {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={cantidad === 0 ? '' : cantidad}
+                value={cantidadEdicion !== null ? cantidadEdicion : (cantidad === 0 ? '' : cantidad)}
                 onChange={handleCantidadChange}
                 onBlur={handleCantidadBlur}
                 className="w-12 text-center text-sm font-semibold text-brand-dark bg-transparent outline-none"
@@ -491,19 +527,37 @@ export const Customization = () => {
                 <Plus size={16} />
               </button>
             </div>
+            {/* Elemento visual: botón principal de acción — añade al carrito y dispara animación */}
             <button
+              ref={addButtonRef}
               onClick={handleAddToCart}
               disabled={product.activo !== 1}
               className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md text-sm ${
                 product.activo === 1
-                  ? 'bg-primary2 text-white hover:bg-primary-hover hover:shadow-primary2/20 cursor-pointer'
+                  ? added
+                    ? 'bg-green-500 text-white cursor-pointer'
+                    : 'bg-primary2 text-white hover:bg-primary-hover hover:shadow-primary2/20 cursor-pointer'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
-              <ShoppingCart size={18} />
-              Añadir al carrito — S/. {precioTotal.toFixed(2)}
+              {added ? (
+                <>
+                  <Check size={18} />
+                  ¡Añadido al carrito!
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={18} />
+                  Añadir al carrito — S/. {precioTotal.toFixed(2)}
+                </>
+              )}
             </button>
             </div>
+            {cantidadError && (
+              <p className="text-[11px] text-red-500 font-medium mt-1.5">
+                No puede exceder la capacidad máxima
+              </p>
+            )}
           </div>
           </div>
           </div>

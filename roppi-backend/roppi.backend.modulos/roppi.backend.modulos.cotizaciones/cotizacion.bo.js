@@ -53,7 +53,7 @@ class CotizacionBO {
     };
   }
 
-  async agregarItemCarrito(idUsuario, { idProducto, cantidad }) {
+  async agregarItemCarrito(idUsuario, { idGenerico, cantidad, idTamano, idColor, idMaterial, idPersonalizacion, urlDiseno }) {
     if (cantidad <= 0) throw new Error("La cantidad debe ser mayor a 0");
 
     let carrito = await cotizacionGateway.getCarritoActivoByCliente(idUsuario);
@@ -61,23 +61,23 @@ class CotizacionBO {
       carrito = await cotizacionGateway.createCarrito(idUsuario);
     }
 
-    return await detalleCotizacionBO.agregarItem(carrito.numero_cotizacion, carrito.version_cotizacion, idUsuario, { idProducto, cantidad });
+    return await detalleCotizacionBO.agregarItem(carrito.numero_cotizacion, carrito.version_cotizacion, idUsuario, { idGenerico, cantidad, idTamano, idColor, idMaterial, idPersonalizacion, urlDiseno });
   }
 
-  async actualizarCantidadCarrito(idUsuario, idProducto, cantidad) {
+  async actualizarCantidadCarrito(idUsuario, idGenerico, cantidad) {
     if (cantidad <= 0) throw new Error("La cantidad debe ser mayor a 0");
 
     let carrito = await cotizacionGateway.getCarritoActivoByCliente(idUsuario);
     if (!carrito) throw new Error("Carrito no encontrado");
 
-    return await detalleCotizacionBO.actualizarCantidad(carrito.numero_cotizacion, carrito.version_cotizacion, idUsuario, idProducto, cantidad);
+    return await detalleCotizacionBO.actualizarCantidad(carrito.numero_cotizacion, carrito.version_cotizacion, idUsuario, idGenerico, cantidad);
   }
 
-  async eliminarItemCarrito(idUsuario, idProducto) {
+  async eliminarItemCarrito(idUsuario, idGenerico) {
     let carrito = await cotizacionGateway.getCarritoActivoByCliente(idUsuario);
     if (!carrito) throw new Error("Carrito no encontrado");
 
-    return await detalleCotizacionBO.eliminarItem(carrito.numero_cotizacion, carrito.version_cotizacion, idProducto);
+    return await detalleCotizacionBO.eliminarItem(carrito.numero_cotizacion, carrito.version_cotizacion, idGenerico);
   }
 
   async vaciarCarrito(idUsuario) {
@@ -86,6 +86,92 @@ class CotizacionBO {
       await detalleCotizacionBO.vaciarCotizacion(carrito.numero_cotizacion, carrito.version_cotizacion);
     }
     return { exito: true };
+  }
+
+  // --- LOGICA DE COTIZACION ---
+  // EN API
+  async listarCotizacionesActivasPorCliente(idCliente, page, items_per_page) {
+    let indice_min = items_per_page * (page - 1);
+    let indice_max = items_per_page * page;
+
+    const cotizaciones = await cotizacionGateway.listarCotizacionesActivasPorCliente(idCliente, indice_min, indice_max);
+    return cotizaciones;
+  }
+
+  // EN API
+  async listarCotizacionesCerradasPorCliente(idCliente, page, items_per_page) {
+    let indice_min = items_per_page * (page - 1);
+    let indice_max = items_per_page * page;
+
+    const cotizaciones = await cotizacionGateway.listarCotizacionesCerradasPorCliente(idCliente, indice_min, indice_max);
+    return cotizaciones;
+  }
+
+  //EN API
+  async listarTodasLasCotizacionesPorCliente(idCliente, page, items_per_page) {
+    let indice_min = items_per_page * (page - 1);
+    let indice_max = items_per_page * page;
+
+    const cotizaciones = await cotizacionGateway.listarTodasLasCotizacionesPorCliente(idCliente, indice_min, indice_max);
+    return cotizaciones;
+  }
+
+  // EN API
+  async listarCotizacionesAbiertas(page, items_per_page) {
+    let indice_min = items_per_page * (page - 1);
+    let indice_max = items_per_page * page;
+
+    const cotizaciones = await cotizacionGateway.listarCotizacionesAbiertas(indice_min, indice_max);
+    return cotizaciones;
+  }
+
+  // EN API
+  async listarCotizacionesCerradas(page, items_per_page) {
+    let indice_min = items_per_page * (page - 1);
+    let indice_max = items_per_page * page;
+
+    const cotizaciones = await cotizacionGateway.listarCotizacionesCerradas(indice_min, indice_max);
+    return cotizaciones;
+  }
+
+  // EN API
+  async listarTodasLasCotizaciones(page, items_per_page) {
+    let indice_min = items_per_page * (page - 1);
+    let indice_max = items_per_page * page;
+
+    const cotizaciones = await cotizacionGateway.listarTodasLasCotizaciones(indice_min, indice_max);
+    return cotizaciones;
+  }
+
+  // EN API
+  async listarVersionesDeCotizacion(numero_cotizacion, page = 1, items_per_page = 10) {
+    let indice_min = items_per_page * (page - 1);
+    let indice_max = items_per_page * page;
+    const versiones_cotizacion = await cotizacionGateway.listarVersionesDeCotizacion(numero_cotizacion, indice_min, indice_max);
+    return versiones_cotizacion;
+  }
+
+
+  async obtenerDetallesCotizacion(num_cotizacion, num_version) {
+    const cotizacion = await cotizacionGateway.obtenerDetallesCotizacion(num_cotizacion, num_version);
+    return cotizacion;
+  }
+
+  async crearCotizacion({ }) {
+    // Acá también tendríamos que llamar a Detalles Cotizacion para hacer la relación
+
+  }
+
+  // EN API
+  async updateEstadoCotizacion(num_cotizacion, num_version, estado) {
+    const respuesta = await cotizacionGateway.updateEstadoCotizacion(num_cotizacion, num_version, estado);
+    return respuesta;
+  }
+
+  // EN API
+  async asignarComerciante(num_cotizacion, num_version, id_comerciante) {
+    const respuesta = await cotizacionGateway.asignarComerciante(num_cotizacion, num_version, id_comerciante);
+    return respuesta;
   }
 }
 

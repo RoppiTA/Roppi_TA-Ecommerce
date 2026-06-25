@@ -39,7 +39,7 @@ export function ComercianteCotizacionDetailScreen() {
   if (!cotizacion) {
     return (
       <div className="p-10 text-center">
-        <button onClick={() => navigate('/comerciante/quotes')} className="bg-[#005f6a] text-white px-4 py-2 rounded-xl">
+        <button onClick={() => navigate('/comerciante/quotes')} className="bg-primary2 text-white px-4 py-2 rounded-xl">
           Regresar
         </button>
       </div>
@@ -48,7 +48,7 @@ export function ComercianteCotizacionDetailScreen() {
 
   const productos = modoEdicion ? productosEditados : cotizacion.productos;
 
-  const subtotal = calcularSubtotal(productos)*0.92;
+  const subtotal = calcularSubtotal(productos) * 0.92;
   const igv = subtotal * 0.18;
   const total = calcularSubtotal(productos);
 
@@ -73,16 +73,15 @@ export function ComercianteCotizacionDetailScreen() {
     }, 1500);
   };
 
+  const cardCls = "bg-white rounded-[20px] border border-[#C8E6E8] shadow-[0_2px_16px_rgba(61,30,8,0.06)]";
   const labelCls = "text-[10px] font-bold uppercase tracking-wide text-brand-muted block";
   const valueCls = "text-sm font-semibold text-brand-dark mt-0.5";
-  const cardCls = "bg-white rounded-[20px] border border-gray-100 shadow-xs";
 
   return (
-    <div className="min-h-screen lg:h-full bg-[#f4f7f8] flex flex-col overflow-x-hidden lg:overflow-hidden" style={{ fontFamily: "'Nunito', sans-serif" }}>
+    <div className="min-h-screen lg:h-full bg-white flex flex-col overflow-x-hidden lg:overflow-hidden" style={{ fontFamily: "'Nunito', sans-serif" }}>
 
-      {/* Header */}
+      {/* Header inline */}
       <div className="px-4 lg:px-6 pt-6 pb-2 shrink-0 flex flex-col lg:flex-row items-start gap-3 lg:gap-6">
-        {/* Left: navegación + título */}
         <div className="flex-1 min-w-0">
           <button
             onClick={() => navigate('/comerciante/quotes')}
@@ -97,7 +96,7 @@ export function ComercianteCotizacionDetailScreen() {
           <p className="text-sm text-brand-muted mt-0.5">Asignado a: {cotizacion.comerciante}</p>
         </div>
 
-        {/* Right: banner modo edición: Solo sale cuando el comerciante edita "Solicitado" */}
+        {/* Banner modo edición */}
         {modoEdicion && (
           <div className="w-full lg:shrink-0 lg:self-stretch lg:w-[630px] rounded-xl border border-orange-100 border-l-4 border-l-orange-500 bg-[#FFF7ED] px-5 py-3 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-1">
@@ -111,18 +110,18 @@ export function ComercianteCotizacionDetailScreen() {
         )}
       </div>
 
-      {/* Two-column body  - Patrón de diseño usualmente utilziaod en retail*/}
+      {/* Body — dos columnas */}
       <div className="px-4 lg:px-6 py-4 flex flex-col lg:flex-row gap-5 lg:gap-6 lg:flex-1 lg:overflow-hidden">
 
-        {/*  Columna izquierda (70%) */}
+        {/* Columna izquierda (70%) */}
         <div className="flex-1 min-w-0 overflow-hidden space-y-5 pr-1">
 
-          {/* Items table */}
+          {/* Tabla de productos */}
           <div className={`${cardCls} overflow-hidden`}>
             <div className="overflow-x-auto overflow-y-auto max-h-[280px]">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-gray-50">
-                  <tr className="bg-gray-50 border-b border-gray-100">
+                <thead className="sticky top-0 z-10">
+                  <tr className="bg-brand-light border-b border-[#C8E6E8]">
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-5 py-3 min-w-[180px]">Producto</th>
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3 min-w-[120px]">Personalización</th>
                     <th className="text-center text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3">Cantidad</th>
@@ -134,26 +133,26 @@ export function ComercianteCotizacionDetailScreen() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[#C8E6E8]">
                   {productos.map((p, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/40 transition-colors">
+                    <tr key={idx} className="hover:bg-[#E2F4F5] transition-colors">
 
                       {/* Producto + atributos */}
                       <td className="px-5 py-4">
                         <p className="font-bold text-brand-dark">{p.nombre}</p>
                         <div className="flex flex-wrap gap-1 mt-1.5">
                           {p.atributos?.talla && (
-                            <span className="bg-brand-light/60 text-brand-dark text-[10px] font-medium rounded px-1.5 py-0.5">
+                            <span className="bg-brand-light/40 text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               T: {p.atributos.talla}
                             </span>
                           )}
                           {p.atributos?.material && (
-                            <span className="bg-brand-light/60 text-brand-dark text-[10px] font-medium rounded px-1.5 py-0.5">
+                            <span className="bg-brand-light/40 text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               {p.atributos.material}
                             </span>
                           )}
                           {p.atributos?.color && (
-                            <span className="bg-brand-light/60 text-brand-dark text-[10px] font-medium rounded px-1.5 py-0.5">
+                            <span className="bg-brand-light/40 text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               {p.atributos.color}
                             </span>
                           )}
@@ -162,19 +161,19 @@ export function ComercianteCotizacionDetailScreen() {
 
                       {/* Personalización */}
                       <td className="px-3 py-4">
-                        <span className="text-xs text-gray-500">{p.atributos?.personalizacion || "—"}</span>
+                        <span className="text-xs text-brand-muted">{p.atributos?.personalizacion || "—"}</span>
                       </td>
 
                       {/* Cantidad */}
                       <td className="px-3 py-4 text-center">
                         <span className="font-bold text-brand-dark">{p.cantidad}</span>
-                        <span className="block text-[10px] text-brand-muted">Und.</span>
+                        <span className="block text-[10px] text-brand-muted/70">Und.</span>
                       </td>
 
                       {/* P.U. Cliente — solo visible para comerciante */}
                       {esComerciante && (
                         <td className="px-3 py-4 text-right">
-                          <span className="text-sm text-gray-400">
+                          <span className="text-sm text-brand-muted">
                             S/ {cotizacion.productos[idx]?.precioUnitario.toFixed(2) ?? "—"}
                           </span>
                         </td>
@@ -207,10 +206,9 @@ export function ComercianteCotizacionDetailScreen() {
                 </tbody>
               </table>
             </div>
-
           </div>
 
-          {/* comentarios como si fuera chat // lo comentó el JP */}
+          {/* Comentarios */}
           <div className={`${cardCls} p-5`}>
             <p className={`${labelCls} mb-4`}>Comentarios</p>
 
@@ -238,13 +236,13 @@ export function ComercianteCotizacionDetailScreen() {
             )}
 
             {modoEdicion && (
-              <div className={cotizacion.observacionesCliente || cotizacion.comentariosComerciante ? "mt-4 pt-4 border-t border-gray-100" : ""}>
+              <div className={cotizacion.observacionesCliente || cotizacion.comentariosComerciante ? "mt-4 pt-4 border-t border-[#C8E6E8]" : ""}>
                 <textarea
                   value={comentariosMerchant}
                   onChange={(e) => setComentariosMerchant(e.target.value)}
                   rows={3}
                   placeholder="Escribe tu respuesta para el cliente..."
-                  className="w-full text-xs p-3 rounded-xl border border-gray-200 focus:outline-none focus:border-primary2 bg-gray-50 resize-none"
+                  className="w-full text-xs p-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:border-brand-muted/50 focus:ring-1 focus:ring-brand-muted/20 bg-[#FDFAF7] resize-none transition-all placeholder-brand-muted/40"
                 />
               </div>
             )}
@@ -252,10 +250,10 @@ export function ComercianteCotizacionDetailScreen() {
 
         </div>
 
-        {/* columna de (30%) */}
+        {/* Columna derecha (30%) */}
         <div className="w-full lg:w-[30%] lg:min-w-[260px] lg:max-w-[340px] lg:overflow-hidden space-y-4 pb-4">
 
-          {/* Detalle de cotización (estado + metadata unificados) */}
+          {/* Detalle de cotización */}
           <div className={`${cardCls} p-4`}>
             <div className="flex items-start justify-between mb-3">
               <p className={labelCls}>Detalle de cotización</p>
@@ -283,15 +281,15 @@ export function ComercianteCotizacionDetailScreen() {
           <div className={`${cardCls} p-4`}>
             <p className={`${labelCls} mb-3`}>Resumen de Costos</p>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-brand-muted">
                 <span>Subtotal</span>
                 <span className="font-semibold">S/ {subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-brand-muted">
                 <span>IGV (18%)</span>
                 <span className="font-semibold">S/ {igv.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-gray-100 font-bold text-brand-dark">
+              <div className="flex justify-between pt-2 border-t border-[#C8E6E8] font-bold text-brand-dark">
                 <span>Total Propuesto</span>
                 <span className="text-lg text-primary-hover">S/ {total.toFixed(2)}</span>
               </div>
@@ -327,7 +325,7 @@ export function ComercianteCotizacionDetailScreen() {
                     mensaje: '¿Estás seguro de cancelar la cotización? Se guardará con estado definitivo "Cancelado".',
                     onConfirm: () => ejecutarGuardado('Cancelado')
                   })}
-                  className="w-full py-2.5 bg-white hover:bg-red-50 text-red-600 font-bold text-xs rounded-xl border border-red-200 flex items-center justify-center gap-2 transition-colors"
+                  className="w-full py-2.5 bg-transparent hover:bg-[#FFF5EE] text-brand-error font-bold text-xs rounded-xl border border-brand-error/40 hover:border-brand-error/70 flex items-center justify-center gap-2 transition-colors"
                 >
                   <XCircle className="w-3.5 h-3.5" /> Cancelar Cotización
                 </button>
@@ -358,7 +356,7 @@ export function ComercianteCotizacionDetailScreen() {
                       }, 1500);
                     }
                   })}
-                  className="w-full py-2.5 bg-[#005f6a] hover:bg-[#004d56] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
+                  className="w-full py-2.5 bg-primary2 hover:bg-primary-hover text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
                 >
                   <CheckCircle className="w-3.5 h-3.5" /> Confirmar Pedido
                 </button>
@@ -377,16 +375,16 @@ export function ComercianteCotizacionDetailScreen() {
                       }, 1500);
                     }
                   })}
-                  className="w-full py-2.5 bg-white hover:bg-red-50 text-red-600 font-bold text-xs rounded-xl border border-red-200 flex items-center justify-center gap-2 transition-colors"
+                  className="w-full py-2.5 bg-transparent hover:bg-[#FFF5EE] text-brand-error font-bold text-xs rounded-xl border border-brand-error/40 hover:border-brand-error/70 flex items-center justify-center gap-2 transition-colors"
                 >
                   <XCircle className="w-3.5 h-3.5" /> Cancelar Cotización
                 </button>
               </div>
             )}
             {cotizacion.estado === "Observado" && esComerciante && (
-              <div className="flex items-start gap-2 bg-orange-50 rounded-xl px-4 py-3">
-                <Clock className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-orange-700">En espera de confirmación del cliente</p>
+              <div className="flex items-start gap-2 bg-amber-50 rounded-xl px-4 py-3">
+                <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-700">En espera de confirmación del cliente</p>
               </div>
             )}
 

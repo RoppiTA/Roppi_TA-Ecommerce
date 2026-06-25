@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, XCircle, Send } from "lucide-react";
 import { MensajeModal } from "../../components/MensajeModal";
 import { StatusBadge } from "../../components/StatusBadge";
+import { useCarrito } from "../../context/CarritoContext";
 
+// CartItem: forma local usada en la tabla de esta vista
 interface CartItem {
   id: number;
   nombre: string;
@@ -29,22 +31,22 @@ export function SolicitudCotizacionScreen() {
     onConfirmAction?: () => void;
   } | null>(null);
 
-  const [productosSolicitados] = useState<CartItem[]>([
-    {
-      id: 101,
-      nombre: "Polo Clásico Premium",
-      precioUnitario: 45.00,
-      cantidad: 3,
-      atributos: { talla: "M", material: "Algodón 100%", personalizacion: "Estampado Pecho", color: "Negro" }
+  // Entidad: LineaCarrito[] — ítems reales del carrito del cliente
+  const { items: carritoItems, clearCart } = useCarrito();
+
+  // Mapea LineaCarrito al formato CartItem que usa la tabla de esta vista
+  const productosSolicitados: CartItem[] = carritoItems.map((linea) => ({
+    id: linea.productoId,
+    nombre: linea.nombre,
+    precioUnitario: linea.precioUnitario,
+    cantidad: linea.cantidad,
+    atributos: {
+      talla: linea.atributos.talla,
+      material: linea.atributos.material,
+      personalizacion: linea.atributos.personalizacion,
+      color: linea.atributos.color,
     },
-    {
-      id: 102,
-      nombre: "Polera Heavyweight Hoodie",
-      precioUnitario: 85.00,
-      cantidad: 1,
-      atributos: { talla: "L", material: "Franela Reactiva", personalizacion: "Bordado Manga", color: "Gris Grisáceo" }
-    }
-  ]);
+  }));
 
   useEffect(() => {
     const hoy = new Date();
@@ -61,7 +63,11 @@ export function SolicitudCotizacionScreen() {
 
   const ejecutarEnvioSolicitud = () => {
     setModalConfig({ tipo: 'cargando', mensaje: 'Procesando y enviando tu solicitud de cotización...' });
+    // TODO API: reemplazar el setTimeout por CotizacionesAPIService.crearCotizacion(cotizacion)
+    // — POST /cotizaciones — con los productosSolicitados y observaciones
     setTimeout(() => {
+      // Al confirmar el éxito, se vacía el carrito (entidad Carrito en contexto y localStorage)
+      clearCart();
       setModalConfig({
         tipo: 'exito',
         mensaje: '¡Solicitud creada correctamente! El comerciante ha sido notificado y responderá pronto.',
@@ -100,8 +106,8 @@ export function SolicitudCotizacionScreen() {
           <div className={`${cardCls} overflow-hidden`}>
             <div className="overflow-x-auto overflow-y-auto max-h-[320px]">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-[#B8DFE2]">
-                  <tr className="bg-[#B8DFE2] border-b border-[#C8E6E8]">
+                <thead className="sticky top-0 z-10 border-primary-hover/15">
+                  <tr className="bg-brand-light border-b border-[#C8E6E8]">
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-5 py-3 min-w-[180px]">Producto</th>
                     <th className="text-left text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3 min-w-[120px]">Personalización</th>
                     <th className="text-center text-[10px] font-bold uppercase tracking-wide text-brand-muted px-3 py-3">Cantidad</th>
@@ -118,17 +124,17 @@ export function SolicitudCotizacionScreen() {
                         <p className="font-bold text-brand-dark">{p.nombre}</p>
                         <div className="flex flex-wrap gap-1 mt-1.5">
                           {p.atributos.talla && (
-                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
+                            <span className="bg-brand-light/40 text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               T: {p.atributos.talla}
                             </span>
                           )}
                           {p.atributos.material && (
-                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
+                            <span className="bg-brand-light/40 text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               {p.atributos.material}
                             </span>
                           )}
                           {p.atributos.color && (
-                            <span className="bg-[#F5EFE8] text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
+                            <span className="bg-brand-light/40 text-brand-muted text-[10px] font-semibold rounded px-1.5 py-0.5">
                               {p.atributos.color}
                             </span>
                           )}

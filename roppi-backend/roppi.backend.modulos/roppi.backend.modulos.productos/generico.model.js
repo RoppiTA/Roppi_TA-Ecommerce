@@ -3,7 +3,7 @@
 //atributo de auditoria
 class Generico {
   constructor({ id, nombre, descripcion, precio_base, maximo_stock, activo, url_imagen,
-                fecha_creacion, usuario_creacion,
+                posicion_x, posicion_y, fecha_creacion, usuario_creacion,
                 fecha_modificacion, usuario_modificacion }) {
     this.id = id;
     this.nombre = nombre;
@@ -12,6 +12,8 @@ class Generico {
     this.maximoStock = maximo_stock;
     this.activo = activo;
     this.urlImagen = url_imagen;
+    this.posicionX = posicion_x;
+    this.posicionY = posicion_y;
     // Relaciones opcionales
     this.tamanos = [];
     this.materiales = [];
