@@ -29,30 +29,30 @@ class CotizacionesServer {
 
         this.app.post('/carrito/items', async (req, res) => {
             try {
-                const { idUsuario, idProducto, cantidad } = req.body;
-                const resultado = await cotizacionBO.agregarItemCarrito(idUsuario, { idProducto, cantidad });
+                const { idUsuario, idGenerico, cantidad, idTamano, idColor, idMaterial, idPersonalizacion, urlDiseno } = req.body;
+                const resultado = await cotizacionBO.agregarItemCarrito(idUsuario, { idGenerico, cantidad, idTamano, idColor, idMaterial, idPersonalizacion, urlDiseno });
                 this.retornarRespuesta(res, 201, resultado);
             } catch (error) {
                 this.devolverError(res, 400, error.message);
             }
         });
 
-        this.app.put('/carrito/items/:idProducto', async (req, res) => {
+        this.app.put('/carrito/items/:idGenerico', async (req, res) => {
             try {
-                const idProducto = parseInt(req.params.idProducto);
+                const idGenerico = parseInt(req.params.idGenerico);
                 const { idUsuario, cantidad } = req.body;
-                const resultado = await cotizacionBO.actualizarCantidadCarrito(idUsuario, idProducto, cantidad);
+                const resultado = await cotizacionBO.actualizarCantidadCarrito(idUsuario, idGenerico, cantidad);
                 this.retornarRespuesta(res, 200, resultado);
             } catch (error) {
                 this.devolverError(res, 400, error.message);
             }
         });
 
-        this.app.delete('/carrito/items/:idProducto', async (req, res) => {
+        this.app.delete('/carrito/items/:idGenerico', async (req, res) => {
             try {
-                const idProducto = parseInt(req.params.idProducto);
+                const idGenerico = parseInt(req.params.idGenerico);
                 const { idUsuario } = req.body;
-                await cotizacionBO.eliminarItemCarrito(idUsuario, idProducto);
+                await cotizacionBO.eliminarItemCarrito(idUsuario, idGenerico);
                 this.retornarRespuesta(res, 200, { mensaje: "Eliminado" });
             } catch (error) {
                 this.devolverError(res, 400, error.message);
@@ -120,7 +120,9 @@ class CotizacionesServer {
         this.app.get('/solicitudes/:numero', async (req, res) => {
             try {
                 const numero = parseInt(req.params.numero);
-                const resultado = await cotizacionBO.listarVersionesDeCotizacion(numero);
+                const page = parseInt(req.query.page) || 1;
+                const items_per_page = Math.min(parseInt(req.query.len), 10) || 10;
+                const resultado = await cotizacionBO.listarVersionesDeCotizacion(numero, page, items_per_page);
                 this.retornarRespuesta(res, 200, resultado);
             }
             catch (error) {
@@ -144,6 +146,17 @@ class CotizacionesServer {
             try {
                 const { numeroCotizacion, numeroVersion, estado } = req.body;
                 const resultado = await cotizacionBO.updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado);
+                this.retornarRespuesta(res, 200, resultado);
+            }
+            catch (error) {
+                this.devolverError(res, 500, error.message);
+            }
+        })
+
+        this.app.put('/solicitudes/update/comerciante', async (req, res) => {
+            try {
+                const { numeroCotizacion, numeroVersion, idComerciante } = req.body;
+                const resultado = await cotizacionBO.asignarComerciante(numeroCotizacion, numeroVersion, idComerciante);
                 this.retornarRespuesta(res, 200, resultado);
             }
             catch (error) {
