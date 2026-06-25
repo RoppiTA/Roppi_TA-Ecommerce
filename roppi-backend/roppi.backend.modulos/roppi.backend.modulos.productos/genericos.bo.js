@@ -44,14 +44,14 @@ class GenericosBO {
 
   ///////////////////////////////////////////
   //para crear se debe realizar una inserción de todas sus relaciones. Se manejan a este nivel por que si falla alguna inserción, se revierte toda la operación.
-  async crear({ nombre, descripcion, precioBase, maximoStock, urlImagen, tamanos, materiales, colores, personalizaciones, usuarioId }) {
+  async crear({ nombre, descripcion, precioBase, maximoStock, urlImagen, posicionX, posicionY, tamanos, materiales, colores, personalizaciones, usuarioId }) {
     const client = await db.getClient();
     try {
       await client.query('BEGIN');
       //Insertar el genérico
       console.log(nombre);
       const genericoRow = await genericosGateway.createWithClient(client,
-        { nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId });
+        { nombre, descripcion, precioBase, maximoStock, urlImagen, posicionX, posicionY, usuarioId });
       const idGenerico = genericoRow.id;
 
       // Insertar todas las relacinones de manera paralela
@@ -70,23 +70,6 @@ class GenericosBO {
         })),
       ]);
 
-      // Generar todas las combinatorias de personalizados
-      /*for (const tamano of tamanos) {
-        for (const color of colores) {
-          for (const material of materiales) {
-            for (const personalizacion of personalizaciones) {
-              const sku = `${idGenerico}-${tamano.id}-${color.id}-${material.id}-${personalizacion.id}`;
-              const precio = precioBase + (material.costoExtra || 0) + (personalizacion.costoExtra || 0);
-              await personalizadosGateway.createWithClient(client, {
-                idGenerico, idTamano: tamano.id, idColor: color.id,
-                idMaterial: material.id, idPersonalizacion: personalizacion.id,
-                sku, precio, usuarioId
-              });
-            }
-          }
-        }
-      }*/
-
       await client.query('COMMIT');
       return await this.obtenerPorId(idGenerico);
 
@@ -102,7 +85,7 @@ class GenericosBO {
   // MODIFICAR
   //lo que estamos haciendo para actualizar las listas vinculadas es comparar la lista anterior con la nueva 
   // y solo eliminar/insertar lo que cambió.
-  async actualizar(id, { nombre, descripcion, precioBase, maximoStock, urlImagen,
+  async actualizar(id, { nombre, descripcion, precioBase, maximoStock, urlImagen, posicionX, posicionY,
     tamanos, materiales, colores, personalizaciones, usuarioId
   }) {
 
@@ -167,7 +150,7 @@ class GenericosBO {
 
       await genericosGateway.updateWithClient(client, id, {
         nombre: nombre, descripcion: descripcion, precioBase: precioBase, maximoStock: maximoStock,
-        urlImagen: urlImagen, usuarioId: usuarioId
+        urlImagen: urlImagen, posicionX: posicionX, posicionY: posicionY, usuarioId: usuarioId
       });
 
       await Promise.all([
