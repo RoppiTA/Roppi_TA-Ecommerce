@@ -6,11 +6,13 @@ import DetalleProducto from '../../views/cliente/DetalleProducto';
 import DefaultCliente from '../../views/cliente/DefaultCliente';
 import ProductListPage from '../../views/cliente/ProductListPage';
 import { ProtectedRoute } from '../../components/ProtectedRoute';
-import Customization from '../../views/cliente/Customization'
+import Customization from '../../views/cliente/Customization';
 import ProductCart from '../../views/cliente/ProductCart';
+import CompraSegura from '../../views/cliente/CompraSegura';
 import { CotizacionListScreen } from '../../views/cliente/cotizacion/CotizacionList';
 import { CotizacionDetailScreen } from '../../views/cliente/cotizacion/DetalleCotizacion';
 import { SolicitudCotizacionScreen } from '../../views/cliente/SolicitudCotizacion';
+import { CarritoProvider } from '../../context/CarritoContext';
 
 
 interface ClienteStackProps {
@@ -34,6 +36,9 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
     : 'I';
 
   return (
+    // CarritoProvider envuelve todo el stack del cliente para que el carrito
+    // sea accesible desde Header, Customization, ProductCart y SolicitudCotizacion
+    <CarritoProvider>
     <div className="flex h-screen overflow-hidden">
       <Sidebar
         isCollapsed={isCollapsed}
@@ -106,10 +111,19 @@ export const ClienteStack = ({ user }: ClienteStackProps) => {
             //Rutas adicionales para soporte y configuración (Próximamente)
             <Route path="support" element={<div className="p-10 text-brand-muted">❓ Pantalla de Soporte (Próximamente)</div>} />
             <Route path="settings" element={<div className="p-10 text-brand-muted">⚙️ Pantalla de Configuración (Próximamente)</div>} />
+            <Route
+              path="compra-segura"
+              element={
+                <ProtectedRoute isAllowed={isAuthenticated} redirectTo="/auth">
+                  <CompraSegura />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </div>
       </main>
     </div>
+    </CarritoProvider>
   );
 };
 export default ClienteStack;

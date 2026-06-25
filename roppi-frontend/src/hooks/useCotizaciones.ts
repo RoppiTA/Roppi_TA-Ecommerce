@@ -1,124 +1,22 @@
 import { useState, useEffect, useCallback } from "react";
 import { Cotizacion, CotizacionResumen, EstadoCotizacion } from "../types/cotizacion/cotizacion.types";
 import { CotizacionesAPIService } from '../api/cotizaciones.api';
+import { useAuth } from '../context/AuthContext';
 
-// Mock Data (Fechas actualizadas para coincidir con pruebas recientes)
-const MOCK_COTIZACIONES: Cotizacion[] = [
-  {
-    id: 101, // ID numérico autogenerado
-    comerciante: "Carlos Mendoza",
-    cliente: "Empresa Textil S.A.",
-    fechaSolicitud: "2026-06-15",
-    fechaVencimiento: "2026-06-25",
-    version: 3,
-    estado: "Observado",
-    precioAnterior: 1800.0, // Caso solicitado: precio previo al cambio
-    productos: [
-      {
-        idCotizacion: 101,
-        versionCotizacion: 3,
-        numeroLinea: 1,
-        nombre: "Polo Clásico Premium",
-        atributos: { talla: "M", material: "Algodón 100%", personalizacion: "Serigrafía", color: "Blanco Hueso" },
-        precioUnitario: 48.0, 
-        cantidad: 20,
-      },
-      {
-        idCotizacion: 101,
-        versionCotizacion: 3,
-        numeroLinea: 2,
-        nombre: "Camiseta Oversize Urbana",
-        atributos: { talla: "L", material: "Algodón/Poliéster", personalizacion: "Sublimación", color: "Negro" },
-        precioUnitario: 52.5,
-        cantidad: 15,
-      },
-    ],
-    observacionesCliente: "Necesito que los colores sean exactos.",
-    comentariosComerciante: "El color 'Blanco Hueso' tiene un recargo de S/ 3.00 por prenda. Espero tu confirmación para proceder con el pedido.",
-  },
-  {
-    id: 102,
-    comerciante: "Ana Torres",
-    cliente: "Corporación Textil S.A.",
-    fechaSolicitud: "2026-06-10",
-    fechaVencimiento: "2026-06-20",
-    version: 1,
-    estado: "Aceptado",
-    productos: [
-      {
-        idCotizacion: 102,
-        versionCotizacion: 1,
-        numeroLinea: 1,
-        nombre: "Polo Deportivo Dri-Fit",
-        atributos: { talla: "S", material: "Poliéster 100%", personalizacion: "Sublimación", color: "Rojo" },
-        precioUnitario: 55.0,
-        cantidad: 30,
-      },
-    ],
-    comentariosComerciante: "Diseño y presupuesto aprobados, iniciamos producción programada.",
-  },
-  {
-    id: 103,
-    comerciante: "Carlos Mendoza",
-    cliente: "Corporación Textil S.A.",
-    fechaSolicitud: "2026-06-01",
-    fechaVencimiento: "2026-06-05",
-    version: 2,
-    estado: "Cancelado",
-    productos: [
-      {
-        idCotizacion: 103,
-        versionCotizacion: 2,
-        numeroLinea: 1,
-        nombre: "Gorra Trucker Personalizada",
-        atributos: { talla: "Estándar", material: "Malla/Poliéster", personalizacion: "Bordado", color: "Azul Marino" },
-        precioUnitario: 25.0,
-        cantidad: 50,
-      },
-    ],
-    motivoCancelacion: "El cliente solicitó un descuento adicional del 15% que no era viable por los costos de los materiales actuales.",
-  },
-  {
-    id: 104,
-    comerciante: "Carlos Mendoza",
-    cliente: "Corporación Textil S.A.",
-    fechaSolicitud: "2026-06-22",
-    fechaVencimiento: "2026-06-29",
-    version: 1,
-    estado: "Solicitado",
-    productos: [
-      { 
-        idCotizacion: 104, 
-        versionCotizacion: 1, 
-        numeroLinea: 1, 
-        nombre: "Polo Corporativo Algodón", 
-        atributos: { talla: "L", material: "Pima 50/50", personalizacion: "Bordado Pecho", color: "Azul" }, 
-        precioUnitario: 10.0, 
-        cantidad: 100 },
-      { idCotizacion: 104, 
-        versionCotizacion: 1, 
-        numeroLinea: 2, 
-        nombre: "Gorra Publicitaria", 
-        atributos: { talla: "Estándar", material: "Dril", personalizacion: "Estampado", color: "Blanco" }, 
-        precioUnitario: 11.0, 
-        cantidad: 150 }
-    ],
-    observacionesCliente: "Por favor cotizar con el hilo de la mejor calidad posible."
-  }
-];
+export function useCotizaciones(userId?: number, userType?: "CLIENTE" | "COMERCIANTE") {
+  const { user } = useAuth();
+  const resolvedUserId = userId ?? user.id;
+  const resolvedUserType = userType ?? (user.role.includes('COMERCIANTE') ? 'COMERCIANTE' : 'CLIENTE');
 
-export function useCotizaciones(userId: number, userType: "CLIENTE" | "COMERCIANTE") {
-  const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>(MOCK_COTIZACIONES);
-  //const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
+  const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  //Función para cargar todos los datos necesarios
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const cot = await CotizacionesAPIService.getCotizaciones(userId, userType);
+      const cot = await CotizacionesAPIService.getCotizaciones(resolvedUserId, resolvedUserType);
       setCotizaciones(cot);
     } catch (err) {
       setError('Error al conectar con la base de datos');
@@ -126,12 +24,11 @@ export function useCotizaciones(userId: number, userType: "CLIENTE" | "COMERCIAN
     } finally {
       setLoading(false);
     }
-  }, []);
-  
-  // Se ejecuta una vez al montar el componente para cargar los datos iniciales
-  //useEffect(() => {
-  //  fetchData();
-  //}, [fetchData]);
+  }, [resolvedUserId, resolvedUserType]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
   
 
   // Helper para calcular subtotal

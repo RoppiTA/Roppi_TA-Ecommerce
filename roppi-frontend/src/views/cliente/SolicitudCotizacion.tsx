@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, XCircle, Send } from "lucide-react";
 import { MensajeModal } from "../../components/MensajeModal";
 import { StatusBadge } from "../../components/StatusBadge";
+import { useCarrito } from "../../context/CarritoContext";
 
+// CartItem: forma local usada en la tabla de esta vista
 interface CartItem {
   id: number;
   nombre: string;
@@ -29,22 +31,22 @@ export function SolicitudCotizacionScreen() {
     onConfirmAction?: () => void;
   } | null>(null);
 
-  const [productosSolicitados] = useState<CartItem[]>([
-    {
-      id: 101,
-      nombre: "Polo Clásico Premium",
-      precioUnitario: 45.00,
-      cantidad: 3,
-      atributos: { talla: "M", material: "Algodón 100%", personalizacion: "Estampado Pecho", color: "Negro" }
+  // Entidad: LineaCarrito[] — ítems reales del carrito del cliente
+  const { items: carritoItems, clearCart } = useCarrito();
+
+  // Mapea LineaCarrito al formato CartItem que usa la tabla de esta vista
+  const productosSolicitados: CartItem[] = carritoItems.map((linea) => ({
+    id: linea.productoId,
+    nombre: linea.nombre,
+    precioUnitario: linea.precioUnitario,
+    cantidad: linea.cantidad,
+    atributos: {
+      talla: linea.atributos.talla,
+      material: linea.atributos.material,
+      personalizacion: linea.atributos.personalizacion,
+      color: linea.atributos.color,
     },
-    {
-      id: 102,
-      nombre: "Polera Heavyweight Hoodie",
-      precioUnitario: 85.00,
-      cantidad: 1,
-      atributos: { talla: "L", material: "Franela Reactiva", personalizacion: "Bordado Manga", color: "Gris Grisáceo" }
-    }
-  ]);
+  }));
 
   useEffect(() => {
     const hoy = new Date();
@@ -61,7 +63,11 @@ export function SolicitudCotizacionScreen() {
 
   const ejecutarEnvioSolicitud = () => {
     setModalConfig({ tipo: 'cargando', mensaje: 'Procesando y enviando tu solicitud de cotización...' });
+    // TODO API: reemplazar el setTimeout por CotizacionesAPIService.crearCotizacion(cotizacion)
+    // — POST /cotizaciones — con los productosSolicitados y observaciones
     setTimeout(() => {
+      // Al confirmar el éxito, se vacía el carrito (entidad Carrito en contexto y localStorage)
+      clearCart();
       setModalConfig({
         tipo: 'exito',
         mensaje: '¡Solicitud creada correctamente! El comerciante ha sido notificado y responderá pronto.',
