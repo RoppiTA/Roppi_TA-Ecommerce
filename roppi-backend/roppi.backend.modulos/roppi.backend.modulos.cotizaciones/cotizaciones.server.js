@@ -164,6 +164,15 @@ class CotizacionesServer {
             }
         })
 
+        this.app.post('/solicitudes/crear', async (req, res) => {
+            try {
+                const data = req.body;
+                const resultado = await cotizacionBO.crearCotizacionOVersion(data);
+                this.retornarRespuesta(res, 201, resultado);
+            } catch (error) {
+                this.devolverError(res, 500, error.message);
+            }
+        });
 
     }
 

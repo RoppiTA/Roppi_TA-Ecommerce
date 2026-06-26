@@ -91,6 +91,11 @@ class CotizacionesAPI {
             return this.hacerPeticion(req, res, 'GET', `/solicitudes/${numero}`);
         })
 
+        // Crear una nueva cotización (o versión)
+        this.router.post('/solicitudes/crear', async (req, res) => {
+            return this.hacerPeticion(req, res, 'POST', '/solicitudes/crear', req.body);
+        });
+
         // Actualizar estado de la cotización
         this.router.put('/solicitudes/update/estado', async (req, res) => {
             const { numeroCotizacion, numeroVersion, estado } = req.body;

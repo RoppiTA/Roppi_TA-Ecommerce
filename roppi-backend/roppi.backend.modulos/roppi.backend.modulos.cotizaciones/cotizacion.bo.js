@@ -157,9 +157,11 @@ class CotizacionBO {
     return cotizacion;
   }
 
-  async crearCotizacion({ }) {
-    // Acá también tendríamos que llamar a Detalles Cotizacion para hacer la relación
-
+  async crearCotizacionOVersion(data) {
+    if (!data.id_usuario || !data.detalles || data.detalles.length === 0) {
+      throw new Error("Faltan datos obligatorios: id_usuario o detalles de la cotización.");
+    }
+    return await cotizacionGateway.crearCotizacionTransaccion(data);
   }
 
   // EN API
