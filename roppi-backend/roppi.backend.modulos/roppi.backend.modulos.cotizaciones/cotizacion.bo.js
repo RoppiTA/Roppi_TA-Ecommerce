@@ -165,8 +165,8 @@ class CotizacionBO {
   }
 
   // EN API
-  async updateEstadoCotizacion(num_cotizacion, num_version, estado) {
-    const respuesta = await cotizacionGateway.updateEstadoCotizacion(num_cotizacion, num_version, estado);
+  async updateEstadoCotizacion(num_cotizacion, num_version, estado, comentario_cliente, comentario_comerciante) {
+    const respuesta = await cotizacionGateway.updateEstadoCotizacion(num_cotizacion, num_version, estado, comentario_cliente, comentario_comerciante);
     return respuesta;
   }
 

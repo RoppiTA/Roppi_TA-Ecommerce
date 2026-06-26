@@ -144,8 +144,8 @@ class CotizacionesServer {
 
         this.app.put('/solicitudes/update/estado', async (req, res) => {
             try {
-                const { numeroCotizacion, numeroVersion, estado } = req.body;
-                const resultado = await cotizacionBO.updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado);
+                const { numeroCotizacion, numeroVersion, estado, comentario_cliente, comentario_comerciante } = req.body;
+                const resultado = await cotizacionBO.updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado, comentario_cliente, comentario_comerciante);
                 this.retornarRespuesta(res, 200, resultado);
             }
             catch (error) {

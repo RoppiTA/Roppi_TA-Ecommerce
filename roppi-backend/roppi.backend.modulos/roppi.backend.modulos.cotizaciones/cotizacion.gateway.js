@@ -150,13 +150,17 @@ class CotizacionGateway {
     return result.rows;
   }
 
-  async updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado) {
+  async updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado, comentarioCliente, comentarioComerciante) {
     const result = await db.query(`
       UPDATE "RoppiTA".COTIZACIONES
-      SET ESTADO = $1, FECHA_MODIFICACION = CURRENT_TIMESTAMP
+      SET 
+        ESTADO = $1,
+        COMENTARIOS_CLIENTE = COALESCE($4, COMENTARIOS_CLIENTE),
+        COMENTARIOS_COMERCIANTE = COALESCE($5, COMENTARIOS_COMERCIANTE),
+        FECHA_MODIFICACION = CURRENT_TIMESTAMP
       WHERE NUMERO_COTIZACION = $2 AND VERSION_COTIZACION = $3
-      RETURNING NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO
-    `, [estado, numeroCotizacion, numeroVersion]);
+      RETURNING NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, COMENTARIOS_CLIENTE, COMENTARIOS_COMERCIANTE
+    `, [estado, numeroCotizacion, numeroVersion, comentarioCliente ?? null, comentarioComerciante ?? null]);
     return result.rows[0];
   }
 
