@@ -3,10 +3,10 @@ import { Cotizacion, CotizacionResumen, EstadoCotizacion } from "../types/cotiza
 import { CotizacionesAPIService } from '../api/cotizaciones.api';
 import { useAuth } from '../context/AuthContext';
 
-export function useCotizaciones(userId?: number, userType?: "CLIENTE" | "COMERCIANTE") {
+export function useCotizaciones() {
   const { user } = useAuth();
-  const resolvedUserId = userId ?? user.id;
-  const resolvedUserType = userType ?? (user.role.includes('COMERCIANTE') ? 'COMERCIANTE' : 'CLIENTE');
+  const resolvedUserId = user?.id;
+  const resolvedUserType = (user?.role.includes('COMERCIANTE') ? 'COMERCIANTE' : 'CLIENTE');
 
   const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -16,7 +16,7 @@ export function useCotizaciones(userId?: number, userType?: "CLIENTE" | "COMERCI
     try {
       setLoading(true);
       setError(null);
-      const cot = await CotizacionesAPIService.getCotizaciones(resolvedUserId, resolvedUserType);
+      const cot = await CotizacionesAPIService.getCotizaciones(resolvedUserId, resolvedUserType, 1, 100, null);
       setCotizaciones(cot);
     } catch (err) {
       setError('Error al conectar con la base de datos');

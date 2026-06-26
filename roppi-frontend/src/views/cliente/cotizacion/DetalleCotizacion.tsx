@@ -5,10 +5,10 @@ import { useCotizaciones } from "../../../hooks/useCotizaciones";
 import { StatusBadge } from "../../../components/StatusBadge";
 import { MensajeModal } from "../../../components/MensajeModal";
 
-export function CotizacionDetailScreen(userId: number, userType: "CLIENTE" | "COMERCIANTE") {
+export function CotizacionDetailScreen() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { getCotizacionDetalle, calcularSubtotal, calcularDiasRestantes } = useCotizaciones(userId, userType);
+  const { getCotizacionDetalle, calcularSubtotal, calcularDiasRestantes } = useCotizaciones();
 
   const state = location.state as { id?: number; version?: number } | null;
   const cotizacionId = state?.id || 0;
