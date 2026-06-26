@@ -236,7 +236,7 @@ class CotizacionGateway {
         if (existsResult.rowCount === 0) {
           throw new Error(`La cotización con número ${numeroCotizacion} no existe.`);
         }
-        
+
         // Obtener la siguiente versión si ya existe
         const verResult = await client.query('SELECT COALESCE(MAX(VERSION_COTIZACION), 0) + 1 AS next_ver FROM "RoppiTA".COTIZACIONES WHERE NUMERO_COTIZACION = $1', [numeroCotizacion]);
         versionCotizacion = parseInt(verResult.rows[0].next_ver);
@@ -254,8 +254,8 @@ class CotizacionGateway {
         versionCotizacion,
         data.id_usuario,
         data.total || 0,
-        data.comentarios_cliente || null,
-        data.comentarios_comerciante || null,
+        data.comentarios_cliente ?? null,
+        data.comentarios_comerciante ?? null,
         data.estado || 'SOLICITADA',
         data.id_usuario
       ];
