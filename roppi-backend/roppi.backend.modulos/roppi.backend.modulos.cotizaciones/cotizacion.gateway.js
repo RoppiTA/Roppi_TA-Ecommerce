@@ -150,13 +150,17 @@ class CotizacionGateway {
     return result.rows;
   }
 
-  async updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado) {
+  async updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado, comentarioCliente, comentarioComerciante) {
     const result = await db.query(`
       UPDATE "RoppiTA".COTIZACIONES
-      SET ESTADO = $1, FECHA_MODIFICACION = CURRENT_TIMESTAMP
+      SET 
+        ESTADO = $1,
+        COMENTARIOS_CLIENTE = COALESCE($4, COMENTARIOS_CLIENTE),
+        COMENTARIOS_COMERCIANTE = COALESCE($5, COMENTARIOS_COMERCIANTE),
+        FECHA_MODIFICACION = CURRENT_TIMESTAMP
       WHERE NUMERO_COTIZACION = $2 AND VERSION_COTIZACION = $3
-      RETURNING NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO
-    `, [estado, numeroCotizacion, numeroVersion]);
+      RETURNING NUMERO_COTIZACION, VERSION_COTIZACION, ESTADO, COMENTARIOS_CLIENTE, COMENTARIOS_COMERCIANTE
+    `, [estado, numeroCotizacion, numeroVersion, comentarioCliente ?? null, comentarioComerciante ?? null]);
     return result.rows[0];
   }
 
@@ -212,6 +216,89 @@ class CotizacionGateway {
     cabecera.detalles = detalles;
 
     return cabecera;
+  }
+
+  async crearCotizacionTransaccion(data) {
+    const client = await db.getClient();
+    try {
+      await client.query('BEGIN');
+
+      let numeroCotizacion = data.numero_cotizacion;
+      let versionCotizacion = 1;
+
+      // Generar numero_cotizacion si es nuevo
+      if (!numeroCotizacion) {
+        const numResult = await client.query('SELECT COALESCE(MAX(NUMERO_COTIZACION), 0) + 1 AS next_num FROM "RoppiTA".COTIZACIONES');
+        numeroCotizacion = parseInt(numResult.rows[0].next_num);
+      } else {
+        // Verificar que la cotización realmente exista
+        const existsResult = await client.query('SELECT 1 FROM "RoppiTA".COTIZACIONES WHERE NUMERO_COTIZACION = $1 LIMIT 1', [numeroCotizacion]);
+        if (existsResult.rowCount === 0) {
+          throw new Error(`La cotización con número ${numeroCotizacion} no existe.`);
+        }
+        
+        // Obtener la siguiente versión si ya existe
+        const verResult = await client.query('SELECT COALESCE(MAX(VERSION_COTIZACION), 0) + 1 AS next_ver FROM "RoppiTA".COTIZACIONES WHERE NUMERO_COTIZACION = $1', [numeroCotizacion]);
+        versionCotizacion = parseInt(verResult.rows[0].next_ver);
+      }
+
+      // Insertar Cabecera
+      const cabeceraQuery = `
+        INSERT INTO "RoppiTA".COTIZACIONES 
+          (NUMERO_COTIZACION, VERSION_COTIZACION, ID_USUARIO, TOTAL, COMENTARIOS_CLIENTE, COMENTARIOS_COMERCIANTE, ESTADO, USUARIO_CREACION, USUARIO_MODIFICACION)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
+        RETURNING *
+      `;
+      const cabeceraParams = [
+        numeroCotizacion,
+        versionCotizacion,
+        data.id_usuario,
+        data.total || 0,
+        data.comentarios_cliente || null,
+        data.comentarios_comerciante || null,
+        data.estado || 'SOLICITADA',
+        data.id_usuario
+      ];
+
+      await client.query(cabeceraQuery, cabeceraParams);
+
+      // Insertar Detalles
+      const detalles = data.detalles || [];
+      for (const d of detalles) {
+        const detQuery = `
+          INSERT INTO "RoppiTA".detalles_cotizacion
+            (id_generico, numero_cotizacion, version_cotizacion, cantidad, precio, id_tamano, id_color, id_material, id_personalizacion, url_diseno, usuario_creacion, usuario_modificacion)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)
+        `;
+        const detParams = [
+          d.id_generico,
+          numeroCotizacion,
+          versionCotizacion,
+          d.cantidad || 1,
+          d.precio || 0,
+          d.id_tamano || null,
+          d.id_color || null,
+          d.id_material || null,
+          d.id_personalizacion || null,
+          d.url_diseno || null,
+          data.id_usuario
+        ];
+        await client.query(detQuery, detParams);
+      }
+
+      await client.query('COMMIT');
+
+      return {
+        numero_cotizacion: numeroCotizacion,
+        version_cotizacion: versionCotizacion,
+        mensaje: "Cotización registrada exitosamente"
+      };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
 }

@@ -157,14 +157,16 @@ class CotizacionBO {
     return cotizacion;
   }
 
-  async crearCotizacion({ }) {
-    // Acá también tendríamos que llamar a Detalles Cotizacion para hacer la relación
-
+  async crearCotizacionOVersion(data) {
+    if (!data.id_usuario || !data.detalles || data.detalles.length === 0) {
+      throw new Error("Faltan datos obligatorios: id_usuario o detalles de la cotización.");
+    }
+    return await cotizacionGateway.crearCotizacionTransaccion(data);
   }
 
   // EN API
-  async updateEstadoCotizacion(num_cotizacion, num_version, estado) {
-    const respuesta = await cotizacionGateway.updateEstadoCotizacion(num_cotizacion, num_version, estado);
+  async updateEstadoCotizacion(num_cotizacion, num_version, estado, comentario_cliente, comentario_comerciante) {
+    const respuesta = await cotizacionGateway.updateEstadoCotizacion(num_cotizacion, num_version, estado, comentario_cliente, comentario_comerciante);
     return respuesta;
   }
 
