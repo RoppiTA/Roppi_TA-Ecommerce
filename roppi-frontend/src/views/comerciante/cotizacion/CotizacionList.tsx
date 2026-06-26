@@ -6,9 +6,9 @@ import { StatusBadge } from "../../../components/StatusBadge";
 import { EstadoCotizacion } from "../../../types/cotizacion/cotizacion.types";
 
 const ESTADOS_POR_GRUPO: Record<string, EstadoCotizacion[]> = {
-  open:   ['Solicitado', 'Observado'],
-  closed: ['Aceptado', 'Cancelado', 'Vencido'],
-  all:    ['Solicitado', 'Observado', 'Aceptado', 'Cancelado', 'Vencido'],
+  open:   ['SOLICITADA', 'OBSERVADA'],
+  closed: ['ACEPTADA', 'CANCELADA', 'VENCIDA'],
+  all:    ['SOLICITADA', 'OBSERVADA', 'ACEPTADA', 'CANCELADA', 'VENCIDA'],
 };
 
 export function ComercianteCotizacionListScreen() {
@@ -16,6 +16,13 @@ export function ComercianteCotizacionListScreen() {
   const [searchParams] = useSearchParams();
   const { getCotizacionesResumen } = useCotizaciones();
   const [seleccion, setSeleccion] = useState<Set<EstadoCotizacion>>(new Set());
+
+  const formatDate = (dateStr: string | undefined | null) => {
+    if (!dateStr) return '–';
+    const [year, month, day] = dateStr.split("T")[0].split("-");
+    const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+    return `${day} ${months[parseInt(month) - 1]}. ${year}`;
+  };
 
   const grupo = searchParams.get('status') ?? 'all';
   const estadosGrupo = ESTADOS_POR_GRUPO[grupo] ?? ESTADOS_POR_GRUPO.all;
@@ -110,7 +117,7 @@ export function ComercianteCotizacionListScreen() {
                     <UserCheck className="w-3.5 h-3.5" /> <span>Cliente: {c.cliente}</span>
                   </div>
                   <div className="text-[11px] text-brand-muted/70 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" /> Solicitado el {c.fechaSolicitud}
+                    <Calendar className="w-3 h-3" /> Solicitado el {formatDate(c.fechaSolicitud)}
                   </div>
                 </div>
                 <div className="text-right space-y-0.5 shrink-0">

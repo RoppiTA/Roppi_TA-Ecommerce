@@ -4,6 +4,7 @@ import { ArrowLeft, XCircle, Send } from "lucide-react";
 import { MensajeModal } from "../../components/MensajeModal";
 import { StatusBadge } from "../../components/StatusBadge";
 import { useCarrito } from "../../context/CarritoContext";
+import { CotizacionesAPIService } from "../../api/cotizaciones.api";
 
 // CartItem: forma local usada en la tabla de esta vista
 interface CartItem {
@@ -33,7 +34,7 @@ export function SolicitudCotizacionScreen() {
   } | null>(null);
 
   // Entidad: LineaCarrito[] — ítems reales del carrito del cliente
-  const { items: carritoItems, clearCart } = useCarrito();
+  const { items: carritoItems, clearCart, carritoId } = useCarrito();
 
   // Mapea LineaCarrito al formato CartItem que usa la tabla de esta vista
   const productosSolicitados: CartItem[] = carritoItems.map((linea) => ({
@@ -58,8 +59,9 @@ export function SolicitudCotizacionScreen() {
     setFechaVence(vence.toLocaleDateString('es-PE', fmt));
   }, []);
 
-  const subtotal = productosSolicitados.reduce((acc, item) => acc + (item.precioUnitario * item.cantidad), 0);
-  const igv = subtotal * 0.18;
+  const a = productosSolicitados.reduce((acc, item) => acc + (item.precioUnitario * item.cantidad), 0);
+  const subtotal = a * 0.82;
+  const igv = a * 0.18;
   const totalCompleto = subtotal + igv;
 
   const ejecutarEnvioSolicitud = () => {
@@ -79,24 +81,28 @@ export function SolicitudCotizacionScreen() {
       }
     });
   };
-  const procesarEnvioFinal = () => {
-      // Cambiamos el modal al estado de carga
-      setModalConfig({ tipo: 'cargando', mensaje: 'Procesando tu solicitud de cotización...' });
-      
-      // TODO API: reemplazar el setTimeout por CotizacionesAPIService.crearCotizacion(cotizacion)
-      // — POST /cotizaciones — con los productosSolicitados y observaciones
-      setTimeout(() => {
-        setModalConfig({
-          tipo: 'exito',
-          mensaje: 'Tu solicitud de cotización ha sido enviada con éxito al comerciante. Recibirás una respuesta pronto.',
-          onConfirmAction: () => {
-            //al confirmar el éxito, se vacía el carrito (entidad Carrito en contexto y localStorage)
-            clearCart();
-            navigate('/quotes'); // Redirige a la vista de cotizaciones del cliente
-          }
-        });
-      }, 2000);
-    };
+  const procesarEnvioFinal = async () => {
+    setModalConfig({ tipo: 'cargando', mensaje: 'Procesando tu solicitud de cotización...' });
+
+    if (!carritoId) {
+      setModalConfig({ tipo: 'error', mensaje: 'No se encontró el carrito activo. Recarga la página e intenta de nuevo.' });
+      return;
+    }
+
+    try {
+      await CotizacionesAPIService.solicitarCotizacion(carritoId, observaciones);
+      setModalConfig({
+        tipo: 'exito',
+        mensaje: 'Tu solicitud de cotización ha sido enviada con éxito al comerciante. Recibirás una respuesta pronto.',
+        onConfirmAction: () => {
+          clearCart();
+          navigate('/quotes');
+        }
+      });
+    } catch {
+      setModalConfig({ tipo: 'error', mensaje: 'Ocurrió un error al enviar la solicitud. Intenta de nuevo.' });
+    }
+  };
   const cardCls = "bg-white rounded-[20px] border border-[#C8E6E8] shadow-[0_2px_16px_rgba(61,30,8,0.06)]";
   const labelCls = "text-[10px] font-bold uppercase tracking-wide text-brand-muted block";
   const valueCls = "text-sm font-semibold text-brand-dark mt-0.5";
@@ -115,6 +121,11 @@ export function SolicitudCotizacionScreen() {
         </button>
         <h1 className="text-xl font-semibold text-brand-dark">Nueva Solicitud de Cotización</h1>
         <p className="text-sm text-brand-muted mt-0.5">Confirma los detalles antes de enviar</p>
+        {/* DEBUG — comentar antes de producción */}
+        <p className="text-xs text-brand-muted/60 mt-1 font-mono">
+          carritoId: <span className="font-bold text-primary2">{carritoId ?? 'null'}</span>
+        </p>
+        {/* FIN DEBUG */}
       </div>
 
       {/* Body — dos columnas */}
@@ -231,7 +242,7 @@ export function SolicitudCotizacionScreen() {
           <div className={`${cardCls} p-4`}>
             <div className="flex items-start justify-between mb-3">
               <p className={labelCls}>Detalle de solicitud</p>
-              <StatusBadge estado="Solicitado" size="sm" />
+              <StatusBadge estado="Carrito" size="sm" />
             </div>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
