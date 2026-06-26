@@ -144,8 +144,8 @@ class CotizacionesServer {
 
         this.app.put('/solicitudes/update/estado', async (req, res) => {
             try {
-                const { numeroCotizacion, numeroVersion, estado } = req.body;
-                const resultado = await cotizacionBO.updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado);
+                const { numeroCotizacion, numeroVersion, estado, comentario_cliente, comentario_comerciante } = req.body;
+                const resultado = await cotizacionBO.updateEstadoCotizacion(numeroCotizacion, numeroVersion, estado, comentario_cliente, comentario_comerciante);
                 this.retornarRespuesta(res, 200, resultado);
             }
             catch (error) {
@@ -164,6 +164,15 @@ class CotizacionesServer {
             }
         })
 
+        this.app.post('/solicitudes/crear', async (req, res) => {
+            try {
+                const data = req.body;
+                const resultado = await cotizacionBO.crearCotizacionOVersion(data);
+                this.retornarRespuesta(res, 201, resultado);
+            } catch (error) {
+                this.devolverError(res, 500, error.message);
+            }
+        });
 
     }
 
