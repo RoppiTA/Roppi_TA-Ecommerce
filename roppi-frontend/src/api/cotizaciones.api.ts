@@ -82,7 +82,16 @@ export const CotizacionesAPIService = {
         if (!response.data || !response.data.data) {
             throw new Error(`No se encontraron datos para la cotización N°${numero} v${version}`);
         }
-        return mapearACotizacionFrontend(response.data.data);
+        console.log('[getCotizacionByNumeroVersion] raw backend:', response.data.data);
+        const mapped = mapearACotizacionFrontend(response.data.data);
+        console.log('[getCotizacionByNumeroVersion] mapeado:', {
+            id: mapped.id,
+            version: mapped.version,
+            estado: mapped.estado,
+            observacionesCliente: mapped.observacionesCliente,
+            comentariosComerciante: mapped.comentariosComerciante,
+        });
+        return mapped;
     },
 
     // Alias por compatibilidad con llamadas existentes
@@ -98,10 +107,11 @@ export const CotizacionesAPIService = {
     },
 
     // 4. ACTUALIZAR ESTADO DE COTIZACION
-    updateCotizacionEstado: async (cotizacion: Cotizacion): Promise<Cotizacion> => {
+    
+    CotizacionEstado: async (cotizacion: Cotizacion): Promise<Cotizacion> => {
         const response = await apiClient.put<{ exito: boolean; data: any }>(
             `/cotizaciones/solicitudes/update/estado`,
-            { numeroCotizacion: cotizacion.id, numeroVersion: cotizacion.version, estado: cotizacion.estado }
+            { numeroCotizacion: cotizacion.id, numeroVersion: cotizacion.version, estado: cotizacion.estado, comentario_cliente: cotizacion.observacionesCliente || null, comentario_comerciante: cotizacion.comentariosComerciante || null }
         );
         if (!response.data || !response.data.exito) {
             throw new Error(`Error al actualizar el estado de la cotización con ID ${cotizacion.id} y versión ${cotizacion.version}`);
@@ -177,10 +187,13 @@ export const CotizacionesAPIService = {
 
     // 12. CONVERTIR CARRITO EN SOLICITUD FORMAL (estado → "Solicitado")
     solicitarCotizacion: async (numeroCotizacion: number, observacionesCliente: string): Promise<void> => {
+        const body = { numeroCotizacion, numeroVersion: 1, estado: 'SOLICITADA', comentario_cliente: observacionesCliente, comentario_comerciante: null };
+        console.log('[solicitarCotizacion] enviando:', body);
         const response = await apiClient.put<{ exito: boolean; data: any }>(
             `/cotizaciones/solicitudes/update/estado`,
-            { numeroCotizacion, numeroVersion: 1, estado: 'SOLICITADA' }
+            body
         );
+        console.log('[solicitarCotizacion] respuesta backend:', response.data);
         if (!response.data?.exito) {
             throw new Error(`Error al enviar la solicitud de cotización N°${numeroCotizacion}`);
         }

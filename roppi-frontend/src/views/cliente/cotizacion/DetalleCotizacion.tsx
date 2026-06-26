@@ -172,14 +172,27 @@ export function CotizacionDetailScreen() {
             </div>
           </div>
 
-          {/* Comentarios del comerciante */}
-          {cotizacion.comentariosComerciante && (
+          {/* Comentarios */}
+          {(cotizacion.observacionesCliente || cotizacion.comentariosComerciante) && (
             <div className={`${cardCls} p-5`}>
-              <p className={`${labelCls} mb-4`}>Comentarios del comerciante</p>
-              <div className="flex flex-col items-end ml-auto max-w-[80%]">
-                <div className="bg-brand-light/50 text-brand-dark text-xs rounded-2xl rounded-tr-sm px-4 py-3 leading-relaxed">
-                  {cotizacion.comentariosComerciante}
-                </div>
+              <p className={`${labelCls} mb-4`}>Comentarios</p>
+              <div className="space-y-3">
+                {cotizacion.observacionesCliente && (
+                  <div className="flex flex-col items-start max-w-[80%]">
+                    <span className="text-[10px] font-bold text-brand-muted mb-1 ml-1">Tus observaciones</span>
+                    <div className="bg-blue-50 text-gray-700 text-xs rounded-2xl rounded-tl-sm px-4 py-3 leading-relaxed">
+                      {cotizacion.observacionesCliente}
+                    </div>
+                  </div>
+                )}
+                {cotizacion.comentariosComerciante && (
+                  <div className="flex flex-col items-end ml-auto max-w-[80%]">
+                    <span className="text-[10px] font-bold text-brand-muted mb-1 mr-1">Comerciante</span>
+                    <div className="bg-brand-light/50 text-brand-dark text-xs rounded-2xl rounded-tr-sm px-4 py-3 leading-relaxed">
+                      {cotizacion.comentariosComerciante}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

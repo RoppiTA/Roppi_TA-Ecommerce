@@ -242,7 +242,7 @@ export function SolicitudCotizacionScreen() {
           <div className={`${cardCls} p-4`}>
             <div className="flex items-start justify-between mb-3">
               <p className={labelCls}>Detalle de solicitud</p>
-              <StatusBadge estado="Carrito" size="sm" />
+              <StatusBadge estado="CARRITO" size="sm" />
             </div>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">

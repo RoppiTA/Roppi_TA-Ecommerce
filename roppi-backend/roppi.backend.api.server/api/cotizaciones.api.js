@@ -98,8 +98,8 @@ class CotizacionesAPI {
 
         // Actualizar estado de la cotización
         this.router.put('/solicitudes/update/estado', async (req, res) => {
-            const { numeroCotizacion, numeroVersion, estado } = req.body;
-            return this.hacerPeticion(req, res, 'PUT', `/solicitudes/update/estado`, { numeroCotizacion, numeroVersion, estado });
+            const { numeroCotizacion, numeroVersion, estado, comentario_cliente, comentario_comerciante } = req.body;
+            return this.hacerPeticion(req, res, 'PUT', `/solicitudes/update/estado`, { numeroCotizacion, numeroVersion, estado, comentario_cliente, comentario_comerciante });
         });
 
         // Asignar comerciante a la cotización
