@@ -191,25 +191,33 @@ export const Customization = () => {
     if (!product) return;
 
     // Entidad: LineaCarrito — construye la línea con todos los atributos seleccionados
-    addItem({
-      productoId: product.id,
-      nombre: product.nombre,
-      imagenKey: product.imagen,
-      atributos: {
-        talla: getTamanoInfo(selectedTamano ?? 0)?.nombre ?? '',
-        material: getMaterial(selectedMaterial ?? 0)?.nombre ?? '',
-        personalizacion:
-          selectedPersonalizacion == null
-            ? ''
-            : (getPersonalizacion(selectedPersonalizacion)?.nombre ??
-              `Personalización #${selectedPersonalizacion}`),
-        color: getColor(selectedColor ?? 0)?.nombre ?? '',
-        colorHex: colorSeleccionado,
+    addItem(
+      {
+        productoId: product.id,
+        nombre: product.nombre,
+        imagenKey: product.imagen,
+        atributos: {
+          talla: getTamanoInfo(selectedTamano ?? 0)?.nombre ?? '',
+          material: getMaterial(selectedMaterial ?? 0)?.nombre ?? '',
+          personalizacion:
+            selectedPersonalizacion == null
+              ? ''
+              : (getPersonalizacion(selectedPersonalizacion)?.nombre ??
+                `Personalización #${selectedPersonalizacion}`),
+          color: getColor(selectedColor ?? 0)?.nombre ?? '',
+          colorHex: colorSeleccionado,
+        },
+        precioUnitario,
+        cantidad,
+        maximoStock: product.maximo_stock,
       },
-      precioUnitario,
-      cantidad,
-      maximoStock: product.maximo_stock,
-    });
+      {
+        idTamano: selectedTamano ?? 0,
+        idColor: selectedColor ?? 0,
+        idMaterial: selectedMaterial ?? 0,
+        idPersonalizacion: selectedPersonalizacion ?? 0,
+      }
+    );
 
     // Disparar animación del dot desde el botón hacia el ícono del carrito en el Header
     if (addButtonRef.current) {
@@ -219,9 +227,6 @@ export const Customization = () => {
     // Mostrar toast de confirmación brevemente
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
-
-    // TODO API: addItem (dentro de CarritoContext) llama a CarritoAPIService.guardarCarrito
-    // No se navega — el usuario puede seguir personalizando o ir al carrito manualmente
   };
 
   if (loadingHook || loadingLocal) {

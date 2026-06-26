@@ -4,6 +4,16 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Descuento } from '../types/producto/descuento.types';
 import { LineaCarrito } from '../types/carrito/carrito.types';
+import { CotizacionesAPIService } from '../api/cotizaciones.api';
+import { useAuth } from './AuthContext';
+
+type ApiCarritoParams = {
+  idTamano: number;
+  idColor: number;
+  idMaterial: number;
+  idPersonalizacion: number;
+  urlDiseno?: string;
+};
 
 const STORAGE_KEY = 'roppi_carrito';
 
@@ -19,8 +29,10 @@ interface FlyDot {
 interface CarritoContextType {
   items: LineaCarrito[];
   totalItems: number;
-  // Agrega o incrementa una línea; aplica descuento si corresponde
-  addItem: (item: Omit<LineaCarrito, 'numeroLinea' | 'descuentoAplicado'>) => void;
+  carritoId: number | null;
+  // Agrega o incrementa una línea; aplica descuento si corresponde.
+  // apiParams: IDs de atributos necesarios para persistir en el backend.
+  addItem: (item: Omit<LineaCarrito, 'numeroLinea' | 'descuentoAplicado'>, apiParams?: ApiCarritoParams) => void;
   // Actualiza cantidad de una línea; re-calcula descuento
   updateCantidad: (numeroLinea: number, cantidad: number) => void;
   removeItem: (numeroLinea: number) => void;
@@ -41,6 +53,7 @@ export const useCarrito = (): CarritoContextType => {
     return {
       items: [],
       totalItems: 0,
+      carritoId: null,
       addItem: () => {},
       updateCantidad: () => {},
       removeItem: () => {},
@@ -81,6 +94,8 @@ function calcularDescuento(
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export const CarritoProvider = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+
   // Entidad: LineaCarrito[] — lista de ítems del carrito, persistida en localStorage
   const [items, setItems] = useState<LineaCarrito[]>(() => {
     try {
@@ -90,6 +105,8 @@ export const CarritoProvider = ({ children }: { children: React.ReactNode }) => 
       return [];
     }
   });
+
+  const [carritoId, setCarritoId] = useState<number | null>(null);
 
   // Entidad: Descuento[] — catálogo de descuentos disponibles para aplicar al carrito
   const [descuentos, setDescuentos] = useState<Descuento[]>([]);
@@ -112,7 +129,28 @@ export const CarritoProvider = ({ children }: { children: React.ReactNode }) => 
     }
   }, []);
 
-  // TODO API: reemplazar este fetch manual por DescuentosAPIService.getDescuentos()
+  // Re-sincroniza el carrito desde la API cada vez que el usuario cambia (login/logout)
+  useEffect(() => {
+    if (!user) {
+      setCarritoId(null);
+      setItems([]);
+      nextLineaRef.current = 1;
+      return;
+    }
+    CotizacionesAPIService.getCarrito()
+      .then((carrito) => {
+        if (carrito) {
+          setCarritoId(carrito.id ?? null);
+          if (carrito.items.length > 0) {
+            setItems(carrito.items);
+            nextLineaRef.current = Math.max(...carrito.items.map((i) => i.numeroLinea)) + 1;
+          }
+        }
+      })
+      .catch(() => { /* mantiene estado de localStorage */ });
+  }, [user?.id]);
+
+  // Carga descuentos disponibles para calcular descuentos en el carrito
   // cuando el servicio esté disponible — GET /productos/descuentos
   useEffect(() => {
     const cargarDescuentos = async () => {
@@ -133,7 +171,8 @@ export const CarritoProvider = ({ children }: { children: React.ReactNode }) => 
   // ── Agregar ítem ────────────────────────────────────────────────────────────
 
   const addItem = useCallback(
-    (newItem: Omit<LineaCarrito, 'numeroLinea' | 'descuentoAplicado'>) => {
+    (newItem: Omit<LineaCarrito, 'numeroLinea' | 'descuentoAplicado'>, apiParams?: ApiCarritoParams) => {
+      // Actualización local optimista (inmediata)
       setItems((prev) => {
         // Busca línea existente con mismo producto y mismos atributos
         const existingIdx = prev.findIndex(
@@ -178,10 +217,44 @@ export const CarritoProvider = ({ children }: { children: React.ReactNode }) => 
           updated = [...prev, linea];
         }
 
-        // TODO API: llamar a CarritoAPIService.guardarCarrito(updated)
-        // para persistir la entidad Carrito en BD — POST /cotizaciones/carrito
         return updated;
       });
+
+      // Persiste en el backend y sincroniza el estado con la respuesta oficial
+      if (apiParams) {
+        // DEBUG — comentar cuando se confirme el flujo
+        console.log('[addItem] enviando al backend:', { productoId: newItem.productoId, cantidad: newItem.cantidad, ...apiParams });
+        CotizacionesAPIService.addItemCarrito(
+          newItem.productoId,
+          newItem.cantidad,
+          apiParams.idTamano,
+          apiParams.idColor,
+          apiParams.idMaterial,
+          apiParams.idPersonalizacion,
+          apiParams.urlDiseno
+        )
+          .then(() => CotizacionesAPIService.getCarrito())
+          .then((carrito) => {
+            // DEBUG — comentar cuando se confirme el flujo
+            console.log('[addItem] carrito tras sync:', { id: carrito?.id, items: carrito?.items?.length });
+            if (carrito) {
+              setCarritoId(carrito.id ?? null);
+              setItems(carrito.items);
+              nextLineaRef.current = Math.max(...carrito.items.map((i) => i.numeroLinea)) + 1;
+            } else {
+              console.warn('[addItem] getCarrito() devolvió null tras agregar ítem');
+            }
+          })
+          .catch((err) => {
+            console.error('[addItem] error al sincronizar con backend:', err?.response?.data ?? err?.message ?? err);
+            console.error('[addItem] payload enviado:', {
+              idGenerico: newItem.productoId, cantidad: newItem.cantidad,
+              idTamano: apiParams.idTamano, idColor: apiParams.idColor,
+              idMaterial: apiParams.idMaterial, idPersonalizacion: apiParams.idPersonalizacion,
+            });
+          });
+        // FIN DEBUG
+      }
     },
     [descuentos]
   );
@@ -194,7 +267,8 @@ export const CarritoProvider = ({ children }: { children: React.ReactNode }) => 
         prev.map((item) => {
           if (item.numeroLinea !== numeroLinea) return item;
           const cantidadValida = Math.max(1, Math.min(cantidad, item.maximoStock));
-          const linea = {
+          CotizacionesAPIService.updateItemCarrito(item.productoId, cantidadValida).catch(console.error);
+          return {
             ...item,
             cantidad: cantidadValida,
             descuentoAplicado: calcularDescuento(
@@ -204,9 +278,6 @@ export const CarritoProvider = ({ children }: { children: React.ReactNode }) => 
               descuentos
             ),
           };
-          // TODO API: llamar a CarritoAPIService.actualizarLinea(numeroLinea, cantidadValida)
-          // para actualizar la línea en BD — PUT /cotizaciones/carrito/linea/{numeroLinea}
-          return linea;
         })
       );
     },
@@ -217,21 +288,19 @@ export const CarritoProvider = ({ children }: { children: React.ReactNode }) => 
 
   const removeItem = useCallback((numeroLinea: number) => {
     setItems((prev) => {
-      const updated = prev.filter((i) => i.numeroLinea !== numeroLinea);
-      // TODO API: llamar a CarritoAPIService.eliminarLinea(numeroLinea)
-      // para eliminar la línea en BD — DELETE /cotizaciones/carrito/linea/{numeroLinea}
-      return updated;
+      const item = prev.find((i) => i.numeroLinea === numeroLinea);
+      if (item) CotizacionesAPIService.removeItemCarrito(item.productoId).catch(console.error);
+      return prev.filter((i) => i.numeroLinea !== numeroLinea);
     });
   }, []);
 
   // ── Vaciar carrito ──────────────────────────────────────────────────────────
 
   const clearCart = useCallback(() => {
+    CotizacionesAPIService.clearCarrito().catch(console.error);
     setItems([]);
     nextLineaRef.current = 1;
     localStorage.removeItem(STORAGE_KEY);
-    // TODO API: llamar a CarritoAPIService.limpiarCarrito()
-    // para vaciar la entidad Carrito en BD — DELETE /cotizaciones/carrito
   }, []);
 
   // ── Animación: dot volando desde el botón hasta el ícono del carrito ────────
@@ -267,7 +336,7 @@ export const CarritoProvider = ({ children }: { children: React.ReactNode }) => 
 
   return (
     <CarritoContext.Provider
-      value={{ items, totalItems, addItem, updateCantidad, removeItem, clearCart, triggerAddAnimation }}
+      value={{ items, totalItems, carritoId, addItem, updateCantidad, removeItem, clearCart, triggerAddAnimation }}
     >
       {children}
 

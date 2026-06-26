@@ -1,21 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Clock } from "lucide-react";
 import { useCotizaciones } from "../../../hooks/useCotizaciones";
 import { StatusBadge } from "../../../components/StatusBadge";
 import { MensajeModal } from "../../../components/MensajeModal";
+import { Cotizacion } from "../../../types/cotizacion/cotizacion.types";
 
-export function CotizacionDetailScreen(userId: number, userType: "CLIENTE" | "COMERCIANTE") {
+const formatDate = (dateStr: string | undefined | null) => {
+  if (!dateStr) return '–';
+  const [year, month, day] = dateStr.split("T")[0].split("-");
+  const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  return `${day} ${months[parseInt(month) - 1]}. ${year}`;
+};
+
+export function CotizacionDetailScreen() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { getCotizacionDetalle, calcularSubtotal, calcularDiasRestantes } = useCotizaciones(userId, userType);
+  const { fetchCotizacionDetalle, calcularSubtotal, calcularDiasRestantes } = useCotizaciones();
 
   const state = location.state as { id?: number; version?: number } | null;
   const cotizacionId = state?.id || 0;
   const version = state?.version || 0;
 
-  const cotizacion = getCotizacionDetalle(cotizacionId, version);
+  const [cotizacion, setCotizacion] = useState<Cotizacion | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(true);
   const [modalConfig, setModalConfig] = useState<{ tipo: 'exito' | 'error' | 'cargando' | 'confirmar', accion?: 'aceptar' | 'cancelar', mensaje: string } | null>(null);
+
+  useEffect(() => {
+    if (!cotizacionId || !version) { setLoadingDetail(false); return; }
+    fetchCotizacionDetalle(cotizacionId, version).then(cot => {
+      setCotizacion(cot);
+      setLoadingDetail(false);
+    });
+  // fetchCotizacionDetalle cambia al actualizar cotizaciones; solo ejecutar al montar
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cotizacionId, version]);
+
+  const procesarAccion = () => {
+    const accionRealizada = modalConfig?.accion;
+    setModalConfig(null);
+    setTimeout(() => {
+      setModalConfig({
+        tipo: 'exito',
+        mensaje: accionRealizada === 'aceptar'
+          ? '¡Éxito! La cotización ha sido aprobada correctamente.'
+          : 'La cotización ha sido cancelada y archivada.'
+      });
+    }, 200);
+  };
+
+  const cardCls = "bg-white rounded-[20px] border border-[#C8E6E8] shadow-[0_2px_16px_rgba(61,30,8,0.06)]";
+  const labelCls = "text-[10px] font-bold uppercase tracking-wide text-brand-muted block";
+  const valueCls = "text-sm font-semibold text-brand-dark mt-0.5";
+
+  if (loadingDetail) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-brand-muted text-sm font-semibold">Cargando cotización...</p>
+      </div>
+    );
+  }
 
   if (!cotizacion) {
     return (
@@ -37,23 +81,6 @@ export function CotizacionDetailScreen(userId: number, userType: "CLIENTE" | "CO
   const igv = subtotal * 0.18;
   const total = subtotal + igv;
   const diasRestantes = calcularDiasRestantes(cotizacion.fechaVencimiento);
-
-  const procesarAccion = () => {
-    const accionRealizada = modalConfig?.accion;
-    setModalConfig(null);
-    setTimeout(() => {
-      setModalConfig({
-        tipo: 'exito',
-        mensaje: accionRealizada === 'aceptar'
-          ? '¡Éxito! La cotización ha sido aprobada correctamente.'
-          : 'La cotización ha sido cancelada y archivada.'
-      });
-    }, 200);
-  };
-
-  const cardCls = "bg-white rounded-[20px] border border-[#C8E6E8] shadow-[0_2px_16px_rgba(61,30,8,0.06)]";
-  const labelCls = "text-[10px] font-bold uppercase tracking-wide text-brand-muted block";
-  const valueCls = "text-sm font-semibold text-brand-dark mt-0.5";
 
   return (
     <div className="min-h-screen lg:h-full bg-white flex flex-col overflow-x-hidden lg:overflow-hidden" style={{ fontFamily: "'Nunito', sans-serif" }}>
@@ -145,14 +172,27 @@ export function CotizacionDetailScreen(userId: number, userType: "CLIENTE" | "CO
             </div>
           </div>
 
-          {/* Comentarios del comerciante */}
-          {cotizacion.comentariosComerciante && (
+          {/* Comentarios */}
+          {(cotizacion.observacionesCliente || cotizacion.comentariosComerciante) && (
             <div className={`${cardCls} p-5`}>
-              <p className={`${labelCls} mb-4`}>Comentarios del comerciante</p>
-              <div className="flex flex-col items-end ml-auto max-w-[80%]">
-                <div className="bg-brand-light/50 text-brand-dark text-xs rounded-2xl rounded-tr-sm px-4 py-3 leading-relaxed">
-                  {cotizacion.comentariosComerciante}
-                </div>
+              <p className={`${labelCls} mb-4`}>Comentarios</p>
+              <div className="space-y-3">
+                {cotizacion.observacionesCliente && (
+                  <div className="flex flex-col items-start max-w-[80%]">
+                    <span className="text-[10px] font-bold text-brand-muted mb-1 ml-1">Tus observaciones</span>
+                    <div className="bg-blue-50 text-gray-700 text-xs rounded-2xl rounded-tl-sm px-4 py-3 leading-relaxed">
+                      {cotizacion.observacionesCliente}
+                    </div>
+                  </div>
+                )}
+                {cotizacion.comentariosComerciante && (
+                  <div className="flex flex-col items-end ml-auto max-w-[80%]">
+                    <span className="text-[10px] font-bold text-brand-muted mb-1 mr-1">Comerciante</span>
+                    <div className="bg-brand-light/50 text-brand-dark text-xs rounded-2xl rounded-tr-sm px-4 py-3 leading-relaxed">
+                      {cotizacion.comentariosComerciante}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -176,11 +216,11 @@ export function CotizacionDetailScreen(userId: number, userType: "CLIENTE" | "CO
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className={labelCls}>Fecha de solicitud</p>
-                  <p className={valueCls}>{cotizacion.fechaSolicitud}</p>
+                  <p className={valueCls}>{formatDate(cotizacion.fechaSolicitud)}</p>
                 </div>
                 <div>
                   <p className={labelCls}>Vencimiento</p>
-                  <p className={valueCls}>{cotizacion.fechaVencimiento}</p>
+                  <p className={valueCls}>{formatDate(cotizacion.fechaVencimiento)}</p>
                 </div>
               </div>
             </div>
@@ -209,7 +249,7 @@ export function CotizacionDetailScreen(userId: number, userType: "CLIENTE" | "CO
           <div className={`${cardCls} p-4`}>
             <p className={`${labelCls} mb-3`}>Acciones</p>
 
-            {cotizacion.estado === "Observado" && (
+            {cotizacion.estado === "OBSERVADA" && (
               <div className="space-y-2">
                 <div className="flex items-start gap-2 bg-red-50 rounded-xl px-3 py-2.5 border border-red-100 mb-3">
                   <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
@@ -234,21 +274,21 @@ export function CotizacionDetailScreen(userId: number, userType: "CLIENTE" | "CO
               </div>
             )}
 
-            {cotizacion.estado === "Solicitado" && (
+            {cotizacion.estado === "SOLICITADA" && (
               <div className="flex items-start gap-2 bg-amber-50 rounded-xl px-4 py-3">
                 <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700">En espera de observación del comerciante</p>
               </div>
             )}
 
-            {cotizacion.estado === "Aceptado" && (
+            {cotizacion.estado === "ACEPTADA" && (
               <div className="flex items-center gap-2 bg-emerald-50 rounded-xl px-4 py-3">
                 <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
                 <p className="text-xs text-emerald-700">Cotización aceptada</p>
               </div>
             )}
 
-            {cotizacion.estado === "Cancelado" && (
+            {cotizacion.estado === "CANCELADA" && (
               <div className="flex items-center gap-2 bg-red-50 rounded-xl px-4 py-3">
                 <XCircle className="w-4 h-4 text-red-400 shrink-0" />
                 <p className="text-xs text-red-600">Cotización cancelada</p>

@@ -29,7 +29,7 @@ export const ProductCart = () => {
     0
   );
   
-  const productosBase = totalBruto - totalDescuentos;
+  const productosBase = (totalBruto - totalDescuentos)*0.82;
   const igv = totalBruto * 0.18;
   const precioConDescuentos = productosBase + igv;
 

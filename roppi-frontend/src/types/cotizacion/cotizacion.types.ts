@@ -1,4 +1,4 @@
-export type EstadoCotizacion = "Solicitado" | "Observado" | "Aceptado" | "Cancelado" | "Vencido";
+export type EstadoCotizacion = "SOLICITADA" | "OBSERVADA" | "ACEPTADA" | "CANCELADA" | "VENCIDA" | "CARRITO";
 
 export interface LineaProducto {
   numeroLinea: number;
@@ -28,6 +28,7 @@ export interface Cotizacion {
   comentariosComerciante?: string;
   motivoCancelacion?: string;
   precioAnterior?: number;
+  total?: number;
 }
 
 export interface CotizacionResumen {

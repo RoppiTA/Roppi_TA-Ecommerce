@@ -7,11 +7,18 @@ import { StatusBadge } from "../../../components/StatusBadge";
 import { MensajeModal } from "../../../components/MensajeModal";
 import { Cotizacion } from "../../../types/cotizacion/cotizacion.types";
 
+const formatDate = (dateStr: string | undefined | null) => {
+  if (!dateStr) return '–';
+  const [year, month, day] = dateStr.split("T")[0].split("-");
+  const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  return `${day} ${months[parseInt(month) - 1]}. ${year}`;
+};
+
 export function ComercianteCotizacionDetailScreen() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { getCotizacionDetalle, calcularSubtotal, resolverCotizacion } = useCotizaciones();
+  const { fetchCotizacionDetalle, calcularSubtotal, resolverCotizacion } = useCotizaciones();
 
   const esComerciante = user?.role?.includes('COMERCIANTE') ?? true;
 
@@ -23,12 +30,24 @@ export function ComercianteCotizacionDetailScreen() {
   }, []);
 
   const state = location.state as { id?: number; version?: number } | null;
-  const cotizacion = getCotizacionDetalle(state?.id || 0, state?.version || 0);
+  const cotizacionId = state?.id || 0;
+  const version = state?.version || 0;
 
-  const modoEdicion = cotizacion?.estado === 'Solicitado' && esComerciante;
-  const [productosEditados, setProductosEditados] = useState<Cotizacion['productos']>(
-    () => (cotizacion?.productos ?? []).map(p => ({ ...p, precioUnitario: 0 }))
-  );
+  const [cotizacion, setCotizacion] = useState<Cotizacion | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(true);
+
+  useEffect(() => {
+    if (!cotizacionId || !version) { setLoadingDetail(false); return; }
+    fetchCotizacionDetalle(cotizacionId, version).then(cot => {
+      setCotizacion(cot);
+      setLoadingDetail(false);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cotizacionId, version]);
+
+  const modoEdicion = cotizacion?.estado === 'SOLICITADA' && esComerciante;
+
+  const [productosEditados, setProductosEditados] = useState<Cotizacion['productos']>([]);
   const [comentariosMerchant, setComentariosMerchant] = useState("");
   const [intentoEnvio, setIntentoEnvio] = useState(false);
   const [modalConfig, setModalConfig] = useState<{
@@ -37,20 +56,34 @@ export function ComercianteCotizacionDetailScreen() {
     onConfirm?: () => void;
   } | null>(null);
 
+  // Inicializar productosEditados cuando se carga la cotización completa
+  useEffect(() => {
+    if (cotizacion?.productos?.length) {
+      setProductosEditados(cotizacion.productos.map(p => ({ ...p, precioUnitario: 0 })));
+    }
+  }, [cotizacion]);
+
   const ejecutarAcciones = () => {
     setIntentoEnvio(true);
 
-    //Verificación de seguridad: si está vacío o solo tiene espacios, bloqueamos el proceso
     if (comentariosMerchant.trim().length === 0) {
-      return; 
+      return;
     }
 
     setModalConfig({
       tipo: 'confirmar',
       mensaje: 'Pasará a estado "Observado" a espera del cliente.',
-      onConfirm: () => ejecutarGuardado('Observado')
+      onConfirm: () => ejecutarGuardado('OBSERVADA')
     })
   };
+
+  if (loadingDetail) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-brand-muted text-sm font-semibold">Cargando cotización...</p>
+      </div>
+    );
+  }
 
   if (!cotizacion) {
     return (
@@ -77,7 +110,7 @@ export function ComercianteCotizacionDetailScreen() {
     setProductosEditados(copia);
   };
 
-  const ejecutarGuardado = (estadoFinal: 'Observado' | 'Cancelado') => {
+  const ejecutarGuardado = (estadoFinal: 'OBSERVADA' | 'CANCELADA') => {
     setModalConfig({ tipo: 'cargando', mensaje: 'Procesando cambios en el servidor...' });
     setTimeout(() => {
       const nuevaVersion = resolverCotizacion(cotizacion.id, cotizacion.version, estadoFinal, productosEditados, comentariosMerchant);
@@ -204,7 +237,11 @@ export function ComercianteCotizacionDetailScreen() {
                             min="0"
                             value={p.precioUnitario || ''}
                             placeholder="0.00"
-                            onChange={(e) => handlePrecioChange(idx, e.target.value)}
+                            onChange={(e) => {
+                              if (e.target.value.replace('.', '').length <= 5) {
+                                handlePrecioChange(idx, e.target.value);
+                              }
+                            }}
                             onFocus={(e) => e.target.select()}
                             className="w-24 text-right p-1.5 text-sm font-bold bg-amber-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200 [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
                           />
@@ -254,14 +291,14 @@ export function ComercianteCotizacionDetailScreen() {
             {modoEdicion && (
               <div className={cotizacion.observacionesCliente || cotizacion.comentariosComerciante ? "mt-4 pt-4 border-t border-[#C8E6E8]" : ""}>
                 <textarea
-                  maxLength={1000} // Limita exactamente a 1000 caracteres
+                  maxLength={1000}
                   value={comentariosMerchant}
                   onChange={(e) => setComentariosMerchant(e.target.value)}
                   rows={3}
                   placeholder="Escribe tu respuesta para el cliente..."
                   className={`w-full text-xs p-3 rounded-xl border focus:outline-none focus:ring-1 bg-[#FDFAF7] resize-none transition-all placeholder-brand-muted/40 ${
-                    intentoEnvio && comentariosMerchant.trim().length === 0 
-                      ? 'border-red-400 focus:border-red-400 focus:ring-red-400/20' 
+                    intentoEnvio && comentariosMerchant.trim().length === 0
+                      ? 'border-red-400 focus:border-red-400 focus:ring-red-400/20'
                       : 'border-[#EDE8E3] focus:border-brand-muted/50 focus:ring-brand-muted/20'
                   }`}
                 />
@@ -288,11 +325,11 @@ export function ComercianteCotizacionDetailScreen() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className={labelCls}>Fecha de ingreso</p>
-                  <p className={valueCls}>{cotizacion.fechaSolicitud}</p>
+                  <p className={valueCls}>{formatDate(cotizacion.fechaSolicitud)}</p>
                 </div>
                 <div>
                   <p className={labelCls}>Vencimiento</p>
-                  <p className={valueCls}>{cotizacion.fechaVencimiento}</p>
+                  <p className={valueCls}>{formatDate(cotizacion.fechaVencimiento)}</p>
                 </div>
               </div>
             </div>
@@ -327,8 +364,8 @@ export function ComercianteCotizacionDetailScreen() {
           <div className={`${cardCls} p-4`}>
             <p className={`${labelCls} mb-3`}>Acciones</p>
 
-            {/* Solicitado — comerciante */}
-            {cotizacion.estado === "Solicitado" && esComerciante && (
+            {/* SOLICITADA — comerciante */}
+            {cotizacion.estado === "SOLICITADA" && esComerciante && (
               <div className="space-y-2">
                 <button
                   onClick={ejecutarAcciones}
@@ -340,7 +377,7 @@ export function ComercianteCotizacionDetailScreen() {
                   onClick={() => setModalConfig({
                     tipo: 'confirmar',
                     mensaje: '¿Estás seguro de cancelar la cotización? Se guardará con estado definitivo "Cancelado".',
-                    onConfirm: () => ejecutarGuardado('Cancelado')
+                    onConfirm: () => ejecutarGuardado('CANCELADA')
                   })}
                   className="w-full py-2.5 bg-transparent hover:bg-[#FFF5EE] text-brand-error font-bold text-xs rounded-xl border border-brand-error/40 hover:border-brand-error/70 flex items-center justify-center gap-2 transition-colors"
                 >
@@ -348,15 +385,15 @@ export function ComercianteCotizacionDetailScreen() {
                 </button>
               </div>
             )}
-            {cotizacion.estado === "Solicitado" && !esComerciante && (
+            {cotizacion.estado === "SOLICITADA" && !esComerciante && (
               <div className="flex items-start gap-2 bg-amber-50 rounded-xl px-4 py-3">
                 <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700">En espera de observación del comerciante</p>
               </div>
             )}
 
-            {/* Observado */}
-            {cotizacion.estado === "Observado" && !esComerciante && (
+            {/* OBSERVADA */}
+            {cotizacion.estado === "OBSERVADA" && !esComerciante && (
               <div className="space-y-2">
                 <button
                   onClick={() => setModalConfig({
@@ -398,23 +435,23 @@ export function ComercianteCotizacionDetailScreen() {
                 </button>
               </div>
             )}
-            {cotizacion.estado === "Observado" && esComerciante && (
+            {cotizacion.estado === "OBSERVADA" && esComerciante && (
               <div className="flex items-start gap-2 bg-amber-50 rounded-xl px-4 py-3">
                 <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700">En espera de confirmación del cliente</p>
               </div>
             )}
 
-            {/* Aceptado */}
-            {cotizacion.estado === "Aceptado" && (
+            {/* ACEPTADA */}
+            {cotizacion.estado === "ACEPTADA" && (
               <div className="flex items-center gap-2 bg-emerald-50 rounded-xl px-4 py-3">
                 <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
                 <p className="text-xs text-emerald-700">Cotización aceptada</p>
               </div>
             )}
 
-            {/* Cancelado */}
-            {cotizacion.estado === "Cancelado" && (
+            {/* CANCELADA */}
+            {cotizacion.estado === "CANCELADA" && (
               <div className="flex items-center gap-2 bg-red-50 rounded-xl px-4 py-3">
                 <XCircle className="w-4 h-4 text-red-400 shrink-0" />
                 <p className="text-xs text-red-600">Cotización cancelada</p>

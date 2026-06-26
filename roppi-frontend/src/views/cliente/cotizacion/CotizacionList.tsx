@@ -5,21 +5,22 @@ import { useCotizaciones } from "../../../hooks/useCotizaciones";
 import { StatusBadge } from "../../../components/StatusBadge";
 import { EstadoCotizacion } from "../../../types/cotizacion/cotizacion.types";
 
-export function CotizacionListScreen(userId: number, userType: "CLIENTE" | "COMERCIANTE") {
+export function CotizacionListScreen() {
   const navigate = useNavigate();
-  const { getCotizacionesResumen } = useCotizaciones(userId, userType);
+  const { getCotizacionesResumen } = useCotizaciones();
   const resumenes = getCotizacionesResumen();
 
   const [filtro, setFiltro] = useState<EstadoCotizacion | "Todos">("Todos");
-  const tabs: Array<EstadoCotizacion | "Todos"> = ["Todos", "Solicitado", "Observado", "Aceptado", "Cancelado"];
+  const tabs: Array<EstadoCotizacion | "Todos"> = ["Todos", "SOLICITADA", "OBSERVADA", "ACEPTADA", "CANCELADA"];
 
   const filtradas = filtro === "Todos" ? resumenes : resumenes.filter((q) => q.estado === filtro);
 
   const conteo = (tab: EstadoCotizacion | "Todos") =>
     tab === "Todos" ? resumenes.length : resumenes.filter(q => q.estado === tab).length;
 
-  const formatDate = (dateStr: string) => {
-    const [year, month, day] = dateStr.split("-");
+  const formatDate = (dateStr: string | undefined | null) => {
+    if (!dateStr) return '–';
+    const [year, month, day] = dateStr.split("T")[0].split("-");
     const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
     return `${day} ${months[parseInt(month) - 1]}. ${year}`;
   };
