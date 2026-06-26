@@ -117,13 +117,13 @@ export function ComercianteCotizacionListScreen() {
                     <UserCheck className="w-3.5 h-3.5" /> <span>Cliente: {c.cliente}</span>
                   </div>
                   <div className="text-[11px] text-brand-muted/70 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" /> Solicitado el {formatDate(c.fechaSolicitud)}
+                    <Calendar className="w-3 h-3" /> Vence el {formatDate(c.fechaVencimiento)}
                   </div>
                 </div>
                 <div className="text-right space-y-0.5 shrink-0">
                   <span className="text-sm font-bold text-primary-hover">S/ {c.total.toFixed(2)}</span>
                   <div className="text-[10px] text-brand-muted/70 font-bold flex items-center justify-end gap-1">
-                    <Hash className="w-2.5 h-2.5" /> v{c.version} · {c.cantidadProductos} unds.
+                    versión: #{c.version}
                   </div>
                   <ChevronRight className="w-4 h-4 text-brand-muted/40 ml-auto" />
                 </div>

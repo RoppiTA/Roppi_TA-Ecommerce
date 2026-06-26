@@ -237,7 +237,11 @@ export function ComercianteCotizacionDetailScreen() {
                             min="0"
                             value={p.precioUnitario || ''}
                             placeholder="0.00"
-                            onChange={(e) => handlePrecioChange(idx, e.target.value)}
+                            onChange={(e) => {
+                              if (e.target.value.replace('.', '').length <= 5) {
+                                handlePrecioChange(idx, e.target.value);
+                              }
+                            }}
                             onFocus={(e) => e.target.select()}
                             className="w-24 text-right p-1.5 text-sm font-bold bg-amber-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200 [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
                           />
