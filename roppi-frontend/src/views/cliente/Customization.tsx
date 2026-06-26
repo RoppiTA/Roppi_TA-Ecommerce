@@ -87,6 +87,7 @@ export const Customization = () => {
   const [selectedPersonalizacion, setSelectedPersonalizacion] = useState<number | null>(null);
   const [designMode, setDesignMode] = useState<DesignMode>('upload');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<number | null>(null);
   const [selectedTamano, setSelectedTamano] = useState<number | null>(null);
   const [cantidad, setCantidad] = useState(1);
@@ -123,14 +124,38 @@ export const Customization = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     setUploadedFile(file);
-    
+    setUploadError(null);
     if (file) {
+      // 1. Validar formato (solo permitimos las extensiones solicitadas)
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        setUploadError('Formato no válido. Solo se permiten JPG, JPEG, PNG o WEBP.');
+        setUploadedFile(null);
+        setImagenEstampado(null);
+        // Resetea el input para que pueda volver a elegir el mismo archivo si se equivoca
+        if (fileInputRef.current) fileInputRef.current.value = ''; 
+        return;
+      }
+
+      // 2. Validar peso (Umbral estándar: 5MB)
+      const MAX_SIZE_MB = 5;
+      const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+      if (file.size > MAX_SIZE_BYTES) {
+        setUploadError(`La imagen es muy pesada. El tamaño máximo permitido es ${MAX_SIZE_MB}MB.`);
+        setUploadedFile(null);
+        setImagenEstampado(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+
+      // Si pasa las validaciones, actualizamos los estados
+      setUploadedFile(file);
       setDesignMode('upload');
-      // Genera una URL temporal local para que use-image de Konva la pueda cargar
       const objectUrl = URL.createObjectURL(file);
       setImagenEstampado(objectUrl);
     } else {
       setImagenEstampado(null);
+      setUploadedFile(null);
     }
   };
 
@@ -363,7 +388,7 @@ export const Customization = () => {
                       designMode === 'upload'
                         ? 'border-primary2 bg-primary2/10 text-primary-hover'
                         : 'border-primary-hover/20 text-brand-dark hover:bg-brand-light/40'
-                    }`}
+                    } ${uploadError ? 'border-red-400 bg-red-50' : ''}`} 
                   >
                     <Upload size={22} />
                     <span className="text-sm font-medium">Subir imagen</span>
@@ -384,6 +409,8 @@ export const Customization = () => {
                   <button
                     onClick={() => {
                       setDesignMode('preset');
+                      setUploadedFile(null);
+                      setUploadError(null);
                       setImagenEstampado(assets['maxwell']); // <--- CLAVE: Borra la imagen del cliente del Canvas
                     }}
                     className={`flex flex-col items-center justify-center gap-2 py-6 rounded-lg border transition-colors ${
@@ -396,6 +423,11 @@ export const Customization = () => {
                     <span className="text-sm font-medium">Diseño predeterminado</span>
                   </button>
                 </div>
+                {uploadError && (
+                  <p className="text-xs text-red-500 font-medium mt-2">
+                    {uploadError}
+                  </p>
+                )}
               </div>
               );
             })()}

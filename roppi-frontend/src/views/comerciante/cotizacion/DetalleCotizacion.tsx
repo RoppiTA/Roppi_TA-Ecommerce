@@ -30,11 +30,27 @@ export function ComercianteCotizacionDetailScreen() {
     () => (cotizacion?.productos ?? []).map(p => ({ ...p, precioUnitario: 0 }))
   );
   const [comentariosMerchant, setComentariosMerchant] = useState("");
+  const [intentoEnvio, setIntentoEnvio] = useState(false);
   const [modalConfig, setModalConfig] = useState<{
     tipo: 'exito' | 'error' | 'cargando' | 'confirmar';
     mensaje: string;
     onConfirm?: () => void;
   } | null>(null);
+
+  const ejecutarAcciones = () => {
+    setIntentoEnvio(true);
+
+    //Verificación de seguridad: si está vacío o solo tiene espacios, bloqueamos el proceso
+    if (comentariosMerchant.trim().length === 0) {
+      return; 
+    }
+
+    setModalConfig({
+      tipo: 'confirmar',
+      mensaje: 'Pasará a estado "Observado" a espera del cliente.',
+      onConfirm: () => ejecutarGuardado('Observado')
+    })
+  };
 
   if (!cotizacion) {
     return (
@@ -238,11 +254,16 @@ export function ComercianteCotizacionDetailScreen() {
             {modoEdicion && (
               <div className={cotizacion.observacionesCliente || cotizacion.comentariosComerciante ? "mt-4 pt-4 border-t border-[#C8E6E8]" : ""}>
                 <textarea
+                  maxLength={1000} // Limita exactamente a 1000 caracteres
                   value={comentariosMerchant}
                   onChange={(e) => setComentariosMerchant(e.target.value)}
                   rows={3}
                   placeholder="Escribe tu respuesta para el cliente..."
-                  className="w-full text-xs p-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:border-brand-muted/50 focus:ring-1 focus:ring-brand-muted/20 bg-[#FDFAF7] resize-none transition-all placeholder-brand-muted/40"
+                  className={`w-full text-xs p-3 rounded-xl border focus:outline-none focus:ring-1 bg-[#FDFAF7] resize-none transition-all placeholder-brand-muted/40 ${
+                    intentoEnvio && comentariosMerchant.trim().length === 0 
+                      ? 'border-red-400 focus:border-red-400 focus:ring-red-400/20' 
+                      : 'border-[#EDE8E3] focus:border-brand-muted/50 focus:ring-brand-muted/20'
+                  }`}
                 />
               </div>
             )}
@@ -310,11 +331,7 @@ export function ComercianteCotizacionDetailScreen() {
             {cotizacion.estado === "Solicitado" && esComerciante && (
               <div className="space-y-2">
                 <button
-                  onClick={() => setModalConfig({
-                    tipo: 'confirmar',
-                    mensaje: 'Pasará a estado "Observado" a espera del cliente.',
-                    onConfirm: () => ejecutarGuardado('Observado')
-                  })}
+                  onClick={ejecutarAcciones}
                   className="w-full py-2.5 bg-primary2 hover:bg-primary-hover text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
                 >
                   <Send className="w-3.5 h-3.5" /> Enviar Observación

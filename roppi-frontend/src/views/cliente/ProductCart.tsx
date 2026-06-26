@@ -28,12 +28,10 @@ export const ProductCart = () => {
     (acc, i) => acc + (i.descuentoAplicado?.montoDescontado ?? 0),
     0
   );
-  // precioConDescuentos: base para calcular subtotal, IGV y total mostrado
-  const precioConDescuentos = totalBruto - totalDescuentos;
-
-  // Proporciones definidas por el modelo de negocio de Roppi
-  const productosBase = precioConDescuentos * 0.82;
-  const igv = precioConDescuentos * 0.18;
+  
+  const productosBase = totalBruto - totalDescuentos;
+  const igv = totalBruto * 0.18;
+  const precioConDescuentos = productosBase + igv;
 
   // ── Handlers de cantidad ───────────────────────────────────────────────────
 
