@@ -24,6 +24,7 @@ export function SolicitudCotizacionScreen() {
   const [observaciones, setObservaciones] = useState("");
   const [fechaHoy, setFechaHoy] = useState("");
   const [fechaVence, setFechaVence] = useState("");
+  const [intentoEnvio, setIntentoEnvio] = useState(false);
 
   const [modalConfig, setModalConfig] = useState<{
     tipo: 'exito' | 'error' | 'cargando' | 'confirmar';
@@ -62,20 +63,40 @@ export function SolicitudCotizacionScreen() {
   const totalCompleto = subtotal + igv;
 
   const ejecutarEnvioSolicitud = () => {
-    setModalConfig({ tipo: 'cargando', mensaje: 'Procesando y enviando tu solicitud de cotización...' });
-    // TODO API: reemplazar el setTimeout por CotizacionesAPIService.crearCotizacion(cotizacion)
-    // — POST /cotizaciones — con los productosSolicitados y observaciones
-    setTimeout(() => {
-      // Al confirmar el éxito, se vacía el carrito (entidad Carrito en contexto y localStorage)
-      clearCart();
-      setModalConfig({
-        tipo: 'exito',
-        mensaje: '¡Solicitud creada correctamente! El comerciante ha sido notificado y responderá pronto.',
-        onConfirmAction: () => { setModalConfig(null); navigate('/quotes'); }
-      });
-    }, 2000);
-  };
+    setIntentoEnvio(true);
 
+    //Verificación de seguridad: si está vacío o solo tiene espacios, bloqueamos el proceso
+    if (observaciones.trim().length === 0) {
+      return; 
+    }
+
+    setModalConfig({
+      tipo: 'confirmar',
+      mensaje: '¿Estás seguro de que deseas enviar esta solicitud de cotización con los detalles ingresados?',
+      onConfirmAction: () => {
+        // Al confirmar dentro del modal, pasamos al estado de carga y envío real
+        procesarEnvioFinal();
+      }
+    });
+  };
+  const procesarEnvioFinal = () => {
+      // Cambiamos el modal al estado de carga
+      setModalConfig({ tipo: 'cargando', mensaje: 'Procesando tu solicitud de cotización...' });
+      
+      // TODO API: reemplazar el setTimeout por CotizacionesAPIService.crearCotizacion(cotizacion)
+      // — POST /cotizaciones — con los productosSolicitados y observaciones
+      setTimeout(() => {
+        setModalConfig({
+          tipo: 'exito',
+          mensaje: 'Tu solicitud de cotización ha sido enviada con éxito al comerciante. Recibirás una respuesta pronto.',
+          onConfirmAction: () => {
+            //al confirmar el éxito, se vacía el carrito (entidad Carrito en contexto y localStorage)
+            clearCart();
+            navigate('/quotes'); // Redirige a la vista de cotizaciones del cliente
+          }
+        });
+      }, 2000);
+    };
   const cardCls = "bg-white rounded-[20px] border border-[#C8E6E8] shadow-[0_2px_16px_rgba(61,30,8,0.06)]";
   const labelCls = "text-[10px] font-bold uppercase tracking-wide text-brand-muted block";
   const valueCls = "text-sm font-semibold text-brand-dark mt-0.5";
@@ -170,14 +191,35 @@ export function SolicitudCotizacionScreen() {
 
           {/* Observaciones */}
           <div className={`${cardCls} p-5`}>
-            <p className={`${labelCls} mb-3`}>Observaciones para el comerciante</p>
+            <div className="flex justify-between items-end mb-3">
+              <p className={`${labelCls}`}>
+                Observaciones para el comerciante <span className="text-red-500">*</span>
+              </p>
+              {/* Contador de caracteres */}
+              <span className={`text-[11px] font-medium ${observaciones.length >= 1000 ? 'text-red-500' : 'text-gray-400'}`}>
+                {observaciones.length}/1000
+              </span>
+            </div>
+            
             <textarea
               rows={4}
+              maxLength={1000} // Limita exactamente a 1000 caracteres
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
               placeholder="Escribe detalles sobre embalaje, variaciones especiales, horarios de entrega o cualquier condición requerida..."
-              className="w-full text-xs p-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:border-brand-muted/50 focus:ring-1 focus:ring-brand-muted/20 bg-[#FDFAF7] resize-none transition-all placeholder-brand-muted/40"
+              className={`w-full text-xs p-3 rounded-xl border focus:outline-none focus:ring-1 bg-[#FDFAF7] resize-none transition-all placeholder-brand-muted/40 ${
+                intentoEnvio && observaciones.trim().length === 0 
+                  ? 'border-red-400 focus:border-red-400 focus:ring-red-400/20' 
+                  : 'border-[#EDE8E3] focus:border-brand-muted/50 focus:ring-brand-muted/20'
+              }`}
             />
+            
+            {/* Mensaje de error (se muestra si no hay texto válido) */}
+            {intentoEnvio && observaciones.trim().length === 0 && (
+              <p className="text-[11px] text-red-500 font-medium mt-1.5">
+                Este campo no puede estar vacío ni contener únicamente espacios.
+              </p>
+            )}
           </div>
 
         </div>
@@ -234,11 +276,7 @@ export function SolicitudCotizacionScreen() {
             <p className={`${labelCls} mb-3`}>Acciones</p>
             <div className="space-y-2">
               <button
-                onClick={() => setModalConfig({
-                  tipo: 'confirmar',
-                  mensaje: '¿Estás seguro de que deseas enviar esta solicitud de cotización al comerciante asignado?',
-                  onConfirmAction: ejecutarEnvioSolicitud
-                })}
+                onClick={ejecutarEnvioSolicitud}
                 className="w-full py-2.5 bg-primary2 hover:bg-primary-hover text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
               >
                 <Send className="w-3.5 h-3.5" /> Enviar solicitud
