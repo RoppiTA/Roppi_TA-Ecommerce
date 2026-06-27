@@ -6,7 +6,15 @@ import { Tamano } from "../types/producto/tamano.types";
 import { GenericoXColor, GenericoXMaterial, GenericoXPersonalizacion, GenericoXTamano } from "../types/producto/genericoAtributos.types";
 import { CreateProductGenericoDTO, ProductoGenerico } from "../types/producto/productoGen.types";
 import { CreateDescuentoDTO, Descuento } from "../types/producto/descuento.types";
-
+export interface FiltrosGenericos {
+    colores?: number[];
+    materiales?: number[];
+    tamanos?: number[];
+    personalizaciones?: number[];
+    precioMin?: number;
+    precioMax?: number;
+    nombre?: string;
+}
 // Función auxiliar privada para transformar la respuesta del backend al formato del frontend
 const mapearAProductoFrontend = (prod: any): ProductoGenerico => ({
     id: prod.id,
@@ -116,8 +124,28 @@ export const ProductosAPIService = {
     /* --- CRUD DE PRODUCTOS GENÉRICOS --- */
 
     // 1. OBTENER TODOS LOS PRODUCTOS
-    getProductosGenericos: async (): Promise<ProductoGenerico[]> => {
-        const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/genericos');
+    getProductosGenericos: async (filtros?: FiltrosGenericos): Promise<ProductoGenerico[]> => {
+        const params: Record<string, any> = {};
+
+        if (filtros) {
+            Object.entries(filtros).forEach(([key, value]) => {
+                // Filtramos valores nulos, indefinidos o vacíos
+                if (value !== undefined && value !== null && value !== '') {
+                    if (Array.isArray(value)) {
+                        // Si es un arreglo (ej: colores) y tiene elementos, lo unimos con comas
+                        if (value.length > 0) {
+                            params[key] = value.join(',');
+                        }
+                    } else {
+                        // Valores primitivos (nombre, precioMin, precioMax)
+                        params[key] = value;
+                    }
+                }
+            });
+        }
+
+        // Pasamos el objeto params a apiClient (Axios lo serializará en la URL)
+        const response = await apiClient.get<{ exito: boolean; datos: any[] }>('/productos/genericos', { params });
         if (!response.data || !response.data.datos) return [];
         return response.data.datos.map(mapearAProductoFrontend);
     },
@@ -148,7 +176,7 @@ export const ProductosAPIService = {
             colores: productoData.colores,
             personalizaciones: productoData.personalizaciones
         };
-        
+
         const response = await apiClient.post<{ exito: boolean; datos: any }>('/productos/genericos', dtoBackend);
         return mapearAProductoFrontend(response.data.datos);
     },
