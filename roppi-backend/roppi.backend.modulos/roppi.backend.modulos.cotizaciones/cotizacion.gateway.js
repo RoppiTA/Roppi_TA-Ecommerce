@@ -225,17 +225,22 @@ class CotizacionGateway {
 
       let numeroCotizacion = data.numero_cotizacion;
       let versionCotizacion = 1;
+      let idUsuario = data.id_usuario;
 
       // Generar numero_cotizacion si es nuevo
       if (!numeroCotizacion) {
         const numResult = await client.query('SELECT COALESCE(MAX(NUMERO_COTIZACION), 0) + 1 AS next_num FROM "RoppiTA".COTIZACIONES');
         numeroCotizacion = parseInt(numResult.rows[0].next_num);
       } else {
-        // Verificar que la cotización realmente exista
-        const existsResult = await client.query('SELECT 1 FROM "RoppiTA".COTIZACIONES WHERE NUMERO_COTIZACION = $1 LIMIT 1', [numeroCotizacion]);
+        // Verificar que la cotización realmente exista y obtener id_usuario del cliente original
+        const existsResult = await client.query(
+          'SELECT ID_USUARIO FROM "RoppiTA".COTIZACIONES WHERE NUMERO_COTIZACION = $1 LIMIT 1',
+          [numeroCotizacion]
+        );
         if (existsResult.rowCount === 0) {
           throw new Error(`La cotización con número ${numeroCotizacion} no existe.`);
         }
+        idUsuario = data.id_usuario ?? existsResult.rows[0].id_usuario;
 
         // Obtener la siguiente versión si ya existe
         const verResult = await client.query('SELECT COALESCE(MAX(VERSION_COTIZACION), 0) + 1 AS next_ver FROM "RoppiTA".COTIZACIONES WHERE NUMERO_COTIZACION = $1', [numeroCotizacion]);
@@ -244,7 +249,7 @@ class CotizacionGateway {
 
       // Insertar Cabecera
       const cabeceraQuery = `
-        INSERT INTO "RoppiTA".COTIZACIONES 
+        INSERT INTO "RoppiTA".COTIZACIONES
           (NUMERO_COTIZACION, VERSION_COTIZACION, ID_USUARIO, TOTAL, COMENTARIOS_CLIENTE, COMENTARIOS_COMERCIANTE, ESTADO, USUARIO_CREACION, USUARIO_MODIFICACION)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
         RETURNING *
@@ -252,12 +257,12 @@ class CotizacionGateway {
       const cabeceraParams = [
         numeroCotizacion,
         versionCotizacion,
-        data.id_usuario,
+        idUsuario,
         data.total || 0,
         data.comentarios_cliente ?? null,
         data.comentarios_comerciante ?? null,
         data.estado || 'SOLICITADA',
-        data.id_usuario
+        idUsuario
       ];
 
       await client.query(cabeceraQuery, cabeceraParams);
@@ -281,7 +286,7 @@ class CotizacionGateway {
           d.id_material || null,
           d.id_personalizacion || null,
           d.url_diseno || null,
-          data.id_usuario
+          idUsuario
         ];
         await client.query(detQuery, detParams);
       }

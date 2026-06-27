@@ -158,8 +158,12 @@ class CotizacionBO {
   }
 
   async crearCotizacionOVersion(data) {
-    if (!data.id_usuario || !data.detalles || data.detalles.length === 0) {
-      throw new Error("Faltan datos obligatorios: id_usuario o detalles de la cotización.");
+    const esNuevaCotizacion = !data.numero_cotizacion;
+    if (esNuevaCotizacion && !data.id_usuario) {
+      throw new Error("Faltan datos obligatorios: id_usuario para nueva cotización.");
+    }
+    if (!data.detalles || data.detalles.length === 0) {
+      throw new Error("Faltan datos obligatorios: detalles de la cotización.");
     }
     return await cotizacionGateway.crearCotizacionTransaccion(data);
   }

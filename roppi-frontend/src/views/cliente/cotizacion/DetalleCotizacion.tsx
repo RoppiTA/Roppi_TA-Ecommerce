@@ -16,7 +16,7 @@ const formatDate = (dateStr: string | undefined | null) => {
 export function CotizacionDetailScreen() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { fetchCotizacionDetalle, calcularSubtotal, calcularDiasRestantes } = useCotizaciones();
+  const { fetchCotizacionDetalle, calcularSubtotal, calcularDiasRestantes, resolverCotizacion } = useCotizaciones();
 
   const state = location.state as { id?: number; version?: number } | null;
   const cotizacionId = state?.id || 0;
@@ -24,7 +24,11 @@ export function CotizacionDetailScreen() {
 
   const [cotizacion, setCotizacion] = useState<Cotizacion | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(true);
-  const [modalConfig, setModalConfig] = useState<{ tipo: 'exito' | 'error' | 'cargando' | 'confirmar', accion?: 'aceptar' | 'cancelar', mensaje: string } | null>(null);
+  const [modalConfig, setModalConfig] = useState<{
+    tipo: 'exito' | 'error' | 'cargando' | 'confirmar';
+    mensaje: string;
+    onConfirm?: () => void | Promise<void>;
+  } | null>(null);
 
   useEffect(() => {
     if (!cotizacionId || !version) { setLoadingDetail(false); return; }
@@ -36,18 +40,6 @@ export function CotizacionDetailScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cotizacionId, version]);
 
-  const procesarAccion = () => {
-    const accionRealizada = modalConfig?.accion;
-    setModalConfig(null);
-    setTimeout(() => {
-      setModalConfig({
-        tipo: 'exito',
-        mensaje: accionRealizada === 'aceptar'
-          ? '¡Éxito! La cotización ha sido aprobada correctamente.'
-          : 'La cotización ha sido cancelada y archivada.'
-      });
-    }, 200);
-  };
 
   const cardCls = "bg-white rounded-[20px] border border-[#C8E6E8] shadow-[0_2px_16px_rgba(61,30,8,0.06)]";
   const labelCls = "text-[10px] font-bold uppercase tracking-wide text-brand-muted block";
@@ -260,13 +252,32 @@ export function CotizacionDetailScreen() {
                   </p>
                 </div>
                 <button
-                  onClick={() => setModalConfig({ tipo: 'confirmar', accion: 'aceptar', mensaje: '¿Confirmas que deseas aceptar la cotización?' })}
+                  onClick={() => setModalConfig({
+                    tipo: 'error',
+                    mensaje: 'La funcionalidad de aceptar cotizaciones aún no está disponible. Por favor, contáctanos para coordinar la confirmación.'
+                  })}
                   className="w-full py-2.5 bg-primary2 hover:bg-primary-hover text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors"
                 >
                   <CheckCircle className="w-3.5 h-3.5" /> Aceptar cotización
                 </button>
                 <button
-                  onClick={() => setModalConfig({ tipo: 'confirmar', accion: 'cancelar', mensaje: '¿Confirmas que deseas rechazar y cancelar esta cotización?' })}
+                  onClick={() => setModalConfig({
+                    tipo: 'confirmar',
+                    mensaje: '¿Confirmas que deseas rechazar y cancelar esta cotización?',
+                    onConfirm: async () => {
+                      setModalConfig({ tipo: 'cargando', mensaje: 'Cancelando cotización...' });
+                      const result = await resolverCotizacion(cotizacion!, 'CANCELADA', cotizacion!.productos, '');
+                      if (result === false) {
+                        setModalConfig({ tipo: 'error', mensaje: 'Ocurrió un error al cancelar. Intente de nuevo.' });
+                        return;
+                      }
+                      setModalConfig({
+                        tipo: 'exito',
+                        mensaje: 'La cotización ha sido cancelada.',
+                        onConfirm: () => { setModalConfig(null); navigate('/quotes'); }
+                      });
+                    }
+                  })}
                   className="w-full py-2.5 bg-transparent hover:bg-[#FFF5EE] text-brand-error font-bold text-xs rounded-xl border border-brand-error/40 hover:border-brand-error/70 flex items-center justify-center gap-2 transition-colors"
                 >
                   <XCircle className="w-3.5 h-3.5" /> Cancelar cotización
@@ -304,7 +315,7 @@ export function CotizacionDetailScreen() {
           tipo={modalConfig.tipo}
           mensaje={modalConfig.mensaje}
           onClose={() => setModalConfig(null)}
-          onConfirm={procesarAccion}
+          onConfirm={modalConfig.onConfirm}
         />
       )}
     </div>
