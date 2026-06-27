@@ -111,39 +111,73 @@ export function useCotizaciones() {
     }
   }, []);
 
-  // 4. Resolver cotización (aceptar, observar, cancelar) — llama a la API y actualiza estado local
+  // 4. Resolver cotización (observar o cancelar) — llama a la API y actualiza estado local
   const resolverCotizacion = async (
-    id: number,
-    versionActual: number,
+    original: Cotizacion,
     nuevoEstado: EstadoCotizacion,
     productosEditados: Cotizacion['productos'],
     comentarios: string
   ): Promise<number | false> => {
-    const original = cotizaciones.find(c => c.id === id && c.version === versionActual);
-    if (!original) return false;
+    let nuevaVersionNum: number;
 
-    try {
-      await CotizacionesAPIService.updateCotizacionEstado({
-        ...original,
-        estado: nuevoEstado,
-        comentariosComerciante: comentarios
-      });
-    } catch (err) {
-      console.error('resolverCotizacion: error al actualizar estado en API', err);
-      return false;
+    if (nuevoEstado === 'OBSERVADA') {
+      // Crear versión nueva en BD con precios actualizados por el comerciante
+      let resp: { versionCotizacion: number };
+      try {
+        resp = await CotizacionesAPIService.crearNuevaVersionCotizacion(
+          original.id,
+          original.observacionesCliente ?? null,
+          comentarios,
+          calcularSubtotal(productosEditados),
+          'OBSERVADA',
+          productosEditados.map(p => ({
+            idGenerico: p.idGenerico ?? p.numeroLinea,
+            cantidad: p.cantidad,
+            precio: p.precioUnitario,
+            idTamano: p.idTamano ?? null,
+            idColor: p.idColor ?? null,
+            idMaterial: p.idMaterial ?? null,
+            idPersonalizacion: p.idPersonalizacion ?? null,
+          }))
+        );
+      } catch (err) {
+        console.error('resolverCotizacion: error al crear nueva versión', err);
+        return false;
+      }
+      nuevaVersionNum = resp.versionCotizacion;
+
+      if (resolvedUserId) {
+        try {
+          await CotizacionesAPIService.asignarComerciante(original.id, nuevaVersionNum, resolvedUserId);
+        } catch (err) {
+          console.error('resolverCotizacion: error al asignar comerciante', err);
+        }
+      }
+    } else {
+      // CANCELADA — actualizar estado en la versión actual sin crear nueva versión
+      try {
+        await CotizacionesAPIService.CotizacionEstado({
+          ...original,
+          estado: nuevoEstado,
+          comentariosComerciante: comentarios || original.comentariosComerciante,
+        });
+      } catch (err) {
+        console.error('resolverCotizacion: error al actualizar estado en API', err);
+        return false;
+      }
+      nuevaVersionNum = original.version;
     }
 
     const nuevaCotizacion: Cotizacion = {
       ...original,
-      version: versionActual + 1,
+      version: nuevaVersionNum,
       estado: nuevoEstado,
-      comentariosComerciante: comentarios,
-      precioAnterior: calcularSubtotal(original.productos) * 1.18,
-      productos: productosEditados.map(p => ({ ...p, versionCotizacion: versionActual + 1 }))
+      comentariosComerciante: nuevoEstado === 'OBSERVADA' ? comentarios : original.comentariosComerciante,
+      productos: productosEditados.map(p => ({ ...p, versionCotizacion: nuevaVersionNum }))
     };
 
     setCotizaciones(prev => [nuevaCotizacion, ...prev]);
-    return nuevaCotizacion.version;
+    return nuevaVersionNum;
   };
 
   // 5. Asignar comerciante a cotización

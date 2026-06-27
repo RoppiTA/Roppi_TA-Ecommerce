@@ -1,5 +1,5 @@
 import { apiClient } from "./apiCliente";
-import { LineaProducto, Cotizacion, CreateCotizacionDTO, EstadoCotizacion } from "../types/cotizacion/cotizacion.types";
+import { LineaProducto, Cotizacion, EstadoCotizacion } from "../types/cotizacion/cotizacion.types";
 import { Carrito, LineaCarrito } from "../types/carrito/carrito.types";
 
 const mapearACotizacionFrontend = (c: any): Cotizacion => ({
@@ -34,7 +34,12 @@ const mapearALineaProducto = (lp: any): LineaProducto => ({
     },
     // columna DB es "precio", no "precio_unitario"; pg devuelve números como string
     precioUnitario: Number(lp.precio ?? lp.precio_unitario ?? lp.precioUnitario ?? 0),
-    cantidad: lp.cantidad
+    cantidad: lp.cantidad,
+    idGenerico: lp.id_generico ?? undefined,
+    idTamano: lp.id_tamano ?? null,
+    idColor: lp.id_color ?? null,
+    idMaterial: lp.id_material ?? null,
+    idPersonalizacion: lp.id_personalizacion ?? null,
 });
 
 
@@ -130,11 +135,39 @@ export const CotizacionesAPIService = {
         }
     },
 
-    // 6. CREAR NUEVA COTIZACIÓN
-    // TODO: El backend no tiene endpoint para crear cotizaciones todavía.
-    // El flujo previsto: el cliente convierte su carrito en solicitud formal desde el microservicio.
-    createCotizacion: async (_cotizacion: CreateCotizacionDTO): Promise<Cotizacion> => {
-        throw new Error('createCotizacion: endpoint no disponible en el backend todavía.');
+    // 6. CREAR NUEVA VERSIÓN DE COTIZACIÓN (con precios actualizados por el comerciante)
+    crearNuevaVersionCotizacion: async (
+        numeroCotizacion: number,
+        comentariosCliente: string | null,
+        comentariosComerciante: string,
+        total: number,
+        estado: EstadoCotizacion,
+        detalles: { idGenerico: number; cantidad: number; precio: number;
+                     idTamano: number | null; idColor: number | null;
+                     idMaterial: number | null; idPersonalizacion: number | null; }[]
+    ): Promise<{ numeroCotizacion: number; versionCotizacion: number }> => {
+        const response = await apiClient.post<{ exito: boolean; data: any }>(
+            `/cotizaciones/solicitudes/crear`,
+            {
+                numero_cotizacion: numeroCotizacion,
+                total,
+                comentarios_cliente: comentariosCliente,
+                comentarios_comerciante: comentariosComerciante,
+                estado,
+                detalles: detalles.map(d => ({
+                    id_generico: d.idGenerico, cantidad: d.cantidad, precio: d.precio,
+                    id_tamano: d.idTamano, id_color: d.idColor,
+                    id_material: d.idMaterial, id_personalizacion: d.idPersonalizacion
+                }))
+            }
+        );
+        if (!response.data?.exito || !response.data.data) {
+            throw new Error(`Error al crear nueva versión de cotización N°${numeroCotizacion}`);
+        }
+        return {
+            numeroCotizacion: response.data.data.numero_cotizacion,
+            versionCotizacion: response.data.data.version_cotizacion
+        };
     },
 
     /* --- CARRITO --- */

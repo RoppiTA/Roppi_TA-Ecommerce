@@ -13,6 +13,11 @@ export interface LineaProducto {
   };
   precioUnitario: number;
   cantidad: number;
+  idGenerico?: number;
+  idTamano?: number | null;
+  idColor?: number | null;
+  idMaterial?: number | null;
+  idPersonalizacion?: number | null;
 }
 
 export interface Cotizacion {

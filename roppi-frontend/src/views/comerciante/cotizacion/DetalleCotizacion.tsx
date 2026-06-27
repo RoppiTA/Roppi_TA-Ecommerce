@@ -110,16 +110,21 @@ export function ComercianteCotizacionDetailScreen() {
     setProductosEditados(copia);
   };
 
-  const ejecutarGuardado = (estadoFinal: 'OBSERVADA' | 'CANCELADA') => {
+  const ejecutarGuardado = async (estadoFinal: 'OBSERVADA' | 'CANCELADA') => {
     setModalConfig({ tipo: 'cargando', mensaje: 'Procesando cambios en el servidor...' });
-    setTimeout(() => {
-      const nuevaVersion = resolverCotizacion(cotizacion.id, cotizacion.version, estadoFinal, productosEditados, comentariosMerchant);
+    const nuevaVersion = await resolverCotizacion(cotizacion!, estadoFinal, productosEditados, comentariosMerchant);
+    if (nuevaVersion === false) {
       setModalConfig({
-        tipo: 'exito',
-        mensaje: `La cotización ha sido actualizada a la versión v${nuevaVersion} en estado ${estadoFinal}.`,
-        onConfirm: () => { setModalConfig(null); navigate('/comerciante/quotes'); }
+        tipo: 'error',
+        mensaje: 'Ocurrió un error al procesar la cotización. Intente de nuevo.',
       });
-    }, 1500);
+      return;
+    }
+    setModalConfig({
+      tipo: 'exito',
+      mensaje: `La cotización ha sido actualizada a la versión v${nuevaVersion} en estado ${estadoFinal}.`,
+      onConfirm: () => { setModalConfig(null); navigate('/comerciante/quotes'); }
+    });
   };
 
   const cardCls = "bg-white rounded-[20px] border border-[#C8E6E8] shadow-[0_2px_16px_rgba(61,30,8,0.06)]";
