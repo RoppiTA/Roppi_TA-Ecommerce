@@ -42,6 +42,7 @@ export function DiscountsPage() {
   ) => {
     try {
       const descuentosFiltrados = await getDescuentosPorIdProducto(productId);
+      console.log(descuentosFiltrados);
       setSelectedProductFilter(productId);
       setDescuentosMostrados(descuentosFiltrados ?? []);
       setFilterModalOpen(false);

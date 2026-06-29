@@ -20,20 +20,20 @@ class GenericosGateway {
     `, [id]);
     return result.rows[0];
   }
-  
-  async createWithClient(client, {nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId} ) {
+
+  async createWithClient(client, { nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId, posicionX, posicionY }) {
     console.log(nombre);
   const result = await client.query(`
     INSERT INTO "RoppiTA".GENERICOS
-      (NOMBRE, DESCRIPCION, PRECIO_BASE, MAXIMO_STOCK, USUARIO_CREACION, USUARIO_MODIFICACION, URL_IMAGEN)
-    VALUES ($1, $2, $3, $4, $5, $5, $6)
+      (NOMBRE, DESCRIPCION, PRECIO_BASE, MAXIMO_STOCK, USUARIO_CREACION, USUARIO_MODIFICACION, URL_IMAGEN, POSICION_X, POSICION_Y)
+    VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8)
     RETURNING *
-  `, [nombre, descripcion, precioBase, maximoStock, usuarioId, urlImagen]);
-  return result.rows[0];
-  } 
+  `, [nombre, descripcion, precioBase, maximoStock, usuarioId, urlImagen, posicionX, posicionY]);
+    return result.rows[0];
+  }
 
-  async updateWithClient(client, id, { nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId }) {
-  const result = await client.query(`
+  async updateWithClient(client, id, { nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId, posicionX, posicionY }) {
+    const result = await client.query(`
     UPDATE "RoppiTA".GENERICOS
     SET NOMBRE = $1,
         DESCRIPCION = $2,
@@ -41,11 +41,13 @@ class GenericosGateway {
         MAXIMO_STOCK = $4,
         USUARIO_MODIFICACION = $5,
         FECHA_MODIFICACION = CURRENT_TIMESTAMP,
-        URL_IMAGEN = $6
-    WHERE ID = $7
+        URL_IMAGEN = $6,
+        POSICION_X = $7,
+        POSICION_Y = $8
+    WHERE ID = $9
     RETURNING *
-  `, [nombre, descripcion, precioBase, maximoStock, usuarioId, urlImagen, id]);
-  return result.rows[0];
+  `, [nombre, descripcion, precioBase, maximoStock, usuarioId, urlImagen, posicionX, posicionY, id]);
+    return result.rows[0];
   }
 
   async deactivate(id, usuarioId) {

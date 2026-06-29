@@ -44,48 +44,31 @@ class GenericosBO {
 
   ///////////////////////////////////////////
   //para crear se debe realizar una inserción de todas sus relaciones. Se manejan a este nivel por que si falla alguna inserción, se revierte toda la operación.
-  async crear( {nombre, descripcion, precioBase, maximoStock, urlImagen, tamanos, materiales, colores, personalizaciones, usuarioId} ) {
-  const client = await db.getClient();
-  try {
-    await client.query('BEGIN');
-    //Insertar el genérico
-    console.log(nombre);
-    const genericoRow = await genericosGateway.createWithClient(client,
-      {nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId});
-    const idGenerico = genericoRow.id;
+  async crear({ nombre, descripcion, precioBase, maximoStock, urlImagen, posicionX, posicionY, tamanos, materiales, colores, personalizaciones, usuarioId }) {
+    const client = await db.getClient();
+    try {
+      await client.query('BEGIN');
+      //Insertar el genérico
+      console.log(nombre);
+      const genericoRow = await genericosGateway.createWithClient(client,
+        { nombre, descripcion, precioBase, maximoStock, urlImagen, usuarioId, posicionX, posicionY });
+      const idGenerico = genericoRow.id;
 
-    // Insertar todas las relacinones de manera paralela
-    await Promise.all([
-      ...tamanos.map(t => genericosGateway.addTamanoWithClient(client, {
-        idGenerico: idGenerico, idTamano: t.id, alto: t.alto, ancho: t.ancho, usuarioId: usuarioId
-      })),
-      ...materiales.map(m => genericosGateway.addMaterialWithClient(client, {
-        idGenerico: idGenerico, idMaterial: m.id, costoExtra: m.costoExtra, usuarioId: usuarioId
-      })),
-      ...colores.map(c => genericosGateway.addColorWithClient(client, {
-        idGenerico: idGenerico, idColor: c.id, usuarioId: usuarioId
-      })),
-      ...personalizaciones.map(p => genericosGateway.addPersonalizacionWithClient(client, {
-        idGenerico: idGenerico, idPersonalizacion: p.id, costoExtra: p.costoExtra, usuarioId: usuarioId
-      })),
-    ]);
-
-    // Generar todas las combinatorias de personalizados
-    /*for (const tamano of tamanos) {
-      for (const color of colores) {
-        for (const material of materiales) {
-          for (const personalizacion of personalizaciones) {
-            const sku = `${idGenerico}-${tamano.id}-${color.id}-${material.id}-${personalizacion.id}`;
-            const precio = precioBase + (material.costoExtra || 0) + (personalizacion.costoExtra || 0);
-            await personalizadosGateway.createWithClient(client, {
-              idGenerico, idTamano: tamano.id, idColor: color.id,
-              idMaterial: material.id, idPersonalizacion: personalizacion.id,
-              sku, precio, usuarioId
-            });
-          }
-        }
-      }
-    }*/
+      // Insertar todas las relacinones de manera paralela
+      await Promise.all([
+        ...tamanos.map(t => genericosGateway.addTamanoWithClient(client, {
+          idGenerico: idGenerico, idTamano: t.id, alto: t.alto, ancho: t.ancho, usuarioId: usuarioId
+        })),
+        ...materiales.map(m => genericosGateway.addMaterialWithClient(client, {
+          idGenerico: idGenerico, idMaterial: m.id, costoExtra: m.costoExtra, usuarioId: usuarioId
+        })),
+        ...colores.map(c => genericosGateway.addColorWithClient(client, {
+          idGenerico: idGenerico, idColor: c.id, usuarioId: usuarioId
+        })),
+        ...personalizaciones.map(p => genericosGateway.addPersonalizacionWithClient(client, {
+          idGenerico: idGenerico, idPersonalizacion: p.id, costoExtra: p.costoExtra, usuarioId: usuarioId
+        })),
+      ]);
 
     await client.query('COMMIT');
     return await this.obtenerPorId(idGenerico);
@@ -103,19 +86,19 @@ class GenericosBO {
 //lo que estamos haciendo para actualizar las listas vinculadas es comparar la lista anterior con la nueva 
 // y solo eliminar/insertar lo que cambió.
   async actualizar(id, { nombre, descripcion, precioBase, maximoStock, urlImagen,
-                       tamanos, materiales, colores, personalizaciones, usuarioId 
-                    }) {
-      
-      // Obtener el producto actual con sus atributos
-      const existe = await genericosGateway.findById(id);
-      if (!existe) throw new Error(`Genérico con ID ${id} no encontrado`);
-      
-      const coloresActuales = await genericosGateway.findColoresByGenerico(id);
-      const materialesActuales = await genericosGateway.findMaterialesByGenerico(id);
-      const tamanosActuales = await genericosGateway.findTamanosByGenerico(id);
-      const personalizacionesActuales = await genericosGateway.findPersonalizacionesByGenerico(id);
-      
-      // Obtener los atributos a insertar y eliminar
+    tamanos, materiales, colores, personalizaciones, usuarioId, posicionX, posicionY
+  }) {
+
+    // Obtener el producto actual con sus atributos
+    const existe = await genericosGateway.findById(id);
+    if (!existe) throw new Error(`Genérico con ID ${id} no encontrado`);
+
+    const coloresActuales = await genericosGateway.findColoresByGenerico(id);
+    const materialesActuales = await genericosGateway.findMaterialesByGenerico(id);
+    const tamanosActuales = await genericosGateway.findTamanosByGenerico(id);
+    const personalizacionesActuales = await genericosGateway.findPersonalizacionesByGenerico(id);
+
+    // Obtener los atributos a insertar y eliminar
 
       const oldIdsT = new Set(tamanosActuales.map(x => Number(x.id)));
       const newIdsT = new Set(tamanos.map(x => Number(x.id)));
@@ -165,10 +148,10 @@ class GenericosBO {
       try {
           await client.query('BEGIN');
 
-          await genericosGateway.updateWithClient(client, id, {
-          nombre: nombre, descripcion: descripcion, precioBase: precioBase, maximoStock: maximoStock, 
-          urlImagen: urlImagen, usuarioId: usuarioId
-          });
+      await genericosGateway.updateWithClient(client, id, {
+        nombre: nombre, descripcion: descripcion, precioBase: precioBase, maximoStock: maximoStock,
+        urlImagen: urlImagen, usuarioId: usuarioId, posicionX: posicionX, posicionY: posicionY
+      });
 
           await Promise.all([
                 ...tamanosInsertar.map(t => genericosGateway.addTamanoWithClient(client, {

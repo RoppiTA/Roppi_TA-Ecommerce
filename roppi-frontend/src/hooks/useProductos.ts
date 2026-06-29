@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ProductosAPIService, DescuentosAPIService } from '../api/productos.api';
+import { ProductosAPIService, DescuentosAPIService, FiltrosGenericos } from '../api/productos.api';
 import { Color } from "../types/producto/color.types";
 import { Material } from "../types/producto/material.types";
 import { Personalizacion } from "../types/producto/personalizacion.types";
 import { Tamano } from "../types/producto/tamano.types";
 import { CreateProductGenericoDTO, ProductoGenerico } from "../types/producto/productoGen.types";
-import { CreateDescuentoDTO, Descuento } from '../types/producto/descuento.types';  
+import { CreateDescuentoDTO, Descuento } from '../types/producto/descuento.types';
 
 
 export const useProductosGenericos = () => {
@@ -22,7 +22,7 @@ export const useProductosGenericos = () => {
 
     // Función para cargar todos los datos necesarios 
     // (productos + catálogos) al inicio
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (filtros?: FiltrosGenericos) => {
         try {
             setLoading(true);
             setError(null);
@@ -32,7 +32,8 @@ export const useProductosGenericos = () => {
                 ProductosAPIService.getMateriales(),
                 ProductosAPIService.getTamano(),
                 ProductosAPIService.getPersonalizaciones(),
-                ProductosAPIService.getProductosGenericos()
+                // Pasamos los filtros a la API de productos genéricos
+                ProductosAPIService.getProductosGenericos(filtros)
             ]);
 
             setColores(c);
@@ -52,6 +53,20 @@ export const useProductosGenericos = () => {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    const aplicarFiltros = useCallback(async (nuevosFiltros: FiltrosGenericos) => {
+        try {
+            setLoading(true);
+            setError(null);
+            const prodsFiltrados = await ProductosAPIService.getProductosGenericos(nuevosFiltros);
+            setProductos(prodsFiltrados);
+        } catch (err) {
+            setError('Error al aplicar los filtros de búsqueda');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     // Utiliza un estado local temporal o de retorno directo en la vista de edición.
     const getProductoById = useCallback(async (id: number): Promise<ProductoGenerico> => {
@@ -75,10 +90,10 @@ export const useProductosGenericos = () => {
         try {
             const nuevo = await ProductosAPIService.createProductoGenerico(data);
             setProductos((prev) => [...prev, nuevo]);
-            return nuevo; 
+            return nuevo;
         } catch (err) {
             console.error("Error al crear producto:", err);
-            throw err; 
+            throw err;
         }
     };
 
@@ -104,18 +119,19 @@ export const useProductosGenericos = () => {
     };
 
     return {
-        productos, 
-        loading, 
-        error, 
-        colores, 
-        materiales, 
-        tamano: tamanos, 
-        personalizaciones, 
-        getProductoById, 
-        addProducto, 
-        updateProducto, 
-        deleteProducto, 
-        refresh: fetchData
+        productos,
+        loading,
+        error,
+        colores,
+        materiales,
+        tamano: tamanos,
+        personalizaciones,
+        getProductoById,
+        addProducto,
+        updateProducto,
+        deleteProducto,
+        refresh: fetchData,
+        aplicarFiltros
     };
 };
 
@@ -155,8 +171,15 @@ export const useDescuentos = () => {
     const updateDescuento = async (id: number, data: CreateDescuentoDTO) => {
         try {
             const actualizado = await DescuentosAPIService.updateDescuento(id, data);
-            setDescuentos((prev) => 
-                prev.map((d) => (d.id === id ? actualizado : d))
+            setDescuentos((prev) =>
+                prev.map((d) =>
+                    d.id === id
+                        ? {
+                            ...actualizado,
+                            idGenericoVinculados: data.idGenericoVinculados
+                        }
+                        : d
+                )
             );
             return actualizado;
         } catch (err) {

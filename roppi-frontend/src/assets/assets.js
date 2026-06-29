@@ -1,26 +1,30 @@
 /*Archivos de assets para la aplicación con las imagenes claves
 a considerar */
 
-import logoRoppiImg from './Logotipo_Roppi.png';
-import logoRoppiNegroImg from './Logotipo_Roppi_Negro.png';
-import logoRoppiBlancoImg from './Logro_Roppi_Blanco.png';
-import maxwell from './maxwell.jpg';
-import gorra_simple from "./gorra_simple.jpeg";
-import jean from "./jean.jpg";
-import mochila from "./mochila.jpeg";
-import polo_comercial from "./polo_comercial.jpg";
-import chaqueta from "./chaqueta.jpg";
+import logoRoppiImg from './compressed/Logotipo_Roppi.webp';
+import logoRoppiNegroImg from './compressed/Logotipo_Roppi_Negro.webp';
+import logoRoppiBlancoImg from './compressed/Logro_Roppi_Blanco.webp';
+import maxwell from './compressed/maxwell.webp';
+import jean from "./compressed/jean.webp";
+import mochila from "./compressed/mochila.webp";
+import chaqueta from "./compressed/chaqueta.webp";
+import polo from "./compressed/polo.webp";
+import cap_side from "./compressed/cap_frente.webp";
+import totebag from "./compressed/Totebag.webp";
+import tanktop from "./compressed/Tanktop.webp";
 
 const assets = {
-    "logoRoppi": logoRoppiImg,
+    "Logotipo_Roppi.png": logoRoppiImg,
     "logoRoppiNegro": logoRoppiNegroImg,
     "logoRoppiBlanco": logoRoppiBlancoImg,
     "maxwell": maxwell,
-    "gorra_simple": gorra_simple,
     "jean": jean,
     "mochila.jpeg": mochila,
-    "polo_comercial": polo_comercial,
-    "chaqueta.jpg": chaqueta
+    "chaqueta.png": chaqueta,
+    "polo.png" : polo,
+    "cap_side.png": cap_side,
+    "Totebag.png": totebag,
+    "Tanktop.png": tanktop
 };
 
 

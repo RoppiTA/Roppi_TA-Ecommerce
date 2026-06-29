@@ -1,8 +1,9 @@
 // src/components/Header.tsx
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, LogOut, LogIn, User } from 'lucide-react';
-import { useAuth } from '../context/AuthContext'; // Ajusta la ruta a tu AuthContext
+import { Bell, LogOut, LogIn, User, ShoppingCart } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useCarrito } from '../context/CarritoContext';
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -14,6 +15,12 @@ export const Header = () => {
   const displayInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'I';
   const displayName = user?.name || 'Invitado';
   const isGuest = user?.role?.includes('GUEST');
+
+  // Verificar si el rol incluye 'CLIENTE' para colocar opción de carrito de compras
+  const isCliente = user?.role?.includes('CLIENTE');
+
+  // Entidad: LineaCarrito[] — totalItems proviene del contexto global del carrito
+  const { totalItems } = useCarrito();
 
   // Cerrar el menú si el usuario hace clic fuera de él
   useEffect(() => {
@@ -39,8 +46,8 @@ export const Header = () => {
   };
 
   return (
-    <header className="bg-brand-light/40 border-b border-primary-hover/15 px-6 py-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm flex-shrink-0">
-      <div className="flex items-center gap-3 ml-auto">
+    <header className="bg-brand-light/40 border-b border-primary-hover/15 px-6 py-4 flex items-center justify-between sticky top-0 z-30 backdrop-blur-sm flex-shrink-0">
+      <div className="flex items-center gap-4 ml-auto">
         
         {/* Botón de Notificaciones */}
         <button className="p-2 hover:bg-primary2/10 rounded-lg relative transition-colors cursor-pointer">
@@ -97,7 +104,24 @@ export const Header = () => {
           )}
         </div>
 
+        {/* Elemento visual: ícono del carrito con badge de cantidad — solo visible para CLIENTE */}
+        {isCliente && (
+          <button
+            data-cart-icon="true"
+            onClick={() => navigate('/cart')}
+            className="p-2 hover:bg-primary2/10 rounded-lg relative transition-colors cursor-pointer"
+            title="Ver mi carrito"
+          >
+            <ShoppingCart size={20} className="text-brand-dark" />
+            {/* Badge: círculo con la cantidad de ítems en el carrito */}
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-error text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
+                {totalItems > 9 ? '9+' : totalItems}
+              </span>
+            )}
+          </button>
+        )}
       </div>
     </header>
-  );
+);
 };

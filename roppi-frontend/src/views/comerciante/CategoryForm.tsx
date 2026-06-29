@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Camera, Plus, Tag, Trash2, X } from 'lucide-react';
 import { useCategoriaOptions, getColorHex } from '../../hooks/useCategoriaOptions';
 import { CreateProductGenericoDTO } from '../../types/producto/productoGen.types';
+import { PersonalizadorCanvas } from '../../components/PersonalizadorCanvas';
+import { MapPin } from 'lucide-react';
+const DUMMY_STAMP = 'https://placehold.co/100x100/e2e8f0/94a3b8?text=★';
 
 const blockNonInteger = (e: React.KeyboardEvent<HTMLInputElement>) => {
   if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
@@ -61,6 +64,9 @@ export function CategoryForm({ onClose, onSave }: CategoryFormProps) {
   const [precioBase, setPrecioBase]           = useState('');
   const [capacidad, setCapacidad]             = useState('');
   const [descripcion, setDescripcion]         = useState('');
+  const [estampadoPos, setEstampadoPos]   = useState<{ x: number; y: number } | null>(null);
+  const [showPosPicker, setShowPosPicker] = useState(false);
+  const [pendingPos, setPendingPos]       = useState<{ x: number; y: number } | null>(null);
   const [errors, setErrors]                   = useState<FormErrors>({});
   const [showColorModal, setShowColorModal]   = useState(false);
   const [pendingRemoveColorId, setPendingRemoveColorId] = useState<number | null>(null);
@@ -89,6 +95,8 @@ export function CategoryForm({ onClose, onSave }: CategoryFormProps) {
     if (file) {
       setThumbnail(URL.createObjectURL(file));
       setImageName(file.name);
+      setEstampadoPos(null);    
+      setShowPosPicker(false);
       if (errors.thumbnail) setErrors(prev => ({ ...prev, thumbnail: undefined }));
     }
   };
@@ -174,11 +182,13 @@ export function CategoryForm({ onClose, onSave }: CategoryFormProps) {
       maximo_stock: Number(capacidad),
       imagen: imageName,
       colores: Array.from(selectedColorIds).map(id => ({ id })),
-      materiales: materialesForm.map(m => ({ id: m.id, costo_extra: Number(m.costoExtra) })),
+      posicionX: estampadoPos ? Math.round(estampadoPos.x) : 0,
+      posicionY: estampadoPos ? Math.round(estampadoPos.y) : 0,
+      materiales: materialesForm.map(m => ({ id: m.id, costoExtra: Number(m.costoExtra) })),
       tamanos: tallasForm.map(t => ({ id: t.id, ancho: Number(t.ancho), alto: Number(t.alto) })),
       personalizaciones: personalizacionesForm
         .filter(p => p.habilitado)
-        .map(p => ({ id: p.id, costo_extra: Number(p.costoExtra) })),
+        .map(p => ({ id: p.id, costoExtra: Number(p.costoExtra) })),
     });
   };
 
@@ -227,7 +237,7 @@ export function CategoryForm({ onClose, onSave }: CategoryFormProps) {
                   {thumbnail && (
                     <button
                       type="button"
-                      onClick={() => setThumbnail(null)}
+                      onClick={() => { setThumbnail(null); setEstampadoPos(null); setShowPosPicker(false); }}
                       className="absolute top-1.5 right-1.5 z-10 w-6 h-6 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors"
                     >
                       <Trash2 size={12} />
@@ -259,6 +269,61 @@ export function CategoryForm({ onClose, onSave }: CategoryFormProps) {
                   </div>
                 </div>
                 {errors.thumbnail && <p className="mt-1 text-xs text-brand-error">{errors.thumbnail}</p>}
+                
+                {thumbnail && (
+                  <div className="mt-2">
+                    {!showPosPicker ? (
+                      <button
+                        type="button"
+                        onClick={() => { setPendingPos(estampadoPos); setShowPosPicker(true); }}
+                        className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 border border-primary2/40 text-primary-hover rounded-lg text-xs font-medium hover:bg-brand-light/50 transition-colors"
+                      >
+                        <MapPin size={13} />
+                        {estampadoPos ? 'Reposicionar diseño' : 'Definir zona de diseño'}
+                      </button>
+                    ) : (
+                      <div className="border border-primary2/30 rounded-lg p-3 bg-brand-light/20 space-y-2">
+                        <p className="text-[10px] text-brand-muted text-center">
+                          Arrastra la imagen al lugar donde los clientes podrán colocar su diseño.
+                        </p>
+
+                        <div className="flex justify-center">
+                          <PersonalizadorCanvas
+                            prendaUrl={thumbnail}
+                            color="#ffffff"
+                            estampadoUrl={DUMMY_STAMP}
+                            rotacion={0}
+                            escala={1}
+                            initialPos={pendingPos ?? undefined}
+                            onPosChange={setPendingPos}
+                            draggable={true}
+                          />
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowPosPicker(false)}
+                            className="flex-1 py-1.5 border border-brand-muted text-brand-muted rounded-lg text-xs font-medium hover:bg-brand-light transition-colors"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (pendingPos) setEstampadoPos(pendingPos);
+                              setShowPosPicker(false);
+                            }}
+                            className="flex-1 py-1.5 bg-primary-hover text-white rounded-lg text-xs font-semibold hover:bg-primary2 transition-colors"
+                          >
+                            Confirmar posición
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
               </div>
 
               {/* Nombre */}
